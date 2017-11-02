@@ -1,0 +1,1208 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link href="/lib/pace/pace-theme-minimal.min.css?v=1.0.2" rel="stylesheet">
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon.ico?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon.ico?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon.ico?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/favicon.ico?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="ID3, Audio," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="MP3文件分析之ID3v2.3版本关于读取MP3文件的ID3标签，网上众说纷芸，但很多都是错的，在这里总结一下。所有的分析都基于ID3官方网站www.id3.org">
+<meta name="keywords" content="ID3, Audio">
+<meta property="og:type" content="article">
+<meta property="og:title" content="MP3文件分析之ID3v2.3版本">
+<meta property="og:url" content="https://qwertyyb.github.io/2017/03/18/MP3文件分析之ID3v2-3版本/index.html">
+<meta property="og:site_name" content="虚幻">
+<meta property="og:description" content="MP3文件分析之ID3v2.3版本关于读取MP3文件的ID3标签，网上众说纷芸，但很多都是错的，在这里总结一下。所有的分析都基于ID3官方网站www.id3.org">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2017-11-02T12:20:10.204Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="MP3文件分析之ID3v2.3版本">
+<meta name="twitter:description" content="MP3文件分析之ID3v2.3版本关于读取MP3文件的ID3标签，网上众说纷芸，但很多都是错的，在这里总结一下。所有的分析都基于ID3官方网站www.id3.org">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://qwertyyb.github.io/2017/03/18/MP3文件分析之ID3v2-3版本/"/>
+
+
+
+
+
+  <title>MP3文件分析之ID3v2.3版本 | 虚幻</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">虚幻</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">陪伴像幼蝉钻进土壤，无声却能生长</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://qwertyyb.github.io/2017/03/18/MP3文件分析之ID3v2-3版本/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="虚幻">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="虚幻">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">MP3文件分析之ID3v2.3版本</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-03-18T16:36:01+08:00">
+                2017-03-18
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv"><i class="fa fa-file-o"></i>
+            <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="MP3文件分析之ID3v2-3版本"><a href="#MP3文件分析之ID3v2-3版本" class="headerlink" title="MP3文件分析之ID3v2.3版本"></a>MP3文件分析之ID3v2.3版本</h1><p>关于读取MP3文件的ID3标签，网上众说纷芸，但很多都是错的，在这里总结一下。所有的分析都基于ID3<a href="http://www.07net01.com/tags-%E7%BD%91%E7%AB%99-0.html" target="_blank" rel="external">官方网站</a>www.id3.org</p>
+<a id="more"></a>
+<h2 id="1-标签头"><a href="#1-标签头" class="headerlink" title="1. 标签头"></a>1. 标签头</h2><p>  标签头有十个字节，在文件最开始的10个字节，它的数据结构如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">char Header[3];//这个字符串一定为&quot;ID3&quot;</div><div class="line"></div><div class="line">char version;//版本号，而针对在下要讲的版本，理应为3.即为ID3v2.3</div><div class="line"></div><div class="line">char revision;//副版本号，好像一直都是0，没看到过它有变过</div><div class="line"></div><div class="line">char flags;//一些特殊的消息标记，只会使用此字节的高3位，其它的五位并没有什么卵用</div><div class="line"></div><div class="line">char size[4];//代表整个标签帧的大小，但是不包括这开始的10个字节，所以这里得到的size需要加上10才代表整个标签帧的大小</div></pre></td></tr></table></figure>
+<p>ID3v2 flags中的%abc00000，其中高三位表示如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">a - Unsynchronisation</div><div class="line">表示是否同步(自己乱翻译的)，这个搞不清是什么鬼，个人英语不是很行，大概是为了数据帧同步帧数据,校正数据用的</div><div class="line">b - Extended header</div><div class="line">表示是否有扩展头部，这个扩展头部是用来补充标签信息的，原文如下：</div><div class="line">The extended header contains information that is not vital to the correct parsing of the tag information, hence the extended header is optional. </div><div class="line"></div><div class="line">c - Experimental indicator</div><div class="line">表示是否为试验测试，这个东西是什么鬼也不知道，没见过MP3音乐文件这个位进行了设置</div></pre></td></tr></table></figure>
+<p>ID3v2 size中的4?%0xxxxxxx表示的是4个字节，后面的%0xxxxxxx就是一个字节8位了。</p>
+<p>然后计算标签帧的大小，<strong>ID3</strong>规定这四个字节中每个字节的最高位恒为0不使用，格式如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">var size = size4 &amp; 0x7f | ((size3 &amp; 0x7f) &lt;&lt; 7) | ((size2 &amp; 0x7f) &lt;&lt; 14) | ((size1 &amp; 0x7f) &lt;&lt; 21);</div></pre></td></tr></table></figure>
+<p><strong>注意：这里的帧大小，并不包含帧头的10个字节，只表示帧内容的大小</strong></p>
+<p>这里再说一个特殊消息标记的<strong>Extended header</strong>处理，当<strong>Extended header</strong>这个标记位设置为1时，在这最开始的10个字节后面会增加有<strong>Extended header</strong>的内容，这部分内容非常有意思，因为它所占用的大小不算在之前10个字节的size中，就相当这里会凭空多出一些字节。</p>
+<p>然后这个<strong>Extended header</strong>信息内容格式如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">Extended header size   $xx xx xx xx</div><div class="line">Extended Flags         $xx xx</div><div class="line">Size of padding        $xx xx xx xx</div><div class="line">...</div></pre></td></tr></table></figure>
+<p><strong>Extended header size</strong>有四个字节，表示接下来的数据占用多少个字节。</p>
+<p><strong>Extended Flags</strong> 这两个字节不知道干什么</p>
+<p>接下来就都是扩展头部的数据了（我猜<strong>Extended Flags</strong>这两个字节好像没有，扩展头部本来就没有多大用，一般直接就滤掉了）</p>
+<p>这里是JS代码实现标签头的识别：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div></pre></td><td class="code"><pre><div class="line">getByteAt(iOffset);//得到iOffset位置的一个字节数据</div><div class="line"></div><div class="line">isBitSetAt(iOffset, iBit);//判断iOffset位置的字节的iBit位是1还是0</div><div class="line"></div><div class="line">readSynchsafeInteger32At(data, iOffset);//这是处理标签头的size</div><div class="line"></div><div class="line">getLongAt(iOffset, bBigEndian);//得到iOffset位置的Long数据，bBigEndian表示是低端还是高端</div><div class="line"></div><div class="line"></div><div class="line">/****************/</div><div class="line"></div><div class="line">var offset = 0,</div><div class="line">    major = data.getByteAt(offset + 3),</div><div class="line">    revision = data.getByteAt(offset + 4),</div><div class="line">    unsynch = data.isBitSetAt(offset + 5, 7),</div><div class="line">    xheader = data.isBitSetAt(offset + 5, 6),</div><div class="line">    xtest = data.isBitSetAt(offset + 5, 5),</div><div class="line">    size = this.readSynchsafeInteger32At(data, offset + 6);</div><div class="line"></div><div class="line">offset += 10;</div><div class="line">if (xheader) &#123;</div><div class="line">    var xheadersize = data.getLongAt(offset, true);</div><div class="line">    offset += xheadersize + 4;</div><div class="line">&#125;</div><div class="line"></div><div class="line">var id3 = &#123;</div><div class="line">    &quot;version&quot;: &apos;2.&apos; + major + &apos;.&apos; + revision,</div><div class="line">    &quot;major&quot;: major,</div><div class="line">    &quot;flags&quot;: &#123;</div><div class="line">        &quot;unsynchronisation&quot;: unsynch,</div><div class="line">        &quot;extended_header&quot;: xheader,</div><div class="line">        &quot;experimental_indicator&quot;: xtest</div><div class="line">    &#125;,</div><div class="line">    &quot;size&quot;: size</div><div class="line">&#125;;</div></pre></td></tr></table></figure>
+<h2 id="2-标签帧内容"><a href="#2-标签帧内容" class="headerlink" title="2. 标签帧内容"></a>2. 标签帧内容</h2><h4 id="帧头的定义"><a href="#帧头的定义" class="headerlink" title="帧头的定义"></a>帧头的定义</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">char ID[4];//用四个字符标识一个帧，表明这个帧的内容是什么</div><div class="line"></div><div class="line">char size[4];//帧内容的大小，不包括帧头</div><div class="line"></div><div class="line">char flags[2];//特殊的消息标记</div></pre></td></tr></table></figure>
+<ul>
+<li><strong>帧标识</strong>：The frame ID made out of the characters capital A-Z and<br>0-9.FrameID会是一串由A-Z和0-9的字符串组成，占用4个字节</li>
+<li><strong>帧大小</strong>：The frame ID is followed by a size descriptor, making a total header size of ten bytes in every frame. The size is calculated as frame size excluding frame header</li>
+<li>最后这个flags跟前面说的都一样为特殊标记</li>
+</ul>
+<h4 id="常见有用的帧标识"><a href="#常见有用的帧标识" class="headerlink" title="常见有用的帧标识"></a>常见有用的帧标识</h4><ol>
+<li><strong>TIT2</strong>：歌曲标题名字</li>
+<li><strong>TPE1</strong>：作者名字</li>
+<li><strong>TALB</strong>：作品专辑</li>
+<li><strong>TYER</strong>：作品产生年代</li>
+<li><strong>COMM</strong>：备注信息</li>
+<li><strong>APIC</strong>：专辑图片</li>
+</ol>
+<h4 id="帧标记说明"><a href="#帧标记说明" class="headerlink" title="帧标记说明"></a>帧标记说明</h4><p>只定义了6位，另外的10位为0，一般这些标记也不用，通常为0，格式如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">flags %abc00000 ijk00000 </div><div class="line"></div><div class="line">a -- 标签保护标志，设置时认为此帧作废</div><div class="line"></div><div class="line">b -- 文件保护标志，设置时认为此帧作废</div><div class="line"></div><div class="line">c -- 只读标志，设置时认为此帧不能修改(但我没有找到一个软件理会这个标志) </div><div class="line"></div><div class="line">i -- 压缩标志，设置时一个字节存放两个BCD 码表示数字 </div><div class="line"></div><div class="line">j -- 加密标志(没有见过哪个MP3 文件的标签用了加密) </div><div class="line"></div><div class="line">k -- 组标志，设置时说明此帧和其他的某帧是一组</div></pre></td></tr></table></figure>
+<h4 id="帧标识"><a href="#帧标识" class="headerlink" title="帧标识"></a>帧标识</h4><p><strong>帧标识这一块有太多，各种各样的，到官方网站去看，这里会主要区分三种主要的标识信息（其他的都拜拜吧，通过看官方网站的信息你就知道为什么拜拜了）。</strong></p>
+<ol>
+<li><p>T*，即以T开头的帧标识，为文本标识。</p>
+<p>文本标识就会涉及到文字的编码，此标签内容分为三部分。</p>
+<p>第一部分为1个字节，这个字节一定是[0x00,0x01,0x02,0x03]中的一种，0x00代表这个标签帧后续的数据为<strong>iso-8859-1</strong>编码，0x01则是<strong>utf-16</strong>编码，0x02则是<strong>utf-16be</strong>编码，0x03则是<strong>utf-8</strong>编码</p>
+<p>第二部分根据编码确定是否存在<br>如果为0x00编码的话就不会存在，字节就是直接读取</p>
+<p>如果为0x01和0x02那么这里会占用2个字节，会出现两种可能的数据，一种为<strong>FF FE</strong>表示小端，即数据<a href="http://www.07net01.com/storage_networking/" target="_blank" rel="external">存储</a>是高数据在高位，一种为<strong>FE FF</strong>表示大端与小端相反</p>
+<p>如果为0x03编码则是会占用三个字节 <strong>EF BB BF</strong></p>
+<p>第三部分就是数据</p>
+</li>
+<li><p><strong>APIC</strong>，专辑图片，好像整个<strong>MP3</strong>的数据就只有这个标识有图片</p>
+<p>这里直接以官方说明来讲解比较好：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">&lt;Header for &apos;Attached picture&apos;, ID: &quot;APIC&quot;&gt;</div><div class="line">Text encoding   $xx</div><div class="line">MIME type       &lt;text string&gt; $00</div><div class="line">Picture type    $xx</div><div class="line">Description     &lt;text string according to encoding&gt; $00 (00)</div><div class="line">Picture data    &lt;binary data&gt;</div></pre></td></tr></table></figure>
+<p>第一个为数据编码，和以<strong>T</strong>开头的一样，分为四种0x00,0x01,0x02,0x03</p>
+<p>第二个为<strong>MIME type</strong>数据了，表示的是什么类型图片，有image/jpeg,image/png…等，<br>这里的字节数不确定，是用0x00作为字符串的结束标志，来停止读取的，也就是说MIME type数据需要一直读取，知道读取到了0x00也就是我们常见的字符串结束标志\0.</p>
+<p>第三个为<strong>Picture type</strong>，表示的是图片代表什么，是作者还是一些什么内容。</p>
+<p>第四个为<strong>Description</strong>，就是简单的图片描述了，这里和<strong>MIME type</strong>数据一样，是以\0为结束的，这里多说一句的是，这个属性好像也不经常用，它的值经常为”“</p>
+<p>第五部分就是图片数据了，记住这不是<strong>base64</strong>编码的数据。</p>
+<p><strong>Picture type</strong>的值扩充说明(就是这些值表示这张图片的大概内容)</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div></pre></td><td class="code"><pre><div class="line">$00     Other</div><div class="line">$01     32x32 pixels &apos;file icon&apos; (PNG only)</div><div class="line">$02     Other file icon</div><div class="line">$03     Cover (front)</div><div class="line">$04     Cover (back)</div><div class="line">$05     Leaflet page</div><div class="line">$06     Media (e.g. lable side of CD)</div><div class="line">$07     Lead artist/lead performer/soloist</div><div class="line">$08     Artist/performer</div><div class="line">$09     Conductor</div><div class="line">$0A     Band/Orchestra</div><div class="line">$0B     Composer</div><div class="line">$0C     Lyricist/text writer</div><div class="line">$0D     Recording Location</div><div class="line">$0E     During recording</div><div class="line">$0F     During performance</div><div class="line">$10     Movie/video screen capture</div><div class="line">$11     A bright coloured fish</div><div class="line">$12     Illustration</div><div class="line">$13     Band/artist logotype</div><div class="line">$14     Publisher/Studio logotype</div></pre></td></tr></table></figure>
+<p>​</p>
+</li>
+<li><p><strong>COMM</strong>，备注消息，这个玩意一直在飞，全程都是懵逼的，这个属性感觉并没有什么卵用</p>
+<p>这里还是官方说明来讲解比较好</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">&lt;Header for &apos;Comment&apos;, ID: &quot;COMM&quot;&gt;</div><div class="line">Text encoding           $xx</div><div class="line">Language                $xx xx xx</div><div class="line">Short content descrip.  &lt;text string according to encoding&gt; $00 (00)</div><div class="line">The actual text         &lt;full text string according to encoding&gt;</div></pre></td></tr></table></figure>
+<p>第一个不想说了，跟前面的一模一样;</p>
+<p>第二个表示接下来是什么语言，就是说是中文还是英文还是其它语言，一般是英文就是eng</p>
+<p>然后就是短描叙了，这里的字节数也是不确定的，也就是说这里是以\0为结尾的数据，需要不断读取直到\0结束</p>
+<p>接下来就是最终的数据了</p>
+</li>
+</ol>
+<h2 id="3-编码数据扩充"><a href="#3-编码数据扩充" class="headerlink" title="3. 编码数据扩充"></a>3. 编码数据扩充</h2><ol>
+<li><p><strong>utf-16</strong>，即为<strong>UCS-2</strong>，这种编码会出现两种形式，一个为2字节也就是一个字，一个为四字节也就是两个字，<br>当第一个字节小于0xD8或者大于0xDF，则是第一种情况，否则就是第二种，其中0xDB-0xDF为代理区<br>当然在这个音乐文件中有小端和大端区分，所以我们经常会看到如下编码选项 <strong>UCS-2 Big Endian</strong>(大端),<strong>UCS-2 Little Endian</strong>(小端)</p>
+</li>
+<li><p><strong>utf-8</strong>,这个编码可以说是最操蛋的，网上的解释也参差不齐，俺也懒得去看官网了，这里讲解的只是最常用的，<a href="http://www.qiche887.com/tags-%E5%A4%A7%E4%BC%97-0.html" target="_blank" rel="external">大众</a>的。<br>这个编码分为三种，一个为1字节(这里很明显是用一个字节来表示英文字母)，然后就是2字节，接着就是3字节<br>区分：</p>
+<ul>
+<li>第一字节小于0x80则为1个字节</li>
+<li>第一字节大于等于0xC2小于0xE0则是2字节</li>
+<li>第一字节大于等于0xE0小于0xF0则是3字节</li>
+</ul>
+</li>
+<li><p>其他的编码就一股脑的读取一个字节就可以了</p>
+</li>
+</ol>
+<p>关于更多文字编码的知识可以看这里：<a href="/2017/03/12/彻底搞懂字符编码/index.html">彻底搞懂字符编码</a>;</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/ID3-Audio/" rel="tag"># ID3, Audio</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/03/12/彻底搞懂字符编码/" rel="next" title="彻底搞懂字符编码">
+                <i class="fa fa-chevron-left"></i> 彻底搞懂字符编码
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/05/28/shadowsocks服务端的配置/" rel="prev" title="shadowsocks服务端的配置">
+                shadowsocks服务端的配置 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="虚幻" />
+            
+              <p class="site-author-name" itemprop="name">虚幻</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">6</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">6</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          <div class="links-of-author motion-element">
+            
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/qwertyyb" target="_blank" title="GitHub">
+                    
+                      <i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#MP3文件分析之ID3v2-3版本"><span class="nav-number">1.</span> <span class="nav-text">MP3文件分析之ID3v2.3版本</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-标签头"><span class="nav-number">1.1.</span> <span class="nav-text">1. 标签头</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-标签帧内容"><span class="nav-number">1.2.</span> <span class="nav-text">2. 标签帧内容</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#帧头的定义"><span class="nav-number">1.2.0.1.</span> <span class="nav-text">帧头的定义</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#常见有用的帧标识"><span class="nav-number">1.2.0.2.</span> <span class="nav-text">常见有用的帧标识</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#帧标记说明"><span class="nav-number">1.2.0.3.</span> <span class="nav-text">帧标记说明</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#帧标识"><span class="nav-number">1.2.0.4.</span> <span class="nav-text">帧标识</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-编码数据扩充"><span class="nav-number">1.3.</span> <span class="nav-text">3. 编码数据扩充</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">虚幻</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.3</div>
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      
+    </span>
+  
+
+  
+    <span class="site-pv">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      
+    </span>
+  
+</div>
+
+
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//tajs.qq.com/stats?sId=64035988";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/three/three.min.js"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/three/three-waves.min.js"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.3"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
