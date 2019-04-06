@@ -1,7 +1,7 @@
 ---
 title: 基于webRTC的网络直播与点播系统(1)
 date: 2019-04-03 17:02:07
-tags: webRTC, 网络直播, 点播
+tags: webRTC, kuretno, 媒体服务器
 categories:
 ---
 ## 简介
@@ -11,6 +11,7 @@ categories:
 2. 基于nodejs的服务器，实现信令传递，浏览器和媒体服务器交互和用户常规逻辑的后端
 3. 前端vuejs，搭建用户界面
 ```
+本节是关于kurento媒体服务器的搭建
 <!-- more -->
 ## 媒体服务器的搭建
 ### 环境
