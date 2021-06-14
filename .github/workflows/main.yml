@@ -1,0 +1,35 @@
+name: build site
+
+on:
+  push:
+    branch: [master]
+
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps: 
+      - uses: actions/checkout@v2
+
+      - name: install dependencies
+        run: npm install
+
+      - name: install theme
+        run: npm run theme:install
+
+      - name: set up deploy info
+        run: |
+          git config --global init.defaultBranch master
+          git config --global user.email "qwertyyb@foxmail.com"
+          git config --global user.name "qwertyyb"
+      
+      - name: build site
+        run: npm run build
+
+      - name: update site
+        run: |
+          mv public docs
+          git add docs
+          git commit -m "update site"
+          git push origin master:release -f
