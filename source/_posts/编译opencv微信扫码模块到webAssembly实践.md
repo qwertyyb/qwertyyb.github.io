@@ -1,5 +1,5 @@
 ---
-title: 编译opencv微信扫码模块为webAssembly版本实践
+title: 编译opencv微信扫码模块到webAssembly实践
 date: 2021-06-19 18:55:20
 tags: webAssembly, opencv
 categories: webAssembly, opencv
@@ -237,9 +237,21 @@ sudo docker run --rm -v /data/home/marchyang/mine/ocv:/src -u $(id -u):$(id -g) 
 
 ![执行结果](https://tva1.sinaimg.cn/large/008i3skNgy1groznnndx8j30sy0ligq0.jpg)
 
-## 下一步
-
 可以发现已经输出了二维码的内容，也没有报错，跟我们的期望结果一致。至此，微信二维码识别模块终于在web页面上跑起来了。
 
-但是现在发现打包出来的 `opencv.js` 文件很大, 原因是打包进来了很多额外的模块，下一步，可以去掉不需要的模块减小打包后文件的大小。
+## 减少打包文件大小
+
+查看network发现打包出来的 `opencv.js` 文件很大7.9M, 原因是打包进来了很多额外的模块，可以去掉不需要的模块减小打包后文件的大小。
+
+分为三步: 
+
+1. 修改 `opencv/platforms/js/build_js.py` 文件，把不需要构建的模块值由ON调整为OFF,如下图: 
+![build_js.py](https://tva1.sinaimg.cn/large/008i3skNgy1grp1pmwhxqj320y0rw13f.jpg)
+
+2. 移除 `opencv_contrib/modules` 目录下多余的模块文件夹，只保留 `wechat_qrcode` 文件夹
+
+3. 修改 `opencv/platforms/js/opencv_config.js.py` 文件，whitelist 只保留 wechat_qrcode, 如下图:
+![opencv_config.js.py](https://tva1.sinaimg.cn/large/008i3skNgy1grp1tj65wej31w00iun44.jpg)
+
+以上三步执行完毕后，再次执行编译命令，刷新浏览器，发现opencv.js文件已经从原来的7.9M减少到了4.6M
 
