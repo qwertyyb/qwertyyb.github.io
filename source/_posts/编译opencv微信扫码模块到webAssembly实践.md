@@ -19,7 +19,7 @@ categories: webAssembly, opencv
 
 而微信的大数据也确实可怕，瞬间洞察我心，把微信的二维码识别解码能力开源了。而这篇文章就是记录一下在编译此模块到webAssembly过程中遇到的一些问题和解决方案
 
-## opencv项目
+## opencv项目简介
 
 opencv在业内大名鼎鼎，为了编译此项目到webAssembly，需要对该项目大概有一个了解。
 
@@ -129,11 +129,11 @@ white_list = makeWhiteList([core, imgproc, objdetect, video, dnn, features2d, ph
 
 ![编译wechat_qrcode模块报错](https://tva1.sinaimg.cn/large/008i3skNgy1gros8m5xf3j31a404mn00.jpg)
 
-### 失败踩坑
+## 失败踩坑
 
 愿望是美好的，现实是残酷的，编译wechat_qrcode模块失败了，为了能在web中用上这个模块，需要一一定位并解决这些问题。
 
-#### 1. 编译失败报错 no memeber named 'vectorstd' in namespace 'std'
+### 1. 编译失败报错 no memeber named 'vectorstd' in namespace 'std'
 这里的报错信息非常清晰，可以看到是在生成的 `build_wasm/modules/js_bindings_generator/gen/bindings.cpp` 文件中的wechat_qrcode模块的detectAndDecode函数的返回类型不正常
 
 对比 `opencv_contrib/modules/wechat_qrcode/include/opencv2/wechat_qrcode.hpp` 中此函数的声明，发现原函数声明的返回类型为 `std::vector<std::string>`, 但是生成的函数的返回类型为 `std::vectorstd::string`，一对比就发现是在生成的过程中 `bindings.cpp` 时，把原返回类型中的两个 `<>` 符合吞掉了。
@@ -148,7 +148,7 @@ white_list = makeWhiteList([core, imgproc, objdetect, video, dnn, features2d, ph
 
 替换完成后，再次执行编译，发现这个错误已经没有了。但是出现了另一个错误
 
-#### 2. 编译失败报错 unknown type name 'string'; did you mean 'String'
+### 2. 编译失败报错 unknown type name 'string'; did you mean 'String'
 
 错误截图如下所示:
 
@@ -187,7 +187,7 @@ img.onload = () => {
 
 在准备这段代码的过程中，其实就会发现问题，实例化二维码实例时，需要传入4个模型文件，但是这4个模型文件在C++中是从文件系统中读取的，但是编译为webAssembly后，怎么读这4个文件？
 
-#### 3. 模型文件加载问题
+### 3. 模型文件加载问题
 
 google发现webAssembly模拟了文件系统，可以把文件打包然后像读取文件系统一样，对文件进行读取操作。
 
@@ -217,11 +217,61 @@ sudo docker run --rm -v /data/home/marchyang/mine/ocv:/src -u $(id -u):$(id -g) 
 
 然后刷新页面，打开JS运行控制台，再运行上面的测试代码，看效果如下图
 
+![运行效果](https://tva1.sinaimg.cn/large/008i3skNgy1grwoffk01sj30sm11ejyw.jpg)
+
+排查发现这次的报错是在初始化类时报的错
+
+### 4. 运行报错: 初始化类时 `wechat_qrcode_WeChatQRCode` 类时，报错处理
+
+在控制台看到这个错误，再看错误的堆栈信息，一阵头大，这个报错中什么都没有，自然没有办法获取到有用的信息，也无从猜测到底是源代码的哪一部分报错了。
+
+到这里为止，几乎要放弃了，觉得没有办法编译了。可是心中仍有一份希望，料想chrome如此强大，应该有调试webAssembly的办法吧，于是一番google, 果然不出我所料，chrome确实提供了调试方式，具体可以查看 [这篇文章](https://developer.chrome.com/blog/wasm-debugging-2020/)
+
+具体做法:
+1. 编译时加上 `-g` 参数
+2. chrome 开发者工具打开 webAssembly 调试
+3. 在Docker上编译时，需要映射路径
+4. 打断点，调试
+
+根据文章，先加上编译参数，编译脚本在 `opencv/modules/js/CMakeLists.txt` 中，修改如下: 
+
+![修改编译脚本](https://tva1.sinaimg.cn/large/008i3skNgy1grwpqe9vmej321k0f4tez.jpg)
+
+然后重新编译，编译完成后再次执行测试脚本，报错信息如下: 
+
+![报错信息](https://tva1.sinaimg.cn/large/008i3skNgy1grwpsnrtmzj31800fm41s.jpg)
+
+可以看到错误堆栈中已经有了源代码信息。可是由于我这边是在远程开发机上使用Docker编译，然后把远程开发机端口映射到本地测试的，所以源代码无法显示出来，实为不美。
+
+根据错误信息，可以此错误是因为 `wechat_qrcode_WeChatQRCode`的初始化函数中，调用了 `cv::utils::fs::exists` ，而后面的函数报错了导致的。
+
+明明文件系统已经加载映射了，为什么 `cv::utils::fs::exists` 会报错失败呢？真是百思不得其解，在这里卡了好久。
+
+忽然灵光一现，想到有没有可能是 `cv::utils::fs::exists` 这个方法在编译为webAssembly时不兼容导致的呢？随即一想，感觉又不太可能，因为从这个方法的命名就可知晓，这个方法是 opencv 工具类库中的方法，应该会比较稳定，不应该出现这种问题才对。
+
+然而，虽然觉得不太可能，但是由于实在找不到头绪，只能先按这个思路排查。
+
+分析 `wechat_qrcode_WeChatQRCode` 的构造函数可知，在构造函数中，会先去调用 `cv::utils::fs::exits` 方法判断传入的文件路径对应的文件是否存在，然后会调用 `cv::dnn::readNetFromCaffe` 传入文件路径初始化 detector 模型。
+
+所以如果我们直接跳过检测文件，去调用 `cv::dnn::readNetFromCaffe` , 如果成功，就可以证明 `cv::utils::fs::exists` 确实有问题。而刚好，webAssembly时，`readNetFromCaffe` 方法也导出了，所以可以在console中调用此方法来验证即可，如下图: 
+
+![readNetFromCaffe](https://tva1.sinaimg.cn/large/008i3skNgy1grwqgj648rj310404gaaz.jpg)
+
+卧槽，我看到什么，直接传入竟然成功了。虽然不愿意相信，但是事实摆在眼前，不容得人不信， `cv::utils::fs::exists` 确实是有问题。
+
+知道了问题所在，就比较容易解决了。可以把 `opencv_contrib/modules/wechat_qrcode/src/wechat_qrcode.cpp` 文件中对 `cv::utils::fs::exists｀ 的调用注释掉即可，如下图：
+
+![删除cv::utils::fs::exists的调用](https://tva1.sinaimg.cn/large/008i3skNgy1grwqm0in8yj31n70u0ws5.jpg)
+
+然后再次编译，重新运行测试代码验证。运行效果如下图
+
 ![运行效果](https://tva1.sinaimg.cn/large/008i3skNgy1groyy7b8iij31ea0sc10r.jpg)
 
-发现在执行 `detectAndDecode` 时报了 `UnboundTypeError` 的错误
+可以发现，`wechat_qrcode_WeChatQRCode` 已经初始化成功了，图中的报错是在调用实例的 `detectAndDecode` 方法时报的异常。所以实例化的问题已解决，可以解决图中所示的问题了。
 
-#### 4. 运行报错： UnboundTypeError
+而且，在分析构造函数时发现，如果传入4个空的字符串，就不会再判断文件存在也不会读取模型文件了，所以 `var wr = new cv.wechat_qrcode_WeChartQRCode('', '', '', '')` 也是可以成功实例化并调用 `wr.detectAndDecode` 的。当然检测并解析二维码的时候也就不能用训练出的模型了，识别解码效果可能会打折扣。
+
+### 4. 运行报错： detectAndDecode报错，UnboundTypeError
 
 分析错误信息发现报错的类型，此函数原返回类型为 `std::vector<std::string>` 而报错的类型和这个类型颇为相似，所以猜测可能是因为 `std::vector<std::string>` 未在编译为webAssembly时注册的原因。
 
@@ -239,19 +289,30 @@ sudo docker run --rm -v /data/home/marchyang/mine/ocv:/src -u $(id -u):$(id -g) 
 
 可以发现已经输出了二维码的内容，也没有报错，跟我们的期望结果一致。至此，微信二维码识别模块终于在web页面上跑起来了。
 
-## 减少打包文件大小
+## 减少文件大小
 
-查看network发现打包出来的 `opencv.js` 文件很大7.9M, 原因是打包进来了很多额外的模块，可以去掉不需要的模块减小打包后文件的大小。
+至此，已经成功编译并在Web环境中运行了微信的二维码引擎，但是从network可以发现，编译生成的opencv.js文件很大，有11.5M, 实在是过大了。在生产环境中使用时，需要根据需求，进行裁剪，去掉一些不需要的功能，减小包的大小
 
 分为三步: 
 
-1. 修改 `opencv/platforms/js/build_js.py` 文件，把不需要构建的模块值由ON调整为OFF,如下图: 
-![build_js.py](https://tva1.sinaimg.cn/large/008i3skNgy1grp1pmwhxqj320y0rw13f.jpg)
+1. 打包时去掉 `-g` 参数，这个参数是在调试webAssembly时加上的，使chrome的开发者工具可以显示并调试webAssembly，加上此参数，会大大增加opencv.js文件的大小，如果在生产环境中使用，去掉此参数，可大大减小包文件的大小，实测如果把 `-g` 参数去掉后，文件大小由11.5M减小到了8.9M, 减小了2.6M, 22%的大小
 
-2. 移除 `opencv_contrib/modules` 目录下多余的模块文件夹，只保留 `wechat_qrcode` 文件夹
+2. 修改 `opencv/platforms/js/opencv_config.js.py` 文件，whitelist 只保留 wechat_qrcode, 如下图:
 
-3. 修改 `opencv/platforms/js/opencv_config.js.py` 文件，whitelist 只保留 wechat_qrcode, 如下图:
 ![opencv_config.js.py](https://tva1.sinaimg.cn/large/008i3skNgy1grp1tj65wej31w00iun44.jpg)
 
-以上三步执行完毕后，再次执行编译命令，刷新浏览器，发现opencv.js文件已经从原来的7.9M减少到了4.6M
+这步的修改，可以把8.9M的文件，再次精简至4.6M, 又减小了4.3M, 在上一步的基础了，减小了近50％的文件大小。可以说很惊人了
 
+## Demo页面
+
+编译成功之后，把编译产物拿出来做了一个demo页面，地址是:  https://qwertyyb.github.io/wechat_qrcode_webassembly/demo.html 
+
+此页面也输出了图片中二维码的位置信息，具体的使用方法可以参考源码
+
+## 下一步
+
+到目前为止，成功的把微信二维码引擎编译成了webAssembly，可以在web中运行并成功的解码二维码内容。
+
+之所以构建编译此版本，是因为我需要在一个基于electron的项目中使用，所以接下来，会在此工具中引入，看是否有坑。
+
+另外，在编译过程中，遇到的这些问题也可以再深入研究一下，看下能否向opencv提个mr。
