@@ -20,7 +20,7 @@ categories: 游戏, godot
 
 现在开始吧
 
-### 环境
+## 环境
 
 - Godot 3.5.2
 - MacOS 13.2.1
