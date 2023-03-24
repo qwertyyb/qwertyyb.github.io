@@ -17,19 +17,14 @@ jobs:
 
       - name: install theme
         run: npm run theme:install
-
-      - name: set up deploy info
-        run: |
-          git config --global init.defaultBranch master
-          git config --global user.email "qwertyyb@foxmail.com"
-          git config --global user.name "qwertyyb"
       
       - name: build site
         run: npm run build
-
+        
+      - name: upload pages artifact
+        uses: actions/upload-pages-artifact@v1
+        with:
+          path: public
+    
       - name: update site
-        run: |
-          mv public docs
-          git add docs
-          git commit -m "update site"
-          git push origin master:release -f
+        uses: actions/deploy-pages@v1
