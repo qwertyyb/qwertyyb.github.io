@@ -109,7 +109,7 @@ $$B(t) = (1-t)^2P_0 + 2t(1-t)P_1 + t^P_2, t \in [0, 1] $$
 
 ```python
 func addPoints():
-	var points = curve.get_baked_points()
+	var points = curve.tessellate()
 	var P0 = points[points.size() - 1] # 曲线的最后一个点
 	var lastSecPoint = points[points.size() - 2]  # 曲线的倒数第二个点
 	var tangent = (P0 - points[points.size() - 2]).normalized() # 计算第一个切线的方向向量: 用最后两个点连成的向量当作曲线的切线向量
@@ -151,7 +151,7 @@ func addPoints():
 
 ```python
 func updateShape():
-	var points = curve.get_baked_points()
+	var points = curve.tessellate()
 	
 	# 曲线上的第一个点，也就是曲线的左上角的那个点
 	var first = points[0]
@@ -178,10 +178,105 @@ func updateShape():
 ![运行效果](https://user-images.githubusercontent.com/16240729/227434952-6e0468ba-e13f-4311-8ef7-966db36236a2.gif)
 
 
-### 下一步
+### 无限地图
 
-到这里其实还没有结束，因为目前循环只能生成有限长度的曲线，并不是无限的，这是因为不可能一开始就生成一条无限长的曲线，只能是生成有限长的曲线，然后配合画面的移动，不停的在曲线上续接，最终游玩的时候，就好像有无限长的路径一样。但是目前我们的画面还不能移动，所以无法在画面移动时进行续接，因为这里下一节，会让画面动起来。
+目前循环只能生成有限长度的曲线，并不是无限的，这是因为不可能一开始就生成一条无限长的曲线，只能是生成有限长的曲线，然后配合画面的移动，不停的在曲线上续接，最终游玩的时候，就好像有无限长的路径一样。这里有三个步骤:
 
+1. 获取画面的位置信息，包括画面的最左边和最右边位置，最左边用于清理之前生成的路径，最右边用于判断是否需要生成新的路径
+
+2. 清理之前的路径
+
+3. 生成新的路径
+
+这里要想获取当前画面的位置信息，就需要了解 `Camera2D` 的原理。
+
+#### Camera2D 的原理
+
+这里需要理解一下 `Camera2D` 的原理。首先所有的 `CanvasItem` 是画在 `Canvas` 上(layer默认为0)，从运行效果上，我们会认为是 `Camera2D` 在画面上移动，渲染 `Camera2D` 范围内的图像到 `viewport`， 然而实际情况下并不是这样的， `Camera2D` 的作用只是把画布进行平移变换，让画面反方向动起来，这样视窗就看到画面向前运动了。如下:
+
+![Camera2D在画布上移动](https://user-images.githubusercontent.com/16240729/228217992-1e446043-8ddd-4faf-8b1a-9e4edfd2289c.gif)
+
+![Camera2D移动画布](https://user-images.githubusercontent.com/16240729/228217976-6df97a44-615c-43e6-8c11-2ac8acfbfd01.gif)
+
+而画布的移动是通过 `viewport.canvas_transform` 属性来改变的，也就是说 `Camera2D` 做的仅是自动计算人物的位置，然后更新 `viewport.canvas_transform` 的值。
+
+#### 具体实现
+
+了解了 `Camera2D` 的原理，就可以通过下面的代码计算当前视窗内画面的位置信息了。
+
+```python
+  # 当前平移的距离取反就算出了 Camera 的等价平移距离
+	var origin = - get_viewport().canvas_transform.origin
+  # 视窗的大小
+	var width = abs(get_viewport_rect().size.x)
+  # 最左边边界的X坐标
+	var minX = origin.x
+  # 最右边的边界X坐标
+	var maxX = origin.x + width
+```
+
+下一步，需要把点位置位于最左边边界左侧的点移除。这里需要注意的是，如果一个点在边界左边，一个点在边界右边(也就是视窗内或视窗右边)，那这两个点形成的曲线会有一部分在视窗内可以被看到，那这时就不能移动边界左边的点。转换一下就是是否要移除当前的点，需要判断下一个点是不是否在边界右边，如果下一个点在边界右边，那就不能移除，其余情况都可以移除。所以可以添加 `removePoints` 函数如下: 
+
+```python
+func removePoints(minX: int):
+	var index = 0
+	for i in curve.get_point_count() - 1:
+
+		if index + 1 > curve.get_point_count() - 1:
+			break;
+
+		# 根据下一点所在的位置，判断当前点要不要删除
+		var nextPoint = curve.get_point_position(index + 1)
+		
+		if nextPoint.x > minX:
+			# 下一个点在视窗范围右侧，即在视窗范围内或还没进入视窗，则循环结束
+			break
+		else:
+			# 下一个点在视窗范围左侧，说明当前点对视窗范围内的曲线无影响，可以移除
+			curve.remove_point(index)
+			
+			# 移除后，需要注意下一次循环的index的变化
+			index -= 1
+
+		index += 1
+```
+
+接着需要对原来的 `addPoints` 方法做改造。需要把原来写死只能生成四段曲线的逻辑动态化，确保生成的曲线的最后一个点位于视窗的最右侧边界右边。这里同样会有一个问题，比如说如果我们的曲线的最后一段的两个点分别在边界的两侧，那在下一次生成曲线之前，如果视窗的移动非常快已经越过了最后一个点的位置，那玩家就会看到一段断掉的曲线，即使后面我们很快补上了，玩家也会看到补接的这一过程，这样就不够流畅，所以必须要在右边预留足够的曲线长度，才能在视窗移动不太离谱的情况下，保证玩家见到曲线不断。把 `addPoints` 方法改造如下:
+
+```python
+- func addPoints():
++ func addPoints(maxX: int):
++   # 生成的曲线延伸到两屏之后，确保可视区域内的网线不断
++   var lastPointOverX = maxX + abs(get_viewport_rect().size.x) * 2
+    ...
+-   for i in range(4):
++   while(P0.x < lastPointOverX):
+-     P1 = P0 + tangent * rand_range(60,80) # 在切线的方向向量延伸 60-80 单位区间，随机一个数值，作为点 P1 的位置
++     P1 = P0 + tangent * rand_range(100,200) # 在切线的方向向量延伸 100-200 单位区间，随机一个数值，作为点 P1 的位置
+      ...
+-     var P2 = P1 + P2Direction * rand_range(60, 80)
++     var P2 = P1 + P2Direction * rand_range(100, 200)
+    ...
+```
+
+然后需要删除原来的在 `_ready` 方法中对 `addPoints` 的调用，添加 `_process` 方法，在每一帧去做点的清理和添加动作。
+
+```python
+func _process(delta):
+	# 当前平移的距离取反就算出了 Camera 的等价平移距离
+	var origin = - get_viewport().canvas_transform.origin
+	var width = get_viewport_rect().size.x
+	var minX = origin.x
+	var maxX = origin.x + width
+	
+	removePoints(minX)
+	
+	addPoints(maxX)
+```
+
+接着点击右上角运行场景，会发现曲线变得平滑，人物也能在曲线上进行无限的滑动了
+
+![无限地图](https://user-images.githubusercontent.com/16240729/228729561-924714a3-fe22-4ffd-9f08-3a0a651d5724.gif)
 
 
 
