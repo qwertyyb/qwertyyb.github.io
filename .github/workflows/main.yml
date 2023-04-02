@@ -3,6 +3,7 @@ name: build site
 on:
   push:
     branch: [master]
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -18,9 +19,6 @@ jobs:
 
       - name: install dependencies
         run: npm install
-
-      - name: install theme
-        run: npm run theme:install
       
       - name: build site
         run: npm run build
