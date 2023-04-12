@@ -39,6 +39,6 @@ jobs:
           email: qwertyyb@foxmail.com
           build_dir: public
           branch: gh-pages
-          cname: domain.tld              # optional
+          cname: www.qwertyyb.com              # optional
           jekyll: no                     # optional
           commit_message: update site # optional
