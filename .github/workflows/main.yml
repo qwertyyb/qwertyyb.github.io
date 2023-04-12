@@ -24,21 +24,10 @@ jobs:
         run: npm run build
         
       - name: upload pages artifact
-        uses: actions/upload-pages-artifact@v1
+        uses: actions/upload-artifact@v3
         with:
+          name: site
           path: public
     
       - name: update site
-        uses: actions/deploy-pages@v1
-        
-      - name: Deploy to GitHub Pages
-        uses: Cecilapp/GitHub-Pages-deploy@v3
-        env:
-          GITHUB_TOKEN: ${{ github.GITHUB_TOKEN }}
-        with:
-          email: qwertyyb@foxmail.com
-          build_dir: public
-          branch: gh-pages
-          cname: www.qwertyyb.com              # optional
-          jekyll: no                     # optional
-          commit_message: update site # optional
+        run: npm run deploy
