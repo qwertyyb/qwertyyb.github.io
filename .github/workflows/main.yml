@@ -30,4 +30,7 @@ jobs:
           path: public
     
       - name: update site
-        run: npm run deploy
+        run: |
+          git config user.email "qwertyyb@foxmail.com"
+          git config user.name "qwertyyb"
+          npm run deploy
