@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
@@ -22,15 +22,21 @@ jobs:
       
       - name: build site
         run: npm run build
+    
+      - name: Deploy to GitHub Pages
+        uses: Cecilapp/GitHub-Pages-deploy@v3
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          email: qwertyyb@foxmail.com
+          build_dir: public
+          branch: gh-pages
+          cname: www.qwertyyb.com
+          jekyll: no
+          commit_message: update site
         
       - name: upload pages artifact
         uses: actions/upload-artifact@v3
         with:
           name: site
           path: public
-    
-      - name: update site
-        run: |
-          git config user.email "qwertyyb@foxmail.com"
-          git config user.name "qwertyyb"
-          npm run deploy
