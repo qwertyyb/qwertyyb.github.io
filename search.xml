@@ -1,0 +1,962 @@
+<?xml version="1.0" encoding="utf-8"?>
+<search>
+  <entry>
+    <title>Godot游戏开发第一天-基本场景搭建</title>
+    <url>/2023/03/15/Godot%E6%B8%B8%E6%88%8F%E5%BC%80%E5%8F%91%E7%AC%AC%E4%B8%80%E5%A4%A9-%E5%9F%BA%E6%9C%AC%E5%9C%BA%E6%99%AF%E6%90%AD%E5%BB%BA/</url>
+    <content><![CDATA[<p>使用Godot游戏引擎开发一款2D游戏，第一天，基本场景搭建</p>
+<span id="more"></span>
+
+<blockquote>
+<p>Godot 是一款开源的游戏开发引擎，支持 2D 和 3D 游戏的开发，脚本可以使用类似 <code>python</code> 语法的 <code>gdscript</code> 或微软的 <code>C#</code>，从文档上来看，<code>Godot</code> 相比 <code>Unity</code> 要轻量许多</p>
+</blockquote>
+<p>本次开发使用的 <code>Godot</code> 的 3.5.x 版本。虽然刚好 4.0 版本已经正式发布了，但是 4.0 版本的发布明显仓促，官方 4.0 版本的英文文档尚不完全，中文文档仍然是在 3.5 的版本，而且 4.0 作为新版本必定带着新的 Bug，最后官方也承诺 3.x 版本作为 LTS 会继续进行维护。所以这次就使用 3.5.2 版本进行开发，暂不去尝鲜 4.0 版本。</p>
+<p>这次只是 <code>Godot</code> 的初使用，所以先模仿做一个简单的游戏来学习一下。Alto’s Adventure 是一个不错的选择。</p>
+<p><a href="http://altosadventure.com/" title="Alto&#39;s Adventure">Alto’s Adventure</a> 是一个 2D 的滑雪游戏。</p>
+<p><img src="https://i.328888.xyz/2023/03/20/P8tO8.png" alt="Alto&#39;s Adventure"></p>
+<p>现在开始吧</p>
+<h2 id="环境"><a href="#环境" class="headerlink" title="环境"></a>环境</h2><ul>
+<li><code>Godot</code> 3.5.2</li>
+<li><code>MacOS</code> 13.2.1</li>
+</ul>
+<h2 id="基本思路"><a href="#基本思路" class="headerlink" title="基本思路"></a>基本思路</h2><p>先做一个简单的滑道(地面)和人物，使用 <code>Godot</code> 的物理引擎，开始时给人物一个初始速度，让人物在重力场景下沿着滑道进行滑动。</p>
+<p>这里有几个概念: 物理引擎、地面和人物</p>
+<h2 id="Godot-2D-中的物理学"><a href="#Godot-2D-中的物理学" class="headerlink" title="Godot 2D 中的物理学"></a>Godot 2D 中的物理学</h2><p>Godot 2D 涉及到物理体的主要有<code>Area2D</code>、<code>StaticBody2D</code>、<code>RigidBody2D</code>、<code>KimentBody2D</code>。</p>
+<ul>
+<li>Area2D: 可以用来检测另一个物理体对当前 Area2D 实例的碰撞，也可用于覆盖物理属性, 例如一定区域内的重力或阻尼。</li>
+<li>StaticBody2D: 物理引擎不移动的主体. 它参与碰撞检测, 但不会响应碰撞而移动. 它们通常用于属于环境的对象或不需要任何动态行为的对象，比如地面</li>
+<li>RigidBody2D: 有质量，受重力和阻力等物理影响的物体，类比现实中的物体。你不能直接改变它的状态，而是在其中施加力，由物理引擎来计算速度</li>
+<li>KinematicBody2D: 没有质量，不受物理引擎的约束，但是可以检测和其它物理体的碰撞，它的移动和碰撞响应必须通过代码控制</li>
+</ul>
+<p>基本上认识以上四种物理物体就足够使用了</p>
+<p>在此游戏中，滑道是不移动的，人物在其上进行滑动。所以地面是一个 <code>StaticBody2D</code>, 而人物是一个 <code>RigidBody2D</code>。</p>
+<h2 id="创建滑道-地面"><a href="#创建滑道-地面" class="headerlink" title="创建滑道(地面)"></a>创建滑道(地面)</h2><h3 id="添加物理地面"><a href="#添加物理地面" class="headerlink" title="添加物理地面"></a>添加物理地面</h3><p>首先往场景中添加一个 <code>StaticBody2D</code>，命名为 <code>Ground</code>，如下图。</p>
+<p><img src="https://i.328888.xyz/2023/03/20/PhBnp.png" alt="添加Ground节点"></p>
+<p>有一个配置警告，提示需要添加一个 <code>CollisionShape2D</code> 或 <code>CollisionPolygon2D</code> 为其子节点，而且添加了 <code>StaticBody2D</code> 后，预览场景也并没有任何变化，这是怎么回事？</p>
+<h3 id="给地面以形状"><a href="#给地面以形状" class="headerlink" title="给地面以形状"></a>给地面以形状</h3><p><code>StaticBody2D</code> 有摩擦力等物理属性，但是目前并没有一个确切的形状来描述 <code>Ground</code>，那人物怎么知道应该停留在哪个位置是地面呢？而所谓的 <code>CollisionShape2D</code> 和 <code>CollisonPolygon2D</code> 也就是碰撞体形状和碰撞体多边形，就是用来给 <code>Ground</code> 分配形状的，只有有了形状，物理引擎才能按物品的形状来检测碰撞。</p>
+<p>那 <code>CollisionShape2D</code> 和 <code>CollisionPolygon2D</code> 应该使用哪个呢？</p>
+<ul>
+<li><code>CollisionShape2D</code> 预定义了椭圆、圆、凹多边形、凸多边形、矩形、线形、线段这几个形状，如果物品的形状是这几种，或者这几种形状可以叠加出来的形状，那可以使用一个或多个<code>CollisionShape2D</code> 作为子节点</li>
+<li><code>CollisionPolygon2D</code> 是把一些点连起来，作为碰撞形状的，所以相对于<code>CollisionShape2D</code>来说更加自由方便，需要提供一个顶点的列表作为 <code>polygon</code> 属性，然后 <code>CollisionPolygon2D</code> 将按顺序，第一个点连第二个点，第二个点连第三个点，以此类推，直到最后的最后最后一个点连第一个点，形式一个闭合的形状</li>
+</ul>
+<p>那作为此游戏中的滑道(地面)，正如下图所示，主要复杂在，它有一条曲线，而这条曲线确定了最好使用 <code>CollisionPolygon2D</code>。添加一个 <code>CollisionPolygon2D</code> 节点到 <code>Ground</code> 中，命名为<code>GroundShape</code>。</p>
+<p>在 <code>GroundShape</code> 右边有一个警告提示，提示 <code>polygon</code> 属性为空，不起作用，而 <code>polygon</code> 属性就是这个多边形的顶点，那么这个形状的点如何确定呢？手工填写吗？未免太低效，后续也不方便调试，这里可以使用 <code>Path2D</code> 节点</p>
+<p><img src="https://i.328888.xyz/2023/03/20/Phcxk.png" alt="添加GroundShape"></p>
+<h3 id="给形状传递点集"><a href="#给形状传递点集" class="headerlink" title="给形状传递点集"></a>给形状传递点集</h3><p><code>Path2D</code> 节点可以生成曲线，先在 <code>GroundShape</code> 中添加 <code>Path2D</code> 子节点，命名为 <code>GroundShapePath</code>。然后随便画个曲线如下(可以不用闭合，<code>GroundShape</code> 会自动帮助我们闭合)。下一步要做的就是把 <code>GroundShapePath</code> 中的点集取出来传递给 <code>GroundShapePath</code>。</p>
+<p><img src="https://i.328888.xyz/2023/03/20/PhmLL.png" alt="添加GroundShapePath"></p>
+<p>查看 <code>Path2D</code> 的文档，发现曲线信息存储在 <code>curve</code> 属性上，而 <code>curve</code> 属性是一个 <code>Curve2D</code> 实例，<code>Curve2D</code> 上有 <code>get_baked_points</code> 会返回曲线上的点，所以我们通过 <code>GroundShapePath.curve.get_baked_points()</code> 就能得到曲线上的点，下一步，把曲线上的点传给 <code>GroundShape</code> 的 <code>polygon</code> 属性，为此，需要写一点脚本。</p>
+<p>右键单击 <code>GroundShape</code> 节点 -&gt; 添加脚本，在 <code>GroundShape.gd</code> 中填入以下代码</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">tool</span><br><span class="line">extends CollisionPolygon2D</span><br><span class="line"></span><br><span class="line">func _ready():</span><br><span class="line">	polygon = get_node(&quot;GroundShapePath&quot;).curve.get_baked_points()</span><br></pre></td></tr></table></figure>
+
+<p>代码很简单，节点ready的时候，获取子节点 <code>GroundShapePath</code> 的曲线点集，赋值给 <code>GroundShape</code> 的 <code>polygon</code> 属性。这里需要注意的是，子节点的 <code>_ready</code> 调用在父节点之前。在 <code>gdscript.gd</code> 的第一行添加 <code>tool</code> 是为了方便在编辑器中也能预览效果。现在保存脚本内容，保存场景为 <code>Game.tscn</code>，然后关闭场景，重新打开此场景，现在应该就能看到 <code>GroundShape</code> 的提示消失了，并且能够看到它的形状。如下图所示，彩色部分就是 <code>GroundShape</code> 的开关了，点击可以看到开关的点</p>
+<p><img src="https://i.328888.xyz/2023/03/20/PG1eA.png" alt="GroundShape"></p>
+<h3 id="位置偏移的处理"><a href="#位置偏移的处理" class="headerlink" title="位置偏移的处理"></a>位置偏移的处理</h3><p>正常情况下，<code>GroundShape</code> 的边会刚好和 <code>GroundShapePath</code> 的边完全重合，预览区域会向上面一样只显示一条曲线。但是如果在上述步骤或后面的步骤中，移动了 <code>GroundShapePath</code> 或 <code>GroundShape</code> 的位置，那就会像下面这样出现两条曲线。这时因为 <code>GroundShapePath</code> 和 <code>GroundShape</code> 的位置出现了偏移。</p>
+<p><img src="https://i.328888.xyz/2023/03/20/PdGDd.png" alt="位置偏移"></p>
+<p>而出现偏移的原因是因为 <code>Godot</code> 中的每个节点都有一个 <code>transform</code> 属性，记录了节点的偏移、缩放和旋转信息，也称之为变换，如果对 <code>GroundShapePath</code> 进行了变换，那曲线上的点就都会在渲染时，应用对应的变换，注意这里只是渲染时应用了变换，通过 <code>GroundShapePath</code> 拿到的点的信息，仍然是没有变换的位置，最终在赋值给其父节点 <code>GroundShape</code> 时，就会有一个偏移。这里可以通过在编辑器中查看 <code>GroundShapePath</code> 的 <code>transform</code> 属性进行确认。这里的解决方式也很简单，只要保持 <code>GroundShapePath</code> 没有进行任何变换就可以了，可以点击输入框左边的图标恢复默认值。</p>
+<p><img src="https://i.328888.xyz/2023/03/20/Pd6KV.png" alt="节点的变换"></p>
+<h3 id="给地面上色"><a href="#给地面上色" class="headerlink" title="给地面上色"></a>给地面上色</h3><p>现在点击左上角运行场景，发现场景中什么都没有，不像编辑器中有一个彩色的图标标注地面。这是因为 <code>GroundShape</code> 只有形状没有颜色，而在编辑器中之所以能看到了，是为了方便调试预览，在实际的场景中是看不到的。为了能够在实际运行时看到和编辑器中一样的效果，可以在调试菜单中勾选  “显示碰撞区域” 的选项，然后再运行，就会发现运行效果中显示出了和编辑器一样的彩色。如果只勾选 “显示导航”，就会看到 <code>GroundShapePath</code> 了。</p>
+<p>虽然可以使用上面两个调试菜单项，但是这两个菜单毕竟只是为了方便调试，只是节目效果，并非地面真的有了颜色。所以还需要往 <code>Ground</code> 上填充真正的颜色，可以打开 <code>gdscript.gd</code> 脚本中添加如下函数。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">func _draw():</span><br><span class="line">  draw_polygon(polygon, [Color(1, 1, 1)])</span><br></pre></td></tr></table></figure>
+
+<p>这里使用顶点数据，向顶点闭合的图形中填充了白色，如此去掉调试的两个勾选项之后，再运行场景，就发现地面有了白色，在编辑器中关闭场景后重新启动，预览区域 <code>GroundShape</code> 也有了白色填充。</p>
+<p><img src="https://i.328888.xyz/2023/03/20/PhARC.png" alt="运行效果"></p>
+<p><img src="https://i.328888.xyz/2023/03/20/PhDSP.png" alt="编辑器效果"></p>
+<p>可以选中 <code>GroundShapePath</code>，然后点击预览区域上方的锁图标，点击锁定位置，这样就不用担心 <code>GroundShapePath</code> 被意外移动了。</p>
+<h2 id="添加人物"><a href="#添加人物" class="headerlink" title="添加人物"></a>添加人物</h2><h3 id="添加"><a href="#添加" class="headerlink" title="添加"></a>添加</h3><p>有了添加地面的经验，人物的添加就会顺畅很多，按下面步骤添加即可:</p>
+<ol>
+<li><p>先在根节点下添加 <code>RigidBody2D</code> 节点，命名为 <code>Player</code>，此时会提示没有碰撞形状节点</p>
+</li>
+<li><p>不着急添加碰撞开关，可以先在 <code>Player</code> 节点下添加 <code>Sprite</code> 节点，设置 <code>Sprite</code> 的 <code>Texture</code> 属性。</p>
+</li>
+<li><p>选中 <code>Sprite</code> 节点，点击预览区域上方的 <code>Sprite</code> 打开转换菜单，点击 <strong>创建CollisionPolygon2D</strong> 兄弟节点，然后在弹窗中点击右下角的 <strong>创建CollisionPolygon2D</strong> 此时，会在 <code>Sprite</code> 的同级添加 <code>CollisonPolygon2D</code> 节点，而且 <code>Player</code> 节点也没有了错误提示。这一步是把 <code>Sprite</code> 转换为 <code>RigidBody2D</code> 所需要的 <code>CollisionPolygon2D</code>。修改 <code>CollisionPolygon2D</code> 命名为 <code>PlayerBody</code>。</p>
+<p> <img src="https://user-images.githubusercontent.com/16240729/226806621-8926ba09-ecf9-4e75-bcea-51826c4b1e21.png" alt="创建CollisionPolygon2D子节点"></p>
+<p> <img src="https://user-images.githubusercontent.com/16240729/226806663-c8188445-033f-4dec-94e1-843646921026.png" alt="CollisionPolygon2D子节点"></p>
+</li>
+<li><p>此时我们人物就已经添加OK了</p>
+<p> <img src="https://user-images.githubusercontent.com/16240729/226806950-4908fd43-4722-4100-a000-75bf52611483.png" alt="Player"></p>
+</li>
+</ol>
+<p>点击右上角运行当前场景，看看效果。</p>
+<p><img src="https://user-images.githubusercontent.com/16240729/226808705-263a262e-4b64-4234-9d5b-a0d44e147ecc.gif" alt="运行效果"></p>
+<h3 id="遇到问题"><a href="#遇到问题" class="headerlink" title="遇到问题"></a>遇到问题</h3><p>可能会遇到以下几个问题:</p>
+<ol>
+<li><p>人物在左上角，被遮挡了一半。</p>
+</li>
+<li><p>人物落下后，静止了，没有沿着地面滑动。</p>
+</li>
+</ol>
+<p>  <img src="https://user-images.githubusercontent.com/16240729/226808698-407d534e-7ec6-4825-8c95-81c62c21ccfe.gif" alt="遮挡、静止"></p>
+<ol start="3">
+<li><p>如上运行效果所示，人物落下后，沿着地面翻滚。</p>
+</li>
+<li><p>整个画面没有跟随人物移动，人物最终会滑出画面。</p>
+</li>
+</ol>
+<h3 id="解决问题"><a href="#解决问题" class="headerlink" title="解决问题"></a>解决问题</h3><ol>
+<li><p>第一个问题可以通过在编辑器中挪动 <code>Player</code> 节点的位置，把 <code>Player</code> 节点挪到编辑器中蓝色区域内的地面上方即可，蓝色区域就是运行时的可见区域。</p>
+</li>
+<li><p>落下后静止了，可能有两个原因</p>
+<ul>
+<li><p>地面坡度问题，这个可以通过调整 <code>GroundShapePath</code> 曲线来解决</p>
+</li>
+<li><p>摩擦力的问题，这个人与地面的摩擦力太大，导致人物静止，不会沿地面滑动。所以我们可以调整 <code>Ground</code> 和 <code>Player</code> 的摩擦系数，都调整为0。调整方式为选择节点，在属性面板的 <code>Physics Material Override</code> 点击 <strong>新建PhysicsMaterial</strong>，然后把 <code>friction</code> 设置为 0,  <code>Ground</code> 或 <code>Player</code> 最好都按上面的方式调整。</p>
+<p> <img src="https://user-images.githubusercontent.com/16240729/226806673-c4ceb4bc-58cd-438b-9c25-e5167d27cee2.png" alt="调整摩擦系数"></p>
+</li>
+</ul>
+</li>
+<li><p>人物落下后翻滚有两个原因</p>
+<ul>
+<li><p>摩擦力的问题，摩擦力太大，导致无法滑动，人物只能翻滚，这个解决方案与上面一致。</p>
+</li>
+<li><p>碰撞体形状问题，可能是人物 <code>Sprite</code> 生成的碰撞形状底部不够平滑，导致滑动过程中多次碰撞，造成人物的翻滚。为此当然可以把碰撞形状 <code>PlayerShape</code> 的底部调平滑，但是这里使用另一种方式，在 <code>Player</code> 下添加 <code>CollisionShape2D</code> 作为子节点，与 <code>PlayerShape</code> 同级，命名为 <code>BoardShape</code>。在属性面板添加 <code>CapsuleShape2D</code> 胶囊形状，也即椭圆形，调整 <code>BoardShape</code> 的位置和大小，调整至如下图，让人物碰撞形状的底部足够光滑。这样 <code>Player</code> 的碰撞形状，实际上就是由 <code>PlayerShape</code> 和 <code>BoardShape</code> 组合而成的。</p>
+</li>
+<li><p><code>Player</code> 的重心太高，众所周知重心太高，也会导致翻滚，为此需要降低 <code>Player</code> 的重心，而通过 <code>Godot</code> 的文档，了解到 <code>RigidBody2D</code> 的重心就是其原点，也就是点击 <code>Player</code> 时出现的十字光标的位置，这个光标的位置不能移动，但是可以移动其内部的子节点的位置，所以可以把 <code>Player</code> 的三个子节点 <code>Sprite</code>, <code>PlayerShape</code> 和 <code>BoardShape</code> 向上平移同样的距离，使重心下降。可以调整三个节点的 <code>transform</code> 属性中 y 的位置，也可以在预览区域拖动挪动位置。最后调整后如图所示</p>
+<p> <img src="https://user-images.githubusercontent.com/16240729/226806686-cd455e3b-0276-45f4-9c1e-d28e49d19106.png" alt="调整重心"></p>
+</li>
+</ul>
+</li>
+</ol>
+<p>处理完后上面的三个问题后，再运行测试，发现人物已经能沿着滑道滑动了。</p>
+<p>  <img src="https://user-images.githubusercontent.com/16240729/226808713-5ea87759-a8e9-458a-96df-c88f53e29adc.gif" alt="最终效果"></p>
+<ol start="4">
+<li><code>Godot</code> 提供了一种非常方便的方式，让整个画面能跟随人物一起移动—— <code>Camera2D</code>, 我们只需要把 <code>Camera2D</code> 添加为 <code>Player</code> 的子节点，再次运行就会发现画面可以跟随人物移动了。</li>
+</ol>
+<h2 id="下一步"><a href="#下一步" class="headerlink" title="下一步"></a>下一步</h2><p>项目的基本场景已经搭建OK了，剩余的就是不断完善。下一步，将会完善滑道，让滑道无限随机生成。</p>
+]]></content>
+      <categories>
+        <category>游戏, godot</category>
+      </categories>
+      <tags>
+        <tag>游戏, godot</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Godot游戏开发第二天-随机地图生成</title>
+    <url>/2023/03/15/Godot%E6%B8%B8%E6%88%8F%E5%BC%80%E5%8F%91%E7%AC%AC%E4%BA%8C%E5%A4%A9-%E9%9A%8F%E6%9C%BA%E5%9C%B0%E5%9B%BE%E7%94%9F%E6%88%90/</url>
+    <content><![CDATA[<p>使用Godot游戏引擎开发一款2D游戏，第二天，在前一天，搭建了基本场景，包含有一个很短滑道和游戏人物，并且让人物在物理引擎的作用下沿滑道滑动，今天来研究并生成一个随机且无限长的滑道。</p>
+<span id="more"></span>
+
+<h2 id="滑道的研究"><a href="#滑道的研究" class="headerlink" title="滑道的研究"></a>滑道的研究</h2><p>游戏中主要使用物理引擎，所以就要尊重物理现实。在不额外施加外部力的情况下，人物的移动是完全依赖重力达成。那滑道就必须要呈现为向下，又由于人是向右运动的，所以滑道的方向整体是向右下方进行延伸，就像下面这样，滑道只有遵循这个原则才能在重力的作用下不断运动。<br><img src="https://user-images.githubusercontent.com/16240729/226924229-158e5e25-e08f-4870-8fa8-acfd3d73c31d.png" alt="滑道的方向"></p>
+<p>但是如果是直直的一条线，那未免太无趣了，所以我们可以再加上转折，就像下面这样。</p>
+<p><img src="https://user-images.githubusercontent.com/16240729/226926806-4683e4fe-7c2f-46fe-88fe-a014f4c20b59.png" alt="带转折的滑道"></p>
+<p>然而这样的转折太生硬，如果在转折的地方能使用平滑的曲线进行链接，那应该就更完美了，所以最终的效果会类似这样。</p>
+<p><img src="https://user-images.githubusercontent.com/16240729/226929025-0785cdc1-534a-4ab8-a25a-9c9f9c760a77.png" alt="最终效果"></p>
+<p>所以今天要解决的具体问题就变成了，如何生成一条整体向右下方平滑曲线的问题。</p>
+<h2 id="实现思路"><a href="#实现思路" class="headerlink" title="实现思路"></a>实现思路</h2><p>因为这个滑道是一个整体向右下的曲线，那就暂且先不考虑向上运动的这种情况。如果用折线来描述，那滑道就是这样的。</p>
+<p><img src="https://user-images.githubusercontent.com/16240729/226939093-f08c57ff-0d0b-41c5-912d-d1d7b7aa8f14.png" alt="移除向上运动后的滑道拆线描述"></p>
+<p>假设我们现在给到了一段初始的指向右下角直线，在这个直线上进行续接，生成随机但是整体向右下角的曲线，该如何实现呢？</p>
+<p>说到曲线，第一个想到的就是圆。那能否利用圆的片断也就弧线相互拼接来生成这一条曲线呢。</p>
+<h3 id="使用圆弧实现"><a href="#使用圆弧实现" class="headerlink" title="使用圆弧实现"></a>使用圆弧实现</h3><p>根据初中数学，我们知道弧线的无缝拼接的要点在于两段弧线拼接点的切线要在同一条直线上，就像下面这样。</p>
+<p><img src="https://user-images.githubusercontent.com/16240729/226943121-a3b398d0-e43c-4d33-a244-daa7e8750af8.png" alt="圆弧的拼接"></p>
+<p>圆弧 PQ 在 Q 点的切线在是 AB，圆弧 QR 在 Q 点的切线也是AB，所以曲线 PQR 是很平滑的曲线。我们接下来在 PQ 弧线上随机选一点 J 做切线，再在 QR 弧线上随机选一点 K 做切线，如下图所示。</p>
+<p><img src="https://user-images.githubusercontent.com/16240729/226946592-b6a03905-2d08-4937-9451-fa646cc6025e.png" alt="前后做切线"></p>
+<p>这样曲线 MJQKN 就可以看做滑道中的转折部分了，目前两个圆的切点重合在了 Q 点，如果我们把两个切点在直线 AB 上错开，就可以看到两个转折分别是曲线 PJY 和 WKN。</p>
+<p><img src="https://user-images.githubusercontent.com/16240729/226950681-6af1015d-15e8-40e8-8b36-dff13edf91db.png" alt="分开切点"></p>
+<p>再回到最开始的问题，给了一段初始的向右下的线段 MN，如何续接一条随机的曲线？这个过程其实就是上面的一个逆过程。</p>
+<ol>
+<li>以 MN 为某个圆的切线，在 N 点作垂直于 MN 的直线 PQ, 根据平面几何原理，直线 PQ 必过以 MN 为切线，N为切点的圆的圆心</li>
+<li>在直线 PQ 上取任意区别于 N 点的点 O 作为圆 O 的圆心</li>
+<li>接下来以 O 为圆心，ON 为半径作圆，则 MN 线段就平滑地续接上了一段曲线。</li>
+<li>最后，可以圆弧上合适的一点，作切线</li>
+<li>可以延长切线，作为曲线中的直线部分</li>
+<li>在第5步的切线上随机寻一点作垂线，重复1-6步，就能生成无限长，随机并且平滑的曲线。</li>
+</ol>
+<p><img src="https://user-images.githubusercontent.com/16240729/227111692-d180becf-6986-4539-b46f-4ffaaafc4f7d.png" alt="基于圆弧的随机曲线生成"></p>
+<p>这就是利用圆弧实现的思路，思路有了具体代码实现也就有了依照，这里就先不列出了。</p>
+<p>说到曲线，除了圆之外，在具体实践中，还有一条曲线也非常有名，其名为贝塞尔曲线，此题其实更适合使用贝塞尔曲线求解。</p>
+<h3 id="使用贝塞尔曲线实现"><a href="#使用贝塞尔曲线实现" class="headerlink" title="使用贝塞尔曲线实现"></a>使用贝塞尔曲线实现</h3><p>先来看一下二次贝塞尔曲线的定义和计算方式</p>
+<p>二次方贝兹曲线的路径由给定点 $P_0$、$P_1$、$P_2$ 的函数 $B(t)$ 追踪：</p>
+<p>$$B(t) &#x3D; (1-t)^2P_0 + 2t(1-t)P_1 + t^P_2, t \in [0, 1] $$</p>
+<p>用动画表示是这样的:</p>
+<p><img src="https://user-images.githubusercontent.com/16240729/227114640-99bd08de-cc2a-4ca5-a749-21496590a484.gif" alt="二次贝塞尔曲线的演示"></p>
+<p>观察二次贝塞尔曲线，可以发现，曲线在 $P_0$ 处的切线为 $P_0P_1$，在 $P_2$ 处的切线为 $P_1P_2$，如果分别沿着 $P_1P_0$、$P_1P_2$ 延伸，再旋转一下，哇哦，那可不就是我们想要的曲线上的一段吗?</p>
+<p><img src="https://user-images.githubusercontent.com/16240729/227127320-d37ac796-c244-4078-bcc8-d0e4659e508e.png" alt="曲线的转折片断"></p>
+<p>那再回到原始的问题，给了一段初始的向右下的线段 MN，如何续接一条随机的曲线？</p>
+<ol>
+<li>类比一下，这里的点 N 其实就是 $P_0$，那需要求解的就是 $P_1$ 和 $P_2$ 的位置。</li>
+<li>根据上面的推理，$P_1$ 的位置比较好找，就是线段 $MN$ 延长线上的一点，那可以在 $MN$ 的延长线上随机选择一点作为 $P_1$，这样就只剩余最后一个点 $P_2$ 的问题需要确定了</li>
+<li>首先 $P_1P_2$ 的方向决定了下一段曲线或直线的方向，那在不考虑向上的情况下，点 $P_2$ 的坐标只可能位于 以点 $P_1$ 为原点，向上为 Y 轴正方向，向右为 X 轴正方向的直角坐标系 的第四象限内，在第四象限内随机选取一点作为 $P_2$。</li>
+<li>有了 $P_0$、$P_1$、$P_2$ 三个点，一条平滑的曲线就生成了。</li>
+<li>接下来，可以在 $P_1P_2$ 的延长线上随机选取一点作为下一断弧线的 $P_1$, 重复1-5步，就能生成无限长，随机并且平滑的曲线。</li>
+</ol>
+<p><img src="https://user-images.githubusercontent.com/16240729/227133457-3a420cf3-e366-49b7-b866-92a9e2b9b8b3.png" alt="基于二次贝塞尔曲线的随机曲线生成"></p>
+<p>这种方式，相对于上面的方式来说更加简单，而且在具体的代码实现上，也会更简洁，下面就来看如何用代码实现。</p>
+<h2 id="代码实现"><a href="#代码实现" class="headerlink" title="代码实现"></a>代码实现</h2><p><strong>注意</strong>: 这一部分要求有基本的向量方面的知识，可以简单阅读 <a href="https://docs.godotengine.org/zh_CN/stable/tutorials/math/vector_math.html" title="Godot 向量数字部分的文档">Godot 向量数字部分的文档</a> 学习。</p>
+<p>首先需要对现有的场景进行改造，调整 <code>GroundShapePath</code>, 只保留三个点即可，调整成如下的样式。</p>
+<p><img src="https://user-images.githubusercontent.com/16240729/227190996-dd5ccd80-08e4-4104-a26c-b87bf321625e.png" alt="调整后的曲线样式"></p>
+<p>然后在 <code>GroundShapePath</code> 中添加 <code>gdscript</code> 脚本，添加 <code>addPoints</code> 方法，因为添加曲线，实际就是循环往曲线上添加 $P_0$、$P_1$、$P_2$ 这三个点。</p>
+<h3 id="获取-P-1-点的位置"><a href="#获取-P-1-点的位置" class="headerlink" title="获取 $P_1$ 点的位置"></a>获取 $P_1$ 点的位置</h3><p>经过上面分析可知，$P_1$ 点在当前曲线最后一个点的切线上，那要先获取最后一段曲线的切线。</p>
+<p>可以用这段曲线最后两个点连成的直线作为曲线的切线。然后在这段切线的延长线上随机获取一点，代码如下:</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">func addPoints():</span><br><span class="line">	var points = curve.tessellate()</span><br><span class="line">	var P0 = points[points.size() - <span class="number">1</span>] <span class="comment"># 曲线的最后一个点</span></span><br><span class="line">	var lastSecPoint = points[points.size() - <span class="number">2</span>]  <span class="comment"># 曲线的倒数第二个点</span></span><br><span class="line">	var tangent = (P0 - points[points.size() - <span class="number">2</span>]).normalized() <span class="comment"># 计算第一个切线的方向向量: 用最后两个点连成的向量当作曲线的切线向量</span></span><br><span class="line">	var P1</span><br><span class="line">	<span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">4</span>):</span><br><span class="line">		P1 = P0 + tangent * rand_range(<span class="number">60</span>,<span class="number">80</span>) <span class="comment"># 在切线的方向向量延伸 60-80 单位区间，随机一个数值，作为点 P1 的位置</span></span><br><span class="line">		</span><br><span class="line">		<span class="comment"># 1. 先定义一个与 X 轴正方向相同的单位向量</span></span><br><span class="line">		<span class="comment"># 2. 为了避免出现完全水平或完全竖直的情况，随机旋转 15-75度 范围内的任意一个值，这样就保证了点 P2 落在对应的象限内</span></span><br><span class="line">		var P2Direction = Vector2(<span class="number">1</span>, <span class="number">0</span>).rotated(rand_range(PI / <span class="number">12</span>, <span class="number">5</span> * PI / <span class="number">12</span>))</span><br><span class="line"></span><br><span class="line">		<span class="comment"># P2 的方向向量乘以随机长度，再加上 P1 的向量，计算出 P2 的实际位置</span></span><br><span class="line">		var P2 = P1 + P2Direction * rand_range(<span class="number">60</span>, <span class="number">80</span>)</span><br><span class="line">		</span><br><span class="line">		<span class="comment"># 把点 P2 和 控制点 P1 追加到曲线末尾, 这里要注意的是， 控制点的位置是相对于添加点的，所以需要P1 - P2</span></span><br><span class="line">		curve.add_point(P2, P1 - P2)</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 下一个P0点就是当前的P2点</span></span><br><span class="line">    <span class="comment"># 下一个P0的切线的方向向量就是当前P2点的切线的方向向量</span></span><br><span class="line">		P0 = P2</span><br><span class="line">		tangent = P2Direction</span><br></pre></td></tr></table></figure>
+
+<p>然后在 <code>_ready</code> 方法中调用 <code>addPoints</code> 方法，然后选择调试，勾选上”显示导航”, 点击右上角运行场景，现在就能看到效果了。</p>
+<p><img src="https://user-images.githubusercontent.com/16240729/227191006-24ae9398-8101-4a6e-b338-24d2ed827749.png" alt="运行效果"></p>
+<p>从图上看发现续接的曲线似乎并不是很平滑，这是为什么？因为现在我们还不能移动画面，所以为了在运行时方便查看曲线的效果，我们把 $P_0$、$P_1$、$P_2$ 这三个点的距离调得很近(目前是60-80)，所以曲线部分在整体来看就会显示不太平滑，我们后面把距离调远，就可以看到更为平滑的曲线了。</p>
+<p>但是发现地面没了，这是怎么回事？</p>
+<p>对于 <code>GroundShape</code> 来说，会把第一个点和最后一个点进行连接，形成一个闭合的多边形，而我们在上面改了曲线，导致曲线的最后一个点和第一个点连接的时候，形成的曲线不闭合，导致了这个问题，接下来就来处理这个问题</p>
+<h3 id="地面的修复"><a href="#地面的修复" class="headerlink" title="地面的修复"></a>地面的修复</h3><p>这里需要先获取曲线上的点，然后再添加其余三条直边的顶点，最后把这些点都传给 <code>GroundShape</code> 就能形成一个闭合的形状。</p>
+<p>先在 <code>GroundShapePath.gd</code> 脚本中，添加方法 <code>updateShape</code> 如下:</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">func updateShape():</span><br><span class="line">	var points = curve.tessellate()</span><br><span class="line">	</span><br><span class="line">	<span class="comment"># 曲线上的第一个点，也就是曲线的左上角的那个点</span></span><br><span class="line">	var first = points[<span class="number">0</span>]</span><br><span class="line">	</span><br><span class="line">	<span class="comment"># 曲线上的最后一个点，曲线右下角的点</span></span><br><span class="line">	var last = points[points.size() - <span class="number">1</span>]</span><br><span class="line">	</span><br><span class="line">	<span class="comment"># 往曲线上添加另外三条边的顶点</span></span><br><span class="line">	<span class="comment"># 用户可见高度</span></span><br><span class="line">	var height = get_viewport_rect().size.y</span><br><span class="line">	var maxY = last.y + height</span><br><span class="line">	</span><br><span class="line">	points.append(Vector2(last.x, maxY)) <span class="comment"># 添加右下角的点</span></span><br><span class="line">	points.append(Vector2(first.x, maxY)) <span class="comment"># 添加左下角的点</span></span><br><span class="line">	</span><br><span class="line">	<span class="comment"># 设置父节点，也就是 GroundShape 的 polygon 属性</span></span><br><span class="line">	get_parent().polygon = points</span><br></pre></td></tr></table></figure>
+
+<p>然后删除 <code>GroundShape.gd</code> 的 <code>_ready</code> 函数，现在完全由子节点 <code>GroundShapePath</code> 来直接更新父节点的属性了，所以 <code>_ready</code> 方法可以删除了。</p>
+<p>然后再点击右上角的运行，现在应该就可以看到地面了。</p>
+<p><img src="https://user-images.githubusercontent.com/16240729/227434952-6e0468ba-e13f-4311-8ef7-966db36236a2.gif" alt="运行效果"></p>
+<h3 id="无限地图"><a href="#无限地图" class="headerlink" title="无限地图"></a>无限地图</h3><p>目前循环只能生成有限长度的曲线，并不是无限的，这是因为不可能一开始就生成一条无限长的曲线，只能是生成有限长的曲线，然后配合画面的移动，不停的在曲线上续接，最终游玩的时候，就好像有无限长的路径一样。这里有三个步骤:</p>
+<ol>
+<li><p>获取画面的位置信息，包括画面的最左边和最右边位置，最左边用于清理之前生成的路径，最右边用于判断是否需要生成新的路径</p>
+</li>
+<li><p>清理之前的路径</p>
+</li>
+<li><p>生成新的路径</p>
+</li>
+</ol>
+<p>这里要想获取当前画面的位置信息，就需要了解 <code>Camera2D</code> 的原理。</p>
+<h4 id="Camera2D-的原理"><a href="#Camera2D-的原理" class="headerlink" title="Camera2D 的原理"></a>Camera2D 的原理</h4><p>这里需要理解一下 <code>Camera2D</code> 的原理。首先所有的 <code>CanvasItem</code> 是画在 <code>Canvas</code> 上(layer默认为0)，从运行效果上，我们会认为是 <code>Camera2D</code> 在画面上移动，渲染 <code>Camera2D</code> 范围内的图像到 <code>viewport</code>， 然而实际情况下并不是这样的， <code>Camera2D</code> 的作用只是把画布进行平移变换，让画面反方向动起来，这样视窗就看到画面向前运动了。如下:</p>
+<p><img src="https://user-images.githubusercontent.com/16240729/228217992-1e446043-8ddd-4faf-8b1a-9e4edfd2289c.gif" alt="Camera2D在画布上移动"></p>
+<p><img src="https://user-images.githubusercontent.com/16240729/228217976-6df97a44-615c-43e6-8c11-2ac8acfbfd01.gif" alt="Camera2D移动画布"></p>
+<p>而画布的移动是通过 <code>viewport.canvas_transform</code> 属性来改变的，也就是说 <code>Camera2D</code> 做的仅是自动计算人物的位置，然后更新 <code>viewport.canvas_transform</code> 的值。</p>
+<h4 id="具体实现"><a href="#具体实现" class="headerlink" title="具体实现"></a>具体实现</h4><p>了解了 <code>Camera2D</code> 的原理，就可以通过下面的代码计算当前视窗内画面的位置信息了。</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"> <span class="comment"># 当前平移的距离取反就算出了 Camera 的等价平移距离</span></span><br><span class="line">var origin = - get_viewport().canvas_transform.origin</span><br><span class="line"> <span class="comment"># 视窗的大小</span></span><br><span class="line">var width = <span class="built_in">abs</span>(get_viewport_rect().size.x)</span><br><span class="line"> <span class="comment"># 最左边边界的X坐标</span></span><br><span class="line">var minX = origin.x</span><br><span class="line"> <span class="comment"># 最右边的边界X坐标</span></span><br><span class="line">var maxX = origin.x + width</span><br></pre></td></tr></table></figure>
+
+<p>下一步，需要把点位置位于最左边边界左侧的点移除。这里需要注意的是，如果一个点在边界左边，一个点在边界右边(也就是视窗内或视窗右边)，那这两个点形成的曲线会有一部分在视窗内可以被看到，那这时就不能移动边界左边的点。转换一下就是是否要移除当前的点，需要判断下一个点是不是否在边界右边，如果下一个点在边界右边，那就不能移除，其余情况都可以移除。所以可以添加 <code>removePoints</code> 函数如下: </p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">func removePoints(minX: <span class="built_in">int</span>):</span><br><span class="line">	var index = <span class="number">0</span></span><br><span class="line">	<span class="keyword">for</span> i <span class="keyword">in</span> curve.get_point_count() - <span class="number">1</span>:</span><br><span class="line"></span><br><span class="line">		<span class="keyword">if</span> index + <span class="number">1</span> &gt; curve.get_point_count() - <span class="number">1</span>:</span><br><span class="line">			<span class="keyword">break</span>;</span><br><span class="line"></span><br><span class="line">		<span class="comment"># 根据下一点所在的位置，判断当前点要不要删除</span></span><br><span class="line">		var nextPoint = curve.get_point_position(index + <span class="number">1</span>)</span><br><span class="line">		</span><br><span class="line">		<span class="keyword">if</span> nextPoint.x &gt; minX:</span><br><span class="line">			<span class="comment"># 下一个点在视窗范围右侧，即在视窗范围内或还没进入视窗，则循环结束</span></span><br><span class="line">			<span class="keyword">break</span></span><br><span class="line">		<span class="keyword">else</span>:</span><br><span class="line">			<span class="comment"># 下一个点在视窗范围左侧，说明当前点对视窗范围内的曲线无影响，可以移除</span></span><br><span class="line">			curve.remove_point(index)</span><br><span class="line">			</span><br><span class="line">			<span class="comment"># 移除后，需要注意下一次循环的index的变化</span></span><br><span class="line">			index -= <span class="number">1</span></span><br><span class="line"></span><br><span class="line">		index += <span class="number">1</span></span><br></pre></td></tr></table></figure>
+
+<p>接着需要对原来的 <code>addPoints</code> 方法做改造。需要把原来写死只能生成四段曲线的逻辑动态化，确保生成的曲线的最后一个点位于视窗的最右侧边界右边。这里同样会有一个问题，比如说如果我们的曲线的最后一段的两个点分别在边界的两侧，那在下一次生成曲线之前，如果视窗的移动非常快已经越过了最后一个点的位置，那玩家就会看到一段断掉的曲线，即使后面我们很快补上了，玩家也会看到补接的这一过程，这样就不够流畅，所以必须要在右边预留足够的曲线长度，才能在视窗移动不太离谱的情况下，保证玩家见到曲线不断。把 <code>addPoints</code> 方法改造如下:</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">- func addPoints():</span><br><span class="line">+ func addPoints(maxX: <span class="built_in">int</span>):</span><br><span class="line">+   <span class="comment"># 生成的曲线延伸到两屏之后，确保可视区域内的网线不断</span></span><br><span class="line">+   var lastPointOverX = maxX + <span class="built_in">abs</span>(get_viewport_rect().size.x) * <span class="number">2</span></span><br><span class="line">    ...</span><br><span class="line">-   <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">4</span>):</span><br><span class="line">+   <span class="keyword">while</span>(P0.x &lt; lastPointOverX):</span><br><span class="line">-     P1 = P0 + tangent * rand_range(<span class="number">60</span>,<span class="number">80</span>) <span class="comment"># 在切线的方向向量延伸 60-80 单位区间，随机一个数值，作为点 P1 的位置</span></span><br><span class="line">+     P1 = P0 + tangent * rand_range(<span class="number">100</span>,<span class="number">200</span>) <span class="comment"># 在切线的方向向量延伸 100-200 单位区间，随机一个数值，作为点 P1 的位置</span></span><br><span class="line">      ...</span><br><span class="line">-     var P2 = P1 + P2Direction * rand_range(<span class="number">60</span>, <span class="number">80</span>)</span><br><span class="line">+     var P2 = P1 + P2Direction * rand_range(<span class="number">100</span>, <span class="number">200</span>)</span><br><span class="line">    ...</span><br></pre></td></tr></table></figure>
+
+<p>然后需要删除原来的在 <code>_ready</code> 方法中对 <code>addPoints</code> 的调用，添加 <code>_process</code> 方法，在每一帧去做点的清理和添加动作。</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">func _process(delta):</span><br><span class="line">	<span class="comment"># 当前平移的距离取反就算出了 Camera 的等价平移距离</span></span><br><span class="line">	var origin = - get_viewport().canvas_transform.origin</span><br><span class="line">	var width = get_viewport_rect().size.x</span><br><span class="line">	var minX = origin.x</span><br><span class="line">	var maxX = origin.x + width</span><br><span class="line">	</span><br><span class="line">	removePoints(minX)</span><br><span class="line">	</span><br><span class="line">	addPoints(maxX)</span><br></pre></td></tr></table></figure>
+
+<p>接着点击右上角运行场景，会发现曲线变得平滑，人物也能在曲线上进行无限的滑动了</p>
+<p><img src="https://user-images.githubusercontent.com/16240729/228729561-924714a3-fe22-4ffd-9f08-3a0a651d5724.gif" alt="无限地图"></p>
+]]></content>
+      <categories>
+        <category>游戏, godot</category>
+      </categories>
+      <tags>
+        <tag>游戏, godot</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>MP3文件分析之ID3v2.3版本</title>
+    <url>/2017/03/18/MP3%E6%96%87%E4%BB%B6%E5%88%86%E6%9E%90%E4%B9%8BID3v2-3%E7%89%88%E6%9C%AC/</url>
+    <content><![CDATA[<h1 id="MP3文件分析之ID3v2-3版本"><a href="#MP3文件分析之ID3v2-3版本" class="headerlink" title="MP3文件分析之ID3v2.3版本"></a>MP3文件分析之ID3v2.3版本</h1><p>关于读取MP3文件的ID3标签，网上众说纷芸，但很多都是错的，在这里总结一下。所有的分析都基于ID3<a href="http://www.07net01.com/tags-%E7%BD%91%E7%AB%99-0.html">官方网站</a><a href="http://www.id3.org/">www.id3.org</a></p>
+<span id="more"></span>
+<h2 id="1-标签头"><a href="#1-标签头" class="headerlink" title="1. 标签头"></a>1. 标签头</h2><p>  标签头有十个字节，在文件最开始的10个字节，它的数据结构如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">char Header[3];//这个字符串一定为&quot;ID3&quot;</span><br><span class="line"></span><br><span class="line">char version;//版本号，而针对在下要讲的版本，理应为3.即为ID3v2.3</span><br><span class="line"></span><br><span class="line">char revision;//副版本号，好像一直都是0，没看到过它有变过</span><br><span class="line"></span><br><span class="line">char flags;//一些特殊的消息标记，只会使用此字节的高3位，其它的五位并没有什么卵用</span><br><span class="line"></span><br><span class="line">char size[4];//代表整个标签帧的大小，但是不包括这开始的10个字节，所以这里得到的size需要加上10才代表整个标签帧的大小</span><br></pre></td></tr></table></figure>
+
+<p>ID3v2 flags中的%abc00000，其中高三位表示如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">a - Unsynchronisation</span><br><span class="line">表示是否同步(自己乱翻译的)，这个搞不清是什么鬼，个人英语不是很行，大概是为了数据帧同步帧数据,校正数据用的</span><br><span class="line">b - Extended header</span><br><span class="line">表示是否有扩展头部，这个扩展头部是用来补充标签信息的，原文如下：</span><br><span class="line">The extended header contains information that is not vital to the correct parsing of the tag information, hence the extended header is optional. </span><br><span class="line"></span><br><span class="line">c - Experimental indicator</span><br><span class="line">表示是否为试验测试，这个东西是什么鬼也不知道，没见过MP3音乐文件这个位进行了设置</span><br></pre></td></tr></table></figure>
+
+<p>ID3v2 size中的4?%0xxxxxxx表示的是4个字节，后面的%0xxxxxxx就是一个字节8位了。</p>
+<p>然后计算标签帧的大小，<strong>ID3</strong>规定这四个字节中每个字节的最高位恒为0不使用，格式如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">var size = size4 &amp; 0x7f | ((size3 &amp; 0x7f) &lt;&lt; 7) | ((size2 &amp; 0x7f) &lt;&lt; 14) | ((size1 &amp; 0x7f) &lt;&lt; 21);</span><br></pre></td></tr></table></figure>
+
+<p><strong>注意：这里的帧大小，并不包含帧头的10个字节，只表示帧内容的大小</strong></p>
+<p>这里再说一个特殊消息标记的<strong>Extended header</strong>处理，当<strong>Extended header</strong>这个标记位设置为1时，在这最开始的10个字节后面会增加有<strong>Extended header</strong>的内容，这部分内容非常有意思，因为它所占用的大小不算在之前10个字节的size中，就相当这里会凭空多出一些字节。</p>
+<p>然后这个<strong>Extended header</strong>信息内容格式如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Extended header size   $xx xx xx xx</span><br><span class="line">Extended Flags         $xx xx</span><br><span class="line">Size of padding        $xx xx xx xx</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<p><strong>Extended header size</strong>有四个字节，表示接下来的数据占用多少个字节。</p>
+<p><strong>Extended Flags</strong> 这两个字节不知道干什么</p>
+<p>接下来就都是扩展头部的数据了（我猜<strong>Extended Flags</strong>这两个字节好像没有，扩展头部本来就没有多大用，一般直接就滤掉了）</p>
+<p>这里是JS代码实现标签头的识别：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">getByteAt(iOffset);//得到iOffset位置的一个字节数据</span><br><span class="line"></span><br><span class="line">isBitSetAt(iOffset, iBit);//判断iOffset位置的字节的iBit位是1还是0</span><br><span class="line"></span><br><span class="line">readSynchsafeInteger32At(data, iOffset);//这是处理标签头的size</span><br><span class="line"></span><br><span class="line">getLongAt(iOffset, bBigEndian);//得到iOffset位置的Long数据，bBigEndian表示是低端还是高端</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">/****************/</span><br><span class="line"></span><br><span class="line">var offset = 0,</span><br><span class="line">    major = data.getByteAt(offset + 3),</span><br><span class="line">    revision = data.getByteAt(offset + 4),</span><br><span class="line">    unsynch = data.isBitSetAt(offset + 5, 7),</span><br><span class="line">    xheader = data.isBitSetAt(offset + 5, 6),</span><br><span class="line">    xtest = data.isBitSetAt(offset + 5, 5),</span><br><span class="line">    size = this.readSynchsafeInteger32At(data, offset + 6);</span><br><span class="line"></span><br><span class="line">offset += 10;</span><br><span class="line">if (xheader) &#123;</span><br><span class="line">    var xheadersize = data.getLongAt(offset, true);</span><br><span class="line">    offset += xheadersize + 4;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">var id3 = &#123;</span><br><span class="line">    &quot;version&quot;: &#x27;2.&#x27; + major + &#x27;.&#x27; + revision,</span><br><span class="line">    &quot;major&quot;: major,</span><br><span class="line">    &quot;flags&quot;: &#123;</span><br><span class="line">        &quot;unsynchronisation&quot;: unsynch,</span><br><span class="line">        &quot;extended_header&quot;: xheader,</span><br><span class="line">        &quot;experimental_indicator&quot;: xtest</span><br><span class="line">    &#125;,</span><br><span class="line">    &quot;size&quot;: size</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<h2 id="2-标签帧内容"><a href="#2-标签帧内容" class="headerlink" title="2. 标签帧内容"></a>2. 标签帧内容</h2><h4 id="帧头的定义"><a href="#帧头的定义" class="headerlink" title="帧头的定义"></a>帧头的定义</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">char ID[4];//用四个字符标识一个帧，表明这个帧的内容是什么</span><br><span class="line"></span><br><span class="line">char size[4];//帧内容的大小，不包括帧头</span><br><span class="line"></span><br><span class="line">char flags[2];//特殊的消息标记</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><strong>帧标识</strong>：The frame ID made out of the characters capital A-Z and<br>0-9.FrameID会是一串由A-Z和0-9的字符串组成，占用4个字节</li>
+<li><strong>帧大小</strong>：The frame ID is followed by a size descriptor, making a total header size of ten bytes in every frame. The size is calculated as frame size excluding frame header</li>
+<li>最后这个flags跟前面说的都一样为特殊标记</li>
+</ul>
+<h4 id="常见有用的帧标识"><a href="#常见有用的帧标识" class="headerlink" title="常见有用的帧标识"></a>常见有用的帧标识</h4><ol>
+<li><strong>TIT2</strong>：歌曲标题名字</li>
+<li><strong>TPE1</strong>：作者名字</li>
+<li><strong>TALB</strong>：作品专辑</li>
+<li><strong>TYER</strong>：作品产生年代</li>
+<li><strong>COMM</strong>：备注信息</li>
+<li><strong>APIC</strong>：专辑图片</li>
+</ol>
+<h4 id="帧标记说明"><a href="#帧标记说明" class="headerlink" title="帧标记说明"></a>帧标记说明</h4><p>只定义了6位，另外的10位为0，一般这些标记也不用，通常为0，格式如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">flags %abc00000 ijk00000 </span><br><span class="line"></span><br><span class="line">a -- 标签保护标志，设置时认为此帧作废</span><br><span class="line"></span><br><span class="line">b -- 文件保护标志，设置时认为此帧作废</span><br><span class="line"></span><br><span class="line">c -- 只读标志，设置时认为此帧不能修改(但我没有找到一个软件理会这个标志) </span><br><span class="line"></span><br><span class="line">i -- 压缩标志，设置时一个字节存放两个BCD 码表示数字 </span><br><span class="line"></span><br><span class="line">j -- 加密标志(没有见过哪个MP3 文件的标签用了加密) </span><br><span class="line"></span><br><span class="line">k -- 组标志，设置时说明此帧和其他的某帧是一组</span><br></pre></td></tr></table></figure>
+
+<h4 id="帧标识"><a href="#帧标识" class="headerlink" title="帧标识"></a>帧标识</h4><p><strong>帧标识这一块有太多，各种各样的，到官方网站去看，这里会主要区分三种主要的标识信息（其他的都拜拜吧，通过看官方网站的信息你就知道为什么拜拜了）。</strong></p>
+<ol>
+<li><p>T*，即以T开头的帧标识，为文本标识。</p>
+<p>文本标识就会涉及到文字的编码，此标签内容分为三部分。</p>
+<p>第一部分为1个字节，这个字节一定是[0x00,0x01,0x02,0x03]中的一种，0x00代表这个标签帧后续的数据为<strong>iso-8859-1</strong>编码，0x01则是<strong>utf-16</strong>编码，0x02则是<strong>utf-16be</strong>编码，0x03则是<strong>utf-8</strong>编码</p>
+<p>第二部分根据编码确定是否存在<br>如果为0x00编码的话就不会存在，字节就是直接读取</p>
+<p>如果为0x01和0x02那么这里会占用2个字节，会出现两种可能的数据，一种为<strong>FF FE</strong>表示小端，即数据<a href="http://www.07net01.com/storage_networking/">存储</a>是高数据在高位，一种为<strong>FE FF</strong>表示大端与小端相反</p>
+<p>如果为0x03编码则是会占用三个字节 <strong>EF BB BF</strong></p>
+<p>第三部分就是数据</p>
+</li>
+<li><p><strong>APIC</strong>，专辑图片，好像整个<strong>MP3</strong>的数据就只有这个标识有图片</p>
+<p>这里直接以官方说明来讲解比较好：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;Header for &#x27;Attached picture&#x27;, ID: &quot;APIC&quot;&gt;</span><br><span class="line">Text encoding   $xx</span><br><span class="line">MIME type       &lt;text string&gt; $00</span><br><span class="line">Picture type    $xx</span><br><span class="line">Description     &lt;text string according to encoding&gt; $00 (00)</span><br><span class="line">Picture data    &lt;binary data&gt;</span><br></pre></td></tr></table></figure>
+
+<p>第一个为数据编码，和以<strong>T</strong>开头的一样，分为四种0x00,0x01,0x02,0x03</p>
+<p>第二个为<strong>MIME type</strong>数据了，表示的是什么类型图片，有image&#x2F;jpeg,image&#x2F;png…等，<br>这里的字节数不确定，是用0x00作为字符串的结束标志，来停止读取的，也就是说MIME type数据需要一直读取，知道读取到了0x00也就是我们常见的字符串结束标志\0.</p>
+<p>第三个为<strong>Picture type</strong>，表示的是图片代表什么，是作者还是一些什么内容。</p>
+<p>第四个为<strong>Description</strong>，就是简单的图片描述了，这里和<strong>MIME type</strong>数据一样，是以\0为结束的，这里多说一句的是，这个属性好像也不经常用，它的值经常为”“</p>
+<p>第五部分就是图片数据了，记住这不是<strong>base64</strong>编码的数据。</p>
+<p><strong>Picture type</strong>的值扩充说明(就是这些值表示这张图片的大概内容)</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$00     Other</span><br><span class="line">$01     32x32 pixels &#x27;file icon&#x27; (PNG only)</span><br><span class="line">$02     Other file icon</span><br><span class="line">$03     Cover (front)</span><br><span class="line">$04     Cover (back)</span><br><span class="line">$05     Leaflet page</span><br><span class="line">$06     Media (e.g. lable side of CD)</span><br><span class="line">$07     Lead artist/lead performer/soloist</span><br><span class="line">$08     Artist/performer</span><br><span class="line">$09     Conductor</span><br><span class="line">$0A     Band/Orchestra</span><br><span class="line">$0B     Composer</span><br><span class="line">$0C     Lyricist/text writer</span><br><span class="line">$0D     Recording Location</span><br><span class="line">$0E     During recording</span><br><span class="line">$0F     During performance</span><br><span class="line">$10     Movie/video screen capture</span><br><span class="line">$11     A bright coloured fish</span><br><span class="line">$12     Illustration</span><br><span class="line">$13     Band/artist logotype</span><br><span class="line">$14     Publisher/Studio logotype</span><br></pre></td></tr></table></figure>
+
+<p>​</p>
+</li>
+<li><p><strong>COMM</strong>，备注消息，这个玩意一直在飞，全程都是懵逼的，这个属性感觉并没有什么卵用</p>
+<p>这里还是官方说明来讲解比较好</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;Header for &#x27;Comment&#x27;, ID: &quot;COMM&quot;&gt;</span><br><span class="line">Text encoding           $xx</span><br><span class="line">Language                $xx xx xx</span><br><span class="line">Short content descrip.  &lt;text string according to encoding&gt; $00 (00)</span><br><span class="line">The actual text         &lt;full text string according to encoding&gt;</span><br></pre></td></tr></table></figure>
+
+<p>第一个不想说了，跟前面的一模一样;</p>
+<p>第二个表示接下来是什么语言，就是说是中文还是英文还是其它语言，一般是英文就是eng</p>
+<p>然后就是短描叙了，这里的字节数也是不确定的，也就是说这里是以\0为结尾的数据，需要不断读取直到\0结束</p>
+<p>接下来就是最终的数据了</p>
+</li>
+</ol>
+<h2 id="3-编码数据扩充"><a href="#3-编码数据扩充" class="headerlink" title="3. 编码数据扩充"></a>3. 编码数据扩充</h2><ol>
+<li><p><strong>utf-16</strong>，即为<strong>UCS-2</strong>，这种编码会出现两种形式，一个为2字节也就是一个字，一个为四字节也就是两个字，<br>当第一个字节小于0xD8或者大于0xDF，则是第一种情况，否则就是第二种，其中0xDB-0xDF为代理区<br>当然在这个音乐文件中有小端和大端区分，所以我们经常会看到如下编码选项 <strong>UCS-2 Big Endian</strong>(大端),<strong>UCS-2 Little Endian</strong>(小端)</p>
+</li>
+<li><p><strong>utf-8</strong>,这个编码可以说是最操蛋的，网上的解释也参差不齐，俺也懒得去看官网了，这里讲解的只是最常用的，<a href="http://www.qiche887.com/tags-%E5%A4%A7%E4%BC%97-0.html">大众</a>的。<br>这个编码分为三种，一个为1字节(这里很明显是用一个字节来表示英文字母)，然后就是2字节，接着就是3字节<br>区分：</p>
+</li>
+</ol>
+<ul>
+<li>第一字节小于0x80则为1个字节</li>
+<li>第一字节大于等于0xC2小于0xE0则是2字节</li>
+<li>第一字节大于等于0xE0小于0xF0则是3字节</li>
+</ul>
+<ol start="3">
+<li>其他的编码就一股脑的读取一个字节就可以了</li>
+</ol>
+<p>关于更多文字编码的知识可以看这里：<a href="/2017/03/12/%E5%BD%BB%E5%BA%95%E6%90%9E%E6%87%82%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81/index.html">彻底搞懂字符编码</a>;</p>
+]]></content>
+      <tags>
+        <tag>ID3, Audio</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>在github上把master分支的内容作为Github Pages站点</title>
+    <url>/2017/03/11/Simpler-Github-Pages-publishing/</url>
+    <content><![CDATA[<p>在github上把master分支的内容作为Github Pages站点，有两种方法</p>
+<span id="more"></span>
+<h2 id="方法一"><a href="#方法一" class="headerlink" title="方法一"></a>方法一</h2><p>把整个master分支或master分支的<code>/docs</code>目录作为GitHub Pages</p>
+<h4 id="第一步"><a href="#第一步" class="headerlink" title="第一步"></a>第一步</h4><p>把代码传到github远程仓库</p>
+<h4 id="第二步"><a href="#第二步" class="headerlink" title="第二步"></a>第二步</h4><p>如果把整个master分支作为Github Pages站点，在settings下Github Pages的source中选择master branch</p>
+<p>如果把master分支的<code>/docs</code>目录作为Github Pages站点，则在setting下Github Pages的source中选择master branch &#x2F;docs folder</p>
+<blockquote>
+<p>参考链接：<a href="https://github.com/blog/2228-simpler-github-pages-publishing">Simpler Github Pages publishing</a></p>
+</blockquote>
+<h2 id="方法二"><a href="#方法二" class="headerlink" title="方法二"></a>方法二</h2><p>如果你的确想用master分支的其他目录作为Github Pages站点（比如说<code>/dist</code>）</p>
+<h4 id="第一步-1"><a href="#第一步-1" class="headerlink" title="第一步"></a>第一步</h4><p><code>/dist</code> 目录需要被 git 记录，于是后面我们才可以用它作为子树（subtree），因此 <code>/dist</code> 不能被 <code>.gitignore </code>规则排除,并且上传到远端仓库。</p>
+<p>第二步</p>
+<p><code>git subtree push --prefix dist origin gh-pages</code></p>
+<p>搞定。其中：</p>
+<p><code>dist</code> 代表子树所在的目录名<br><code>origin</code> 是 remote name<br><code>gh-pages</code> 是目标分支名称</p>
+<!-- more -->
+]]></content>
+      <categories>
+        <category>项目管理</category>
+      </categories>
+      <tags>
+        <tag>github, Github Pages</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>辨析 Sass 中的 Map 和 List</title>
+    <url>/2015/10/21/demo/</url>
+    <content><![CDATA[<p>如果你使用过 Sass 3.3 之前的版本，那么你一定对那段时光颇有感触，那时候没有现如今这么好的条件，那时候的 Map 还只能用多重列表（lists of list）来模拟。多重列表可以实现复杂数据的嵌套定义，但却不是以键值对的形式实现的，所有当我们需要获取其中特定的某一项时就会比较麻烦。Map 这种数据类型天生就是基于键值对的形式，非常便于组织数据。</p>
+<p>自从可以使用 Map 之后，开发者们开始毫无顾忌地定义 Map 存储数据，比如断点宽度、颜色值、栅格布局等等响应式排版的细节，都被一股脑的塞进了 Map 中。</p>
+<p>那么，有了 Map 之后，我们还有必要使用 List 吗？可能某些人会觉得为了保持向后兼容应该继续使用多重列表模拟 Map，因为可能有些开发者仍然在使用老版本的 Sass 编译器，但实际上，这是多此一举了，Sass 的版本通常由 <code>package.json</code> 或者其他同类型的项目配置文件所控制，往往只需一条命令（<code>gem update sass</code>）即可更新 Sass 的版本，因此基本上无需考虑对老版本的兼容问题。</p>
+<span id="more"></span>
+
+<p>使用多重列表替代 Map 的优势之一就是减少代码量。下面让我们来比较一下多种列表和 Map 的语法结构以及遍历方式。</p>
+<h2 id="测试表格"><a href="#测试表格" class="headerlink" title="测试表格"></a>测试表格</h2><table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>site</code></td>
+<td>Sitewide information.</td>
+</tr>
+<tr>
+<td><code>page</code></td>
+<td>Page specific information and custom variables set in front-matter.</td>
+</tr>
+<tr>
+<td><code>config</code></td>
+<td>Site configuration</td>
+</tr>
+<tr>
+<td><code>theme</code></td>
+<td>Theme configuration. Inherits from site configuration.</td>
+</tr>
+<tr>
+<td><code>_</code> (single underscore)</td>
+<td><a href="http://lodash.com/">Lodash</a> library</td>
+</tr>
+<tr>
+<td><code>path</code></td>
+<td>Path of current page</td>
+</tr>
+<tr>
+<td><code>url</code></td>
+<td>Full URL of current page</td>
+</tr>
+<tr>
+<td><code>env</code></td>
+<td>Environment variables</td>
+</tr>
+</tbody></table>
+<h2 id="语法比较"><a href="#语法比较" class="headerlink" title="语法比较"></a>语法比较</h2><div class="note">
+    <h5>测试标题</h5>
+    <p>在下面的示例中，我创建了一个用于控制响应式布局的数据，该数据一共有四个断点，每一个断点都包含了 `min-width`、`max-width`、`font-size` 和 `line-height` 四个样式。</p>
+</div>
+
+<h4 id="Map-语法"><a href="#Map-语法" class="headerlink" title="Map 语法"></a>Map 语法</h4><p>下面就是使用 Map 存储的数据，具体来说，该 Map 中首先存储了四个用于标识断点的 Key，相对应的是保存具体属性值得 Value。虽然这种形式可读性更高，但是总体代码量却高达 26 行 450 个字符。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$breakpoint-map: (</span><br><span class="line">    small: (</span><br><span class="line">        min-width: null,</span><br><span class="line">        max-width: 479px,</span><br><span class="line">        base-font: 16px,</span><br><span class="line">        vertical-rhythm: 1.3</span><br><span class="line">    ),</span><br><span class="line">    medium: (</span><br><span class="line">        min-width: 480px,</span><br><span class="line">        max-width: 959px,</span><br><span class="line">        base-font: 18px,</span><br><span class="line">        vertical-rhythm: 1.414</span><br><span class="line">    ),</span><br><span class="line">    large: (</span><br><span class="line">        min-width: 960px,</span><br><span class="line">        max-width: 1099px,</span><br><span class="line">        base-font: 18px,</span><br><span class="line">        vertical-rhythm: 1.5</span><br><span class="line">    ),</span><br><span class="line">    xlarge: (</span><br><span class="line">        min-width: 1100px,</span><br><span class="line">        max-width: null,</span><br><span class="line">        base-font: 21px,</span><br><span class="line">        vertical-rhythm: 1.618</span><br><span class="line">    )</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+
+<h4 id="多重列表语法"><a href="#多重列表语法" class="headerlink" title="多重列表语法"></a>多重列表语法</h4><p>下面的多重列表存储了和上面 Map 同样的数据，在多重列表中没有 Key-Value 的对应关系，这意味着要想找到特定的值，必须使用遍历或 <code>nth()</code> 的方式来实现了。从另一个角度来看，多种列表又比 Map 的代码量小得多，总共只有六行 180 个字符。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$breakpoint-list: (</span><br><span class="line">    (small, null, 479px, 16px, 1.3),</span><br><span class="line">    (medium, 480px, 959px, 18px, 1.414),</span><br><span class="line">    (large, 960px, 1099px, 18px, 1.5),</span><br><span class="line">    (xlarge, 1100px, null, 21px, 1.618)</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+
+<h2 id="遍历比较"><a href="#遍历比较" class="headerlink" title="遍历比较"></a>遍历比较</h2><div class="note info">
+    <h5>测试标题</h5>
+    <p>从上面简单地比较中可以粗略的看出，多种列表的代码量明显少于 Map。但是，如果我们需要遍历这些值得话，复杂度又是怎样的呢？</p>
+</div>
+
+<h4 id="遍历-Map"><a href="#遍历-Map" class="headerlink" title="遍历 Map"></a>遍历 Map</h4><p>我们可以使用如下的代码遍历 Map：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">@each $label, $map in $breakpoint-map &#123;&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这里的变量 <code>$label</code> 和 <code>$map</code> 会随着对 <code>$breakpoint-map</code> 的遍历被动态地赋值，<code>$label</code> 将会被赋值为 <code>$breakpoint-map</code> 的 Key，而 <code>$map</code> 会被赋值为 <code>$breakpoint-map</code> 的 Value。为了在遍历过程中获取特定值，我们就需要使用 Sass 原生的 <code>map-get()</code> 函数，使用该函数需要传入两个参数：Map 的名字和求取的 Key，最后返回该 Map 中匹配该 Key 的 Value。</p>
+<p>具体的做法就是使用 <code>@each</code> 遍历 Map，然后使用 <code>map-get()</code> 获取特定值，最终只需要六行代码 220 个字符即可完成整个遍历：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">@each $label, $map in $breakpoint-map &#123;</span><br><span class="line">    $min-width: map-get($map, min-width);</span><br><span class="line">    $max-width: map-get($map, max-width);</span><br><span class="line">    $base-font: map-get($map, base-font);</span><br><span class="line">    $vertical-rhythm: map-get($map, vertical-rhythm);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="遍历多重列表"><a href="#遍历多重列表" class="headerlink" title="遍历多重列表"></a>遍历多重列表</h4><p>遍历多重列表不必像遍历 Map 一样动态获取到 Map 后再使用 <code>map-get()</code> 函数取特定值，直接遍历一遍即可获得特定值。</p>
+<p>因为多种列表内层的每一个列表结构相同，都有按照相同顺序排列的五个值，所以我们可以持续遍历每个值并赋值给特定的变量。无需调用 <code>map-get()</code>，直接引用这些变量即可进行赋值等裸机操作。最终遍历多重列表只使用了两行代码 100 个字符：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">@each $label, $min-width, $max-width, $base-font, $vertical-rhythm in $breakpoint-list &#123;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="慎用多重列表"><a href="#慎用多重列表" class="headerlink" title="慎用多重列表"></a>慎用多重列表</h2><div class="note warning">
+    <h5>测试标题</h5>
+    <p>经过上述的比对，看起来多重列表各方面都在碾压 Map，实则不然，Sass 中添加 Map 有一条非常重要的原因就是：Key-Value 的映射关系。</p>
+</div>
+
+<h4 id="遗漏键值"><a href="#遗漏键值" class="headerlink" title="遗漏键值"></a>遗漏键值</h4><p>如果要使用多重列表，那么就必须保证自己非常熟悉多重列表内部的每一项所代表的意义。下面我们举个例子，来看看遗漏了某些值的情况：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$breakpoint-list: (</span><br><span class="line">    (small, null, 479px, 16px, 1.3),</span><br><span class="line">    (medium, 480px, 959px, 18px, 1.414),</span><br><span class="line">    (large, 960px, 1099px, 18px, 1.5),</span><br><span class="line">    (xlarge, 1100px, 21px, 1.618)</span><br><span class="line">);</span><br><span class="line"></span><br><span class="line">p &#123;</span><br><span class="line">    @each $label, $min-width, $max-width, $base-font, $vertical-rhythm in $breakpoint-list &#123;</span><br><span class="line">        @if $min-width &#123;</span><br><span class="line">            @include breakpoint( $min-width ) &#123;</span><br><span class="line">                font-size: $base-font;</span><br><span class="line">                line-height: $vertical-rhythm;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; @else &#123;</span><br><span class="line">            font-size: $base-font;</span><br><span class="line">            line-height: $vertical-rhythm;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>当我们尝试运行这段代码时，结果肯定是错误地，因为在 <code>$breakpoint-list</code> 的最后一行，<code>xlarge</code> 被赋值给了 <code>$label</code>，<code>1100px</code> 被赋值给了 <code>$min-width</code>，<code>21px</code> 被赋值给了 <code>$max-width</code>, <code>1.618</code> 被赋值给了 <code>$base-font</code>，最终导致 <code>$vertical-rhythm</code> 没有被赋值，结果就是 <code>font-size</code> 的属性值是错的，<code>line-height</code> 的属性值是空的。此外，Sass 还不会对此抛出错误，导致我们无从知晓错误所在。</p>
+<p>如果我们使用 Map 来代替这里的多重列表，那么使用 <code>map-get()</code> 函数即使遇见空值也能正确获得想要的结果。这就是值得我们慎重思考的地方：多种列表虽然简单快速，但是丧失了 Map 中的容错能力和快速取值能力。</p>
+<h4 id="查找特定列表"><a href="#查找特定列表" class="headerlink" title="查找特定列表"></a>查找特定列表</h4><p>在多重列表中查找特定列表简直就是一种折磨。如果使用 Map，那么配合 <code>map-get()</code> 函数可以快速定位到特定子 Map：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$medium-map: map-get($maps, medium);</span><br></pre></td></tr></table></figure>
+
+<p>但如果要获取多种列表 <code>medium</code> 列表，麻烦可就大了：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">@function get-list($label) &#123;</span><br><span class="line">    @each $list in $breakpoint-list &#123;</span><br><span class="line">        @if nth($list, 1) == $label &#123;</span><br><span class="line">            @return $list;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    @return null;</span><br><span class="line">&#125;</span><br><span class="line">$medium-list: get-list(medium);</span><br></pre></td></tr></table></figure>
+
+<p>这段代码的逻辑就是遍历整个多重列表，知道找到第一个匹配项，然后返回，如果一直没有找到匹配项，就一直遍历到末尾，然后返回 <code>null</code>。这实际上就是手工实现了 <code>map-get()</code> 的逻辑。</p>
+<h4 id="缺少原生的-Map-函数"><a href="#缺少原生的-Map-函数" class="headerlink" title="缺少原生的 Map 函数"></a>缺少原生的 Map 函数</h4><p>Sass 提供了诸多的原生函数用于处理 Map 数据类型，但是多重列表是没法调用这些函数的，比如，使用 <code>map-merge()</code> 可以合并两个 Map，如果两个 Map 有相同的值，则取第二个 Map 的值为最终值。当然你也可以在多重列表中使用 <code>join()</code> 或 <code>append()</code> 来增加新列表，从而模拟出 <code>map-merge()</code> 的效果。</p>
+<p>另一个实用的 Map 函数就是 <code>map-has-key()</code>，对于依赖 <code>map-get()</code> 的自定义函数来说，<code>map-has-key()</code> 可以用来验证特定的 Key 是否存在。但在列表中是完全没有相似的方法。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><div class="note unreleased">
+    <h5>Test Title</h5>
+    <p>相比起列表来说，Key-Value 模型的 Map 显然更有力量，原生的 Sass Map 函数更是提供了强力的数据查找和验证工具。</p>
+</div>
+
+<p>虽然多重列表代码量少，但并不能像 Map 一样进行错误检查或验证参数。在大多数时候，相比较多重列表而言，我相信 Map 是更好的选择。如果是为了更少的代码量和其他简单地调用，那么我偶尔会用用多重列表，但是从项目的宏观控制和数据存储方面显然更优秀。</p>
+]]></content>
+      <tags>
+        <tag>css</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>java版本更新后,eclipse打不开</title>
+    <url>/2017/11/02/java%E7%89%88%E6%9C%AC%E6%9B%B4%E6%96%B0%E5%90%8E-eclipse%E6%89%93%E4%B8%8D%E5%BC%80/</url>
+    <content><![CDATA[<p>在安装 <code>jdk</code> 的时候，安装成功后会默认询问是否安装 <code>jre</code> ，很多人是一路默认，稀里糊涂就安装上了。今天就遇到了这个问题，<code>jre</code> 环境更新后，<code>eclipse</code> 打不开了，报找不到 <code>jre</code> 的环境了，经过研究，打到了解决办法，这里记录一下。</p>
+<span id="more"></span>
+
+<h2 id="解决办法"><a href="#解决办法" class="headerlink" title="解决办法"></a>解决办法</h2><p>在 <code>C:\Users\&#123;你的用户名&#125;\eclipse\java-oxygen\eclipse</code> 目录下，找到 <code>eclipse.ini</code> 文件，找到 <code>-vm</code> 行的下一行，把路径改为jdk下的 <code>jre/bin</code> 这样，以后 <code>jre</code> 再升级的时候也不会出错了</p>
+<h2 id="出错的原因"><a href="#出错的原因" class="headerlink" title="出错的原因"></a>出错的原因</h2><p>在安装jdk后，java目录会出现两个文件夹，jdk和jre, 具体的目录名字，还会包括版本号，当初始化eclipse的时候，会用jre的目录初始化，而当jre升级后，原来的版本更改，目录名也变了，自然就找不到原来的环境目录了</p>
+<p>参考连接：<br>更详细的原理请参考这里： <a href="http://www.cnblogs.com/PengLee/p/3970760.html">安装JDK的时候为什么会有两个jre文件</a></p>
+]]></content>
+      <categories>
+        <category>java</category>
+      </categories>
+      <tags>
+        <tag>java, eclipse</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>shadowsocks服务端的配置</title>
+    <url>/2017/05/28/shadowsocks%E6%9C%8D%E5%8A%A1%E7%AB%AF%E7%9A%84%E9%85%8D%E7%BD%AE/</url>
+    <content><![CDATA[<h2 id="基于centOS7"><a href="#基于centOS7" class="headerlink" title="基于centOS7"></a>基于centOS7</h2><h3 id="安装组件"><a href="#安装组件" class="headerlink" title="安装组件"></a>安装组件</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$ yum install m2crypto python-setuptools</span><br><span class="line">$ easy_install pip</span><br><span class="line">$ pip install shadowsocks</span><br></pre></td></tr></table></figure>
+<span id="more"></span>
+<h3 id="安装完成后配置服务器参数"><a href="#安装完成后配置服务器参数" class="headerlink" title="安装完成后配置服务器参数"></a>安装完成后配置服务器参数</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$ vi /etc/shadowsocks.json</span><br></pre></td></tr></table></figure>
+<p>写入如下配置：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&#123;</span><br><span class="line">	&quot;server&quot;: &quot;0.0.0.0&quot;,</span><br><span class="line">	&quot;server_port&quot;: 443,</span><br><span class="line">	&quot;local_address&quot;: &quot;127.0.0.1&quot;,</span><br><span class="line">	&quot;local_port&quot;: 1080,</span><br><span class="line">	&quot;password&quot;: &quot;mypassword&quot;,</span><br><span class="line">	&quot;timeout&quot; 300,</span><br><span class="line">	&quot;method&quot;: &quot;aes-256-cfb&quot;,</span><br><span class="line">	&quot;fast_open&quot;: false,</span><br><span class="line">	&quot;workers&quot;: 1</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>将上面的mypassword替换成你的密码， server_port也是可以修改的， 例如443是Shadowsocks客户端默认的端口号<br>如果需要修改端口，需要在防火墙里打开相应的端口，用firewalld操作就简单了</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$ vi /usr/lib/firewalld/services/ss.xml</span><br></pre></td></tr></table></figure>
+<p>把下面的代码粘贴到里面</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</span><br><span class="line">&lt;service&gt;</span><br><span class="line">  &lt;short&gt;SS&lt;/short&gt;</span><br><span class="line">  &lt;description&gt;Shadowsocks port</span><br><span class="line">  &lt;/description&gt;</span><br><span class="line">  &lt;port protocol=&quot;tcp&quot; port=&quot;443&quot;/&gt;</span><br><span class="line">&lt;/service&gt;</span><br></pre></td></tr></table></figure>
+<p>port可自定义，但是需要跟上面的server_port对应起来，保存退出，然后重启firewalld服务</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$ firewall-cmd --permanent --add-service=ss</span><br><span class="line">$ firewall-cmd --reload</span><br></pre></td></tr></table></figure>
+<h3 id="运行命令，启动Shadowsocks服务"><a href="#运行命令，启动Shadowsocks服务" class="headerlink" title="运行命令，启动Shadowsocks服务"></a>运行命令，启动Shadowsocks服务</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$ ssserver -c /etc/shadowsocks.json</span><br></pre></td></tr></table></figure>
+<p>至此shadowsocks搭建完成，shadowsocks已经可以使用，如果你没有过高的要求，下面的步骤可以省略，下面是后台运行Shadowsocks的步骤。</p>
+<h3 id="安装supervisor实现后台运行"><a href="#安装supervisor实现后台运行" class="headerlink" title="安装supervisor实现后台运行"></a>安装supervisor实现后台运行</h3><p>运行以下命令下载supervisor</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$ easy_install supervisor</span><br></pre></td></tr></table></figure>
+<p>然后创建配置文件</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$ echo_supervisord_conf &gt; /etc/supervisord.conf</span><br></pre></td></tr></table></figure>
+<p>然后修改配置文件</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$ vi /etc/supervisord.conf</span><br></pre></td></tr></table></figure>
+<p>在文件末尾添加</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[program:ssserver]</span><br><span class="line">command = ssserver -c /etc/shadowsocks.json</span><br><span class="line">autostart = true</span><br><span class="line">autorestart = true</span><br><span class="line">startsec = 3</span><br></pre></td></tr></table></figure>
+<p>设置 supervisord 开机启动</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$ vi /etc/rc.local</span><br></pre></td></tr></table></figure>
+<p>在末尾另起一行添加</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$ supervisord</span><br></pre></td></tr></table></figure>
+<p>保存退出（和上文类似）。另 CentOS7 还需要为 rc.local 添加执行权限</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$ chmod +x /etc/rc.local</span><br></pre></td></tr></table></figure>
+<p>至此运用 supervisord 控制 Shadowsocks 开机自启和后台运行设置完成。重启服务器即可<br>P.S. 如果当你在运行 supervisord 命令时出现以下的错误提示</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&#x27;Supervisord is running as root and it is searching &#x27;</span><br><span class="line">Error: Another program is already listening on a port that one of our HTTP Servers is configured to use. Shut this program down before starting supervisord.</span><br><span class="line">For help, use /usr/bin/supervisord -h</span><br></pre></td></tr></table></figure>
+<p>那是因为 supervisord 已经启动了，重复启动就会出现上面的错误提示</p>
+]]></content>
+      <categories>
+        <category>Linux</category>
+      </categories>
+      <tags>
+        <tag>Linux, shadowsocks</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>基于webRTC的网络直播与点播系统-2</title>
+    <url>/2019/04/04/%E5%9F%BA%E4%BA%8EwebRTC%E7%9A%84%E7%BD%91%E7%BB%9C%E7%9B%B4%E6%92%AD%E4%B8%8E%E7%82%B9%E6%92%AD%E7%B3%BB%E7%BB%9F-2/</url>
+    <content><![CDATA[<p>WebRTC是在两个浏览器之间建立点对点实时通信的技术，在双方进行通信时不需要中心服务器的参与。然而在通信开始前，双方需要交换一些会话信息，所以需要知道彼此双方的IP地址和端口。</p>
+<p>而目前的网络环境下，通信的两台主机往往位于局域网中，并不会分配到公网IP地址，仅有私网IP地址，两台主机是没有办法进行通信的，为此需要NAT穿透服务，把私网IP映射到公网IP上，以此来实现双方的通信。NAT穿透的原理请参考</p>
+<p>本节主要说明NAT穿透服务coturn的搭建</p>
+<span id="more"></span>
+<h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p><code>coturn</code> 是一个免费的开源的 <code>TURN/STUN</code> 服务器。coturn 服务器完整的实现了 <code>STUN/TURN/ICE</code> 协议，支持 P2P 穿透防火墙。</p>
+<p>STUN 服务器用于获取设备的外部网络地址<br>TURN 服务器是在点对点失败后用于通信中继。<br><code>WebRTC</code> 建立连接的步骤大概是这样的：</p>
+<p>客户端（浏览器）直接尝试直连；<br>如果如果直连则通过 STUN 服务器进行穿透；<br>如果无法穿透则通过 TURN 服务器进行中转。</p>
+<h2 id="安装过程"><a href="#安装过程" class="headerlink" title="安装过程"></a>安装过程</h2><p>安装方式，apt-get二进制文件安装</p>
+<h3 id="1-下载"><a href="#1-下载" class="headerlink" title="1. 下载"></a>1. 下载</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">sudo apt-get install coturn</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-配置"><a href="#2-配置" class="headerlink" title="2.配置"></a>2.配置</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">sudo vim /etc/turnserver.conf</span><br></pre></td></tr></table></figure>
+<p>配置项有很多，都以#开头，表示注释，也说明默认配置或配置示例<br>配置如下：(没有列出的配置不用修改，列出的配置去掉前面的#取消注释并修改如下)</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">listening-ip=&lt;内网IP&gt;</span><br><span class="line">reply-ip=&lt;内网IP&gt;</span><br><span class="line">external-ip=&lt;外网IP&gt;</span><br><span class="line">fingerprint</span><br><span class="line">lt-cred-mech</span><br><span class="line">realm=kurento.org</span><br><span class="line">user=&lt;username&gt;:&lt;password&gt;</span><br></pre></td></tr></table></figure>
+<p>这在段配置可以参考 <a href="https://doc-kurento.readthedocs.io/en/6.9.0/user/faq.html"><code>kurento</code> 文档中的配置</a></p>
+<p><strong>配置说明</strong></p>
+<p>内网IP: 云服务器一般也处于服务商的内网中，一般以10开头，可通过运行命令 <code>ifconfig</code> 查看</p>
+<p>外网IP: 云服务器一般会有一个外网IP地址，可在服务商平台查看</p>
+<p>username: turn转发服务的用户名</p>
+<p>password: turn转发服务的密码，这里采用最简单的静态密码，所以密码不能以0x开头，否则会被以为是一个密钥，具体的配置说明可查看 <a href="https://github.com/coturn/coturn/wiki/turnserver">coturn的配置文档</a></p>
+<p>然后执行命令</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">sudo vim /etc/default/coturn</span><br></pre></td></tr></table></figure>
+<p>在 <code>TURNSERVER_ENABLED=1</code> 前面加#注释掉这一行，然后即可随系统自动启动</p>
+<h3 id="3-运行"><a href="#3-运行" class="headerlink" title="3. 运行"></a>3. 运行</h3><p>在控制台执行命令</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">sudo systemctl start coturn</span><br></pre></td></tr></table></figure>
+<p><strong>注意</strong></p>
+<p>coturn穿透服务需要随机使用UDP端口，所以需要放开服务器的49152到65535(coturn的默认使用的端口范围)的UDP服务的端口，或许需要在服务器或服务商的安全组中进行调整</p>
+<h3 id="4-测试运行"><a href="#4-测试运行" class="headerlink" title="4. 测试运行"></a>4. 测试运行</h3><p>测试coturn服务是正常运行的方法，只需要向服务器发起ICE请求，若返回了请求主机的IP地址就证明coturn服务已正常运行，可在<br><a href="https://webrtc.github.io/samples/src/content/peerconnection/trickle-ice/">Trickle ICE</a> 进行测试<br>在URI处填入turn:&lt;服务器外网IP&gt;:3478,再填入用户名和密码，添加后Gather candidates, 看是否显示出了当前的主机IP地址</p>
+<h3 id="5-配置kurento服务的穿透服务"><a href="#5-配置kurento服务的穿透服务" class="headerlink" title="5. 配置kurento服务的穿透服务"></a>5. 配置kurento服务的穿透服务</h3><p>在上一步，已经使用 <code>docker</code> 的方式安装了 <code>kurento</code> 媒体服务器，现在只需要修改 <code>docker-compose.yml</code> 文件如下:</p>
+<figure class="highlight yml"><table><tr><td class="code"><pre><span class="line"><span class="attr">version:</span> <span class="string">&quot;3&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="attr">services:</span></span><br><span class="line">  <span class="attr">kms:</span></span><br><span class="line">    <span class="attr">container_name:</span> <span class="string">kms</span></span><br><span class="line">    <span class="attr">image:</span> <span class="string">kurento/kurento-media-server:xenial-latest</span></span><br><span class="line">    <span class="attr">ports:</span></span><br><span class="line">       <span class="bullet">-</span> <span class="string">&quot;8888:8888&quot;</span></span><br><span class="line">    <span class="attr">volumes:</span></span><br><span class="line">       <span class="bullet">-</span> <span class="string">./WebRtcEndpoint.conf.ini:/etc/kurento/modules/kurento/WebRtcEndpoint.conf.ini</span></span><br></pre></td></tr></table></figure>
+<p>然后在 <code>docker-compose.yml</code> 的同级目录下新增文件 <code>WebRtcEndpoint.conf.ini</code> 文件，内容如下:</p>
+<figure class="highlight yml"><table><tr><td class="code"><pre><span class="line"><span class="string">turnURL=&lt;username&gt;:&lt;password&gt;@&lt;serverIP&gt;:&lt;serverPort&gt;</span></span><br></pre></td></tr></table></figure>
+<p><strong>说明</strong></p>
+<ul>
+<li>username: turn服务的用户名，在上面配置的</li>
+<li>password: turn服务用户名对应的密码，上面已经配置</li>
+<li>serverIp: turn服务运行的服务器的公网IP</li>
+<li>serverPort: turn服务运行的端口，如果没有修改过coturn的默认配置，则默认端口为3478</li>
+</ul>
+<p>执行命令</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">docker-compose restart kms</span><br></pre></td></tr></table></figure>
+<p>重启kurento media server使配置生效，至此，本章完成</p>
+]]></content>
+      <tags>
+        <tag>webRTC, 信令服务器, NAT穿透服务, Cotun</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>基于webRTC的网络直播与点播系统(1)</title>
+    <url>/2019/04/03/%E5%9F%BA%E4%BA%8EwebRTC%E7%9A%84%E7%BD%91%E7%BB%9C%E7%9B%B4%E6%92%AD%E4%B8%8E%E7%82%B9%E6%92%AD%E7%B3%BB%E7%BB%9F-1/</url>
+    <content><![CDATA[<h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>本项目基于webRTC技术，实现点对点直播，采用的框架和技术：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">1. kurento——媒体服务器</span><br><span class="line">2. 基于nodejs的服务器，实现信令传递，浏览器和媒体服务器交互和用户常规逻辑的后端</span><br><span class="line">3. 前端vuejs，搭建用户界面</span><br></pre></td></tr></table></figure>
+<p>本节是关于kurento媒体服务器的搭建</p>
+<span id="more"></span>
+<h2 id="媒体服务器的搭建"><a href="#媒体服务器的搭建" class="headerlink" title="媒体服务器的搭建"></a>媒体服务器的搭建</h2><h3 id="环境"><a href="#环境" class="headerlink" title="环境"></a>环境</h3><p>  <code>ubuntu 16.04</code> 云服务器</p>
+<h3 id="搭建方式"><a href="#搭建方式" class="headerlink" title="搭建方式"></a>搭建方式</h3><p>  <code>docker</code></p>
+<h3 id="搭建过程"><a href="#搭建过程" class="headerlink" title="搭建过程:"></a>搭建过程:</h3><h4 id="1-安装docker"><a href="#1-安装docker" class="headerlink" title="1. 安装docker"></a>1. 安装docker</h4><ol>
+<li>更新系统包索引<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$ sudo apt-get update</span><br></pre></td></tr></table></figure></li>
+<li>安装依赖<br>安装下面的依赖可以让apt通过https仓库来进行docker包的安装<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$ sudo apt-get install \</span><br><span class="line">    apt-transport-https \</span><br><span class="line">    ca-certificates \</span><br><span class="line">    curl \</span><br><span class="line">    gnupg-agent \</span><br><span class="line">    software-properties-common</span><br></pre></td></tr></table></figure></li>
+<li>添加docker官方的GPG密钥<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$ curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -</span><br></pre></td></tr></table></figure></li>
+<li>添加docker的官方稳定版仓库<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$ sudo apt-get install docker-ce docker-ce-cli containerd.io</span><br></pre></td></tr></table></figure></li>
+<li>验证安装<br>通过运行<code>hello-world</code>镜像以验证docker已正确安装<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$ sudo docker run hello-world</span><br></pre></td></tr></table></figure>
+上面这条命令将下载一个测试镜像并在容器中运行，如果docker已正确安装，容器将输出一条信息并且退出</li>
+</ol>
+<p>更多安装方式参考 <a href="https://docs.docker.com/install/linux/docker-ce/ubuntu/">docker官方文档</a></p>
+<h4 id="2-安装kurento媒体服务器"><a href="#2-安装kurento媒体服务器" class="headerlink" title="2. 安装kurento媒体服务器"></a>2. 安装kurento媒体服务器</h4><p><code>docker-compose</code> 是docker官方推出的管理docker容器和配置的软件，在Linux环境下安装docker时会自动安装 <code>docker-compose</code> 。在这里会把 <code>kurento</code> 容器运行的配置写入 <code>docker-compose.yml</code> 文件中(docker-compose用以管理docker的配置文件)。通过 <code>docker-compose</code> 来运行并管理 <code>kurento</code> 服务，</p>
+<ol>
+<li>配置服务<figure class="highlight yml"><table><tr><td class="code"><pre><span class="line"><span class="attr">version:</span> <span class="string">&quot;3&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="attr">services:</span></span><br><span class="line">  <span class="attr">kms:</span></span><br><span class="line">    <span class="attr">container_name:</span> <span class="string">kms</span></span><br><span class="line">    <span class="attr">image:</span> <span class="string">kurento/kurento-media-server:xenial-latest</span></span><br><span class="line">    <span class="attr">ports:</span></span><br><span class="line">       <span class="bullet">-</span> <span class="string">&quot;8888:8888&quot;</span></span><br></pre></td></tr></table></figure>
+简单解释一下这份配置的作用，这份配置起了一个名为kms并且以kurento官方提供的镜像为媒体服务器的容器，然后把镜像的8888端口映射到了主机的8888端口，这样通过访问主机的8888端口即可访问到kurento的媒体服务器，至于为什么是映射到容器的8888端口而不是其它商品是因为kurento服务器的默认端口为8888</li>
+</ol>
+<p>想要了解更多的docker-compose相关，可以参考配置文档 <a href="https://docs.docker.com/compose/compose-file/"><code>docker-compose</code> 的官方文档</a></p>
+<ol start="2">
+<li>运行服务<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$ docker-compose up -d</span><br></pre></td></tr></table></figure>
+上面这条命令即会运行刚刚配置的kurento服务器</li>
+<li>验证运行<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$ docker-compose ps</span><br></pre></td></tr></table></figure>
+上面这条命令若输出<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Name      Command          State               Ports         </span><br><span class="line">-------------------------------------------------------------</span><br><span class="line">kms    /entrypoint.sh   Up (healthy)   0.0.0.0:8888-&gt;8888/tcp</span><br></pre></td></tr></table></figure>
+即证明服务已正常运行</li>
+</ol>
+]]></content>
+      <tags>
+        <tag>webRTC, kuretno, 媒体服务器</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>基于webRTC的网络直播与点播系统-3（业务功能实现)</title>
+    <url>/2019/04/06/%E5%9F%BA%E4%BA%8EwebRTC%E7%9A%84%E7%BD%91%E7%BB%9C%E7%9B%B4%E6%92%AD%E4%B8%8E%E7%82%B9%E6%92%AD%E7%B3%BB%E7%BB%9F-3/</url>
+    <content><![CDATA[<p>首先，明确两个概念，直播者(<code>presentor</code>)和观众(<code>viewer</code>)</p>
+<ol>
+<li><p>在第一步中，会建立一个基本的直播端页面，这个页面中包含一个视频元素，直播者可以观察到摄像头的录制画面。</p>
+<p><strong>需要注意的是这里并不会直接显示摄像头获取到的本地画面，而是通过一个回环的方式，显示通过网络获取到的画画，这样直播者可以通过观察画面质量知道网络状况，做出调整和优化。所以实际上，直播者(presentor)也是一个观众(viewer)，观看自己的画画</strong></p>
+</li>
+<li><p>在第二步中，会建立一个基本的观众端页面，<br>这个页面和直播端页面类似，唯一的不同是，这个视频源是来自直播者的摄像头而不是来自当前的设备。</p>
+</li>
+<li><p>第三步，完成这一部分的后端逻辑</p>
+</li>
+<li><p>扩展直播和点播的逻辑，完成通话功能</p>
+</li>
+</ol>
+<p>demo地址: <a href="https://webrtc.qwertyyb.cn/front/">https://webrtc.qwertyyb.cn/front/</a></p>
+<span id="more"></span>
+
+<h3 id="开始之前"><a href="#开始之前" class="headerlink" title="开始之前"></a>开始之前</h3><p>在开始之前，简单说一下这个项目的架构。<br><code>kurento</code> 是一个基于 <code>CS</code>架构的 <code>webrtc</code> 框架, 在第一步中，已经通过 <code>docker</code> 的方式搭建了服务器。<code>kurento</code> 提供了不同语言的客户端实现(<code>Java</code>, <code>Javascript nodejs</code>, <code>Javascript browser</code>)。出于安全和业务方面的，采用 <code>nodejs</code> 的客户端实现，前端直接和 <code>nodejs</code> 的服务通信，<code>nodejs</code> 再和媒体服务器通信。这样可以把媒体服务器完全隐匿起来，更安全</p>
+<h3 id="搭建前端页面"><a href="#搭建前端页面" class="headerlink" title="搭建前端页面"></a>搭建前端页面</h3><p>前端页面使用 <code>vue + vuex + vue-router + elementui</code> 实现的具体步骤不再叙述，最终实现出来的两个页面如下</p>
+<ul>
+<li><p>直播端<br><img src="https://i.loli.net/2019/04/29/5cc652167cbe4.png" alt="直播端"></p>
+</li>
+<li><p>观众端<br><img src="https://i.loli.net/2019/04/29/5cc653c413eb4.png" alt="观看端"></p>
+</li>
+</ul>
+<h3 id="前端的部分逻辑"><a href="#前端的部分逻辑" class="headerlink" title="前端的部分逻辑"></a>前端的部分逻辑</h3><h4 id="1-准备工作"><a href="#1-准备工作" class="headerlink" title="1. 准备工作"></a>1. 准备工作</h4><p>使用 <code>kurento</code> 针对浏览器端提供的工具函数，可以大大简化直接使用原生原生构建 <code>webrtc</code> 连接的流程。安装引入，使用文档参考(<a href="https://doc-kurento.readthedocs.io/en/6.9.0/features/kurento_utils_js.html">https://doc-kurento.readthedocs.io/en/6.9.0/features/kurento_utils_js.html</a>)</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">npm install kurento-utils --save</span><br></pre></td></tr></table></figure>
+
+<p>由于 <code>webrtc</code> 是一个比较新的标准，各个浏览器的实现api还有些许不同，所以引入 <code>webrtc-adapter</code> 以屏蔽不同浏览器之间的差异，引入方式如下</p>
+<figure class="highlight js"><table><tr><td class="code"><pre><span class="line">npm install webrtc-adapter --save</span><br><span class="line"></span><br><span class="line"><span class="comment">// 然后在入口文件 src/main.js 中引入即可</span></span><br><span class="line"><span class="keyword">import</span> <span class="string">&#x27;webrtc-adapter&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p>出于实时性的需要，本项目使用 <code>WebSocket</code> 以进行前后端通信，通过 <code>socket.io</code> 建立连接，安装 <code>socket.io</code> 的客户端</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">npm install socket.io-client --save</span><br></pre></td></tr></table></figure>
+
+<h4 id="2-直播端"><a href="#2-直播端" class="headerlink" title="2. 直播端"></a>2. 直播端</h4><p>直播端的逻辑，首先发起 <code>webrtc</code> 请求，生成 <code>sdpOffer</code>，通过 <code>socket.io-client</code> 建立的 <code>WebSocket</code> 连接把 <code>sdpOffer</code> 传到服务端，服务端通过 <code>kurento</code> 的客户端连接到 <code>kurento</code> 的媒体服务器，服务端生成一个<code>webrtc</code>的 <code>endpoint</code>， 然后通过 <code>WebRtcEndPoint</code> 和 <code>sdpOffer</code> 生成 <code>sdpAnswer</code>，服务端把 <code>sdpAnswer</code> 传给客户端，客户端建立起浏览器和媒体服务器的连接，把通过摄像头获取的信息发送给媒体服务器</p>
+<p>上面的流程屏蔽了一些细节，比如 NAT穿透服务的使用、iceCandidate的通信等等，具体的实现细节可以看下面的代码。</p>
+<p>在这个过程中，服务端的作用仅仅是作为一个中间层，传递 <strong>浏览器端和媒体服务器</strong> 的信息， 当连接建立起来之后，就可以越过服务端直接进行通信了。这也就是点对点的概念了。</p>
+<p>上面仅仅是建立连接，在这个应用中，当一个观众进入或离开的时候，还会在当前的直播端显示出来，这个功能也会通过websocket实现，具体代码如下</p>
+<figure class="highlight js"><table><tr><td class="code"><pre><span class="line"><span class="comment">// Presentor.js</span></span><br><span class="line"><span class="keyword">import</span> &#123; iceServers &#125; <span class="keyword">from</span> <span class="string">&#x27;@/config/webrtc&#x27;</span></span><br><span class="line"><span class="keyword">import</span> kurentoUtils <span class="keyword">from</span> <span class="string">&#x27;kurento-utils&#x27;</span></span><br><span class="line"><span class="keyword">import</span> &#123; getNewSocket &#125; <span class="keyword">from</span> <span class="string">&#x27;@/socket&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Presentor</span> &#123;</span><br><span class="line">  socket = <span class="literal">null</span></span><br><span class="line">  localVideo = <span class="literal">null</span></span><br><span class="line">  webRtcPeer = <span class="literal">null</span></span><br><span class="line">  events = &#123;</span><br><span class="line">    <span class="attr">start</span>: [],</span><br><span class="line">    <span class="attr">stop</span>: [],</span><br><span class="line">    <span class="attr">error</span>: [],</span><br><span class="line">    <span class="attr">message</span>: []</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="title function_">constructor</span> (localVideo) &#123;</span><br><span class="line">    <span class="variable language_">this</span>.<span class="property">socket</span> = <span class="title function_">getNewSocket</span>()</span><br><span class="line">    <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="variable language_">this</span>.<span class="property">socket</span>)</span><br><span class="line">    <span class="variable language_">this</span>.<span class="property">socket</span>.<span class="title function_">on</span>(<span class="string">&#x27;error&#x27;</span>, <span class="function"><span class="params">error</span> =&gt;</span> &#123;</span><br><span class="line">      <span class="variable language_">this</span>.<span class="title function_">emit</span>(<span class="string">&#x27;error&#x27;</span>, error)</span><br><span class="line">    &#125;)</span><br><span class="line">    <span class="variable language_">this</span>.<span class="property">socket</span>.<span class="title function_">on</span>(<span class="string">&#x27;connect_error&#x27;</span>, <span class="function"><span class="params">error</span> =&gt;</span> &#123;</span><br><span class="line">      <span class="variable language_">this</span>.<span class="title function_">emit</span>(<span class="string">&#x27;error&#x27;</span>, error)</span><br><span class="line">    &#125;)</span><br><span class="line">    <span class="variable language_">this</span>.<span class="property">socket</span>.<span class="title function_">on</span>(<span class="string">&#x27;callaccepted&#x27;</span>, <span class="function"><span class="params">message</span> =&gt;</span> &#123;</span><br><span class="line">      <span class="variable language_">this</span>.<span class="title function_">emit</span>(<span class="string">&#x27;callaccepted&#x27;</span>, message)</span><br><span class="line">    &#125;)</span><br><span class="line">    <span class="variable language_">this</span>.<span class="property">socket</span>.<span class="title function_">on</span>(<span class="string">&#x27;callrejected&#x27;</span>, <span class="function"><span class="params">message</span> =&gt;</span> &#123;</span><br><span class="line">      <span class="variable language_">this</span>.<span class="title function_">emit</span>(<span class="string">&#x27;callrejected&#x27;</span>, message)</span><br><span class="line">    &#125;)</span><br><span class="line">    <span class="variable language_">this</span>.<span class="property">socket</span>.<span class="title function_">on</span>(<span class="string">&#x27;callerror&#x27;</span>, <span class="function"><span class="params">error</span> =&gt;</span> &#123;</span><br><span class="line">      <span class="variable language_">this</span>.<span class="title function_">emit</span>(<span class="string">&#x27;callerror&#x27;</span>, error)</span><br><span class="line">    &#125;)</span><br><span class="line">    <span class="variable language_">this</span>.<span class="property">localVideo</span> = localVideo</span><br><span class="line">    localVideo.<span class="title function_">addEventListener</span>(<span class="string">&#x27;canplay&#x27;</span>, <span class="variable language_">this</span>.<span class="property">_onVideoCanplay</span>)</span><br><span class="line">  &#125;</span><br><span class="line">  _onVideoCanplay = <span class="function"><span class="params">_</span> =&gt;</span> &#123;</span><br><span class="line">    <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&#x27;onvideocanplay&#x27;</span>)</span><br><span class="line">    <span class="variable language_">this</span>.<span class="title function_">emit</span>(<span class="string">&#x27;start&#x27;</span>)</span><br><span class="line">  &#125;</span><br><span class="line">  bindEvent = <span class="function">() =&gt;</span> &#123;</span><br><span class="line">    <span class="keyword">const</span> &#123; socket, webRtcPeer &#125; = <span class="variable language_">this</span></span><br><span class="line">    socket.<span class="title function_">on</span>(<span class="string">&#x27;startResponse&#x27;</span>, <span class="function">(<span class="params">&#123; sdpAnswer &#125;</span>) =&gt;</span> &#123;</span><br><span class="line">      <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&#x27;SDP answer received from server. Processing ...&#x27;</span>)</span><br><span class="line">      webRtcPeer.<span class="title function_">processAnswer</span>(sdpAnswer)</span><br><span class="line">    &#125;)</span><br><span class="line">    socket.<span class="title function_">on</span>(<span class="string">&#x27;iceCandidate&#x27;</span>, <span class="function">(<span class="params">&#123; candidate &#125;</span>) =&gt;</span> &#123;</span><br><span class="line">      webRtcPeer.<span class="title function_">addIceCandidate</span>(candidate)</span><br><span class="line">    &#125;)</span><br><span class="line">  &#125;</span><br><span class="line">  start = <span class="function">(<span class="params">nickname = <span class="literal">null</span></span>) =&gt;</span> &#123;</span><br><span class="line">    <span class="keyword">const</span> options = &#123;</span><br><span class="line">      <span class="comment">// localVideo: this.localVideo,</span></span><br><span class="line">      <span class="attr">remoteVideo</span>: <span class="variable language_">this</span>.<span class="property">localVideo</span>,</span><br><span class="line">      <span class="attr">mediaConstraints</span>: &#123;</span><br><span class="line">        <span class="attr">video</span>: &#123;</span><br><span class="line">          <span class="attr">width</span>: <span class="number">640</span>,</span><br><span class="line">          <span class="attr">height</span>: <span class="number">480</span></span><br><span class="line">        &#125;,</span><br><span class="line">        <span class="attr">audio</span>: <span class="literal">true</span></span><br><span class="line">      &#125;,</span><br><span class="line">      <span class="attr">onicecandidate</span>: <span class="variable language_">this</span>.<span class="property">onIceCandidate</span>,</span><br><span class="line">      <span class="attr">configuration</span>: &#123;</span><br><span class="line">        iceServers</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">Promise</span>(<span class="function">(<span class="params">resolve, reject</span>) =&gt;</span> &#123;</span><br><span class="line">      <span class="variable language_">this</span>.<span class="property">webRtcPeer</span> = kurentoUtils.<span class="property">WebRtcPeer</span>.<span class="title class_">WebRtcPeerSendrecv</span>(options, <span class="function"><span class="params">error</span> =&gt;</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (error) <span class="keyword">return</span> <span class="title function_">reject</span>(error)</span><br><span class="line">        <span class="title function_">resolve</span>()</span><br><span class="line">      &#125;)</span><br><span class="line">    &#125;).<span class="title function_">then</span>(<span class="function"><span class="params">_</span> =&gt;</span> &#123;</span><br><span class="line">      <span class="variable language_">this</span>.<span class="title function_">bindEvent</span>()</span><br><span class="line">      <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">Promise</span>(<span class="function">(<span class="params">resolve, reject</span>) =&gt;</span> <span class="variable language_">this</span>.<span class="property">webRtcPeer</span>.<span class="title function_">generateOffer</span>(<span class="function">(<span class="params">error, sdp</span>) =&gt;</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (error) <span class="keyword">return</span> <span class="title function_">reject</span>(error)</span><br><span class="line">        <span class="title function_">resolve</span>(sdp)</span><br><span class="line">      &#125;))</span><br><span class="line">    &#125;).<span class="title function_">then</span>(<span class="function"><span class="params">sdp</span> =&gt;</span> &#123;</span><br><span class="line">      <span class="variable language_">console</span>.<span class="title function_">info</span>(<span class="string">&#x27;Invoking SDP offer callback function &#x27;</span> + location.<span class="property">host</span>)</span><br><span class="line">      <span class="variable language_">this</span>.<span class="property">socket</span>.<span class="title function_">emit</span>(<span class="string">&#x27;createPresentor&#x27;</span>, &#123;</span><br><span class="line">        <span class="attr">sdpOffer</span>: sdp,</span><br><span class="line">        <span class="comment">// 邀请某人对话</span></span><br><span class="line">        <span class="attr">invite</span>: nickname</span><br><span class="line">      &#125;)</span><br><span class="line">    &#125;)</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  stop = <span class="function">() =&gt;</span> &#123;</span><br><span class="line">    <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&#x27;Stopping video call ...&#x27;</span>)</span><br><span class="line">    <span class="keyword">if</span> (<span class="variable language_">this</span>.<span class="property">webRtcPeer</span>) &#123;</span><br><span class="line">      <span class="variable language_">this</span>.<span class="property">webRtcPeer</span>.<span class="title function_">dispose</span>()</span><br><span class="line">      <span class="variable language_">this</span>.<span class="property">webRtcPeer</span> = <span class="literal">null</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="variable language_">this</span>.<span class="property">localVideo</span>.<span class="title function_">removeEventListener</span>(<span class="string">&#x27;canplay&#x27;</span>, <span class="variable language_">this</span>.<span class="property">_onVideoCanplay</span>)</span><br><span class="line">    <span class="variable language_">this</span>.<span class="property">socket</span>.<span class="title function_">emit</span>(<span class="string">&#x27;stop&#x27;</span>)</span><br><span class="line">    <span class="variable language_">this</span>.<span class="property">socket</span>.<span class="title function_">close</span>()</span><br><span class="line">    <span class="variable language_">this</span>.<span class="title function_">emit</span>(<span class="string">&#x27;stop&#x27;</span>)</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  onIceCandidate = <span class="function"><span class="params">candidate</span> =&gt;</span> &#123;</span><br><span class="line">    <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&#x27;Local candidate&#x27;</span> + <span class="title class_">JSON</span>.<span class="title function_">stringify</span>(candidate))</span><br><span class="line"></span><br><span class="line">    <span class="variable language_">this</span>.<span class="property">socket</span>.<span class="title function_">emit</span>(<span class="string">&#x27;onIceCandidate&#x27;</span>, &#123; candidate &#125;)</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  emit (name, ...args) &#123;</span><br><span class="line">    <span class="variable language_">console</span>.<span class="title function_">log</span>(name, <span class="variable language_">this</span>.<span class="property">events</span>)</span><br><span class="line">    <span class="keyword">if</span> (!<span class="title class_">Object</span>.<span class="title function_">keys</span>(<span class="variable language_">this</span>.<span class="property">events</span>).<span class="title function_">includes</span>(name)) <span class="keyword">return</span></span><br><span class="line">    <span class="keyword">const</span> cbs = <span class="variable language_">this</span>.<span class="property">events</span>[name]</span><br><span class="line">    <span class="keyword">return</span> cbs.<span class="title function_">map</span>(<span class="function"><span class="params">func</span> =&gt;</span> <span class="title function_">func</span>(...args))</span><br><span class="line">  &#125;</span><br><span class="line">  on (name, cb) &#123;</span><br><span class="line">    <span class="keyword">if</span> (!<span class="title class_">Object</span>.<span class="title function_">keys</span>(<span class="variable language_">this</span>.<span class="property">events</span>).<span class="title function_">includes</span>(name)) <span class="keyword">return</span></span><br><span class="line">    <span class="keyword">const</span> cbs = <span class="variable language_">this</span>.<span class="property">events</span>[name]</span><br><span class="line">    <span class="keyword">if</span> (cbs.<span class="title function_">includes</span>(cb)) <span class="keyword">return</span></span><br><span class="line">    cbs.<span class="title function_">push</span>(cb)</span><br><span class="line">    <span class="keyword">return</span> <span class="variable language_">this</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> <span class="title class_">Presentor</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 在presentor.vue中的使用</span></span><br><span class="line">...</span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> &#123;</span><br><span class="line">  ...</span><br><span class="line"></span><br><span class="line">  <span class="attr">methods</span>: &#123;</span><br><span class="line">    start () &#123;</span><br><span class="line">      <span class="variable language_">this</span>.<span class="property">status</span> = <span class="string">&#x27;starting&#x27;</span></span><br><span class="line">      presentor = <span class="keyword">new</span> <span class="title class_">Presentor</span>(<span class="variable language_">this</span>.<span class="property">$refs</span>.<span class="property">video</span>)</span><br><span class="line">      <span class="variable language_">console</span>.<span class="title function_">log</span>(presentor)</span><br><span class="line">      presentor.<span class="title function_">on</span>(<span class="string">&#x27;start&#x27;</span>, <span class="function">() =&gt;</span> &#123;</span><br><span class="line">        <span class="variable language_">this</span>.<span class="property">status</span> = <span class="string">&#x27;living&#x27;</span></span><br><span class="line">      &#125;)</span><br><span class="line">      presentor.<span class="title function_">on</span>(<span class="string">&#x27;error&#x27;</span>, <span class="function"><span class="params">error</span> =&gt;</span> &#123;</span><br><span class="line">        <span class="variable language_">console</span>.<span class="title function_">log</span>(error)</span><br><span class="line">        <span class="variable language_">this</span>.<span class="title function_">stop</span>()</span><br><span class="line">      &#125;)</span><br><span class="line">      presentor.<span class="title function_">on</span>(<span class="string">&#x27;message&#x27;</span>, <span class="function"><span class="params">message</span> =&gt;</span> &#123;</span><br><span class="line">        <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&#x27;received message:&#x27;</span>, message)</span><br><span class="line">        <span class="variable language_">this</span>.<span class="property">messages</span>.<span class="title function_">push</span>(message)</span><br><span class="line">      &#125;)</span><br><span class="line">      presentor.<span class="title function_">start</span>()</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  ...</span><br><span class="line">&#125;</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<p>代码中的iceServer，即为在第二步中搭建的 TURN 服务器的地址，整个 NAT穿透的过程对用户和开发者而言都是透明的，只需要正确设置服务器地址即可</p>
+<h4 id="2-观众端"><a href="#2-观众端" class="headerlink" title="2. 观众端"></a>2. 观众端</h4><p>观众端逻辑，观众端发起 <code>webrtc</code> 请求，生成 <code>SDP offer</code>，发送给服务端，服务端通过和媒体服务器通信生成一个 <code>WebRtcEndPoint</code> ,然后让直播端的 <code>WebRtcEndPoint</code> 和新生成的连接，然后生成对应 <code>SDP offer</code> 的应答 <code>SDP Answer</code>，传给浏览器，浏览器收到之后，建立起和媒体服务器之间的连接，获取到直播端的画面</p>
+<p>需要说明的是，上面建立起的并不是直播端浏览器和观众端浏览器的直接连接。首先由直播端建立起和媒体服务器点对点的连接，然后媒体服务器再和观众端建立起点对点连接。这么做主要是为了减轻直播端的压力，如果是浏览器之间的直接连接，当一个直播有很多人观看时，因为是点对点的连接，直播端会把视频源传给每一个观众端，那么直播端就会有非常高的网络负载而导致无法正常直播。有了中心媒体服务器，媒体服务器会把视频源分发到观众端，大大减轻了直播端的压力。</p>
+<p>观众端的具体代码和使用如下</p>
+<figure class="highlight js"><table><tr><td class="code"><pre><span class="line"><span class="comment">// Viewer.js</span></span><br><span class="line"><span class="keyword">import</span> &#123; iceServers &#125; <span class="keyword">from</span> <span class="string">&#x27;@/config/webrtc&#x27;</span></span><br><span class="line"><span class="keyword">import</span> kurentoUtils <span class="keyword">from</span> <span class="string">&#x27;kurento-utils&#x27;</span></span><br><span class="line"><span class="keyword">import</span> io <span class="keyword">from</span> <span class="string">&#x27;socket.io-client&#x27;</span></span><br><span class="line"><span class="keyword">import</span> store <span class="keyword">from</span> <span class="string">&#x27;../../store&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Viewer</span> &#123;</span><br><span class="line">  socket = <span class="literal">null</span></span><br><span class="line">  videoDom = <span class="literal">null</span></span><br><span class="line">  webRtcPeer = <span class="literal">null</span></span><br><span class="line">  events = &#123;</span><br><span class="line">    <span class="attr">start</span>: [],</span><br><span class="line">    <span class="attr">stop</span>: [],</span><br><span class="line">    <span class="attr">presentorgone</span>: []</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="title function_">constructor</span> (videoDom, presentorId) &#123;</span><br><span class="line">    <span class="variable language_">console</span>.<span class="title function_">log</span>(videoDom)</span><br><span class="line">    <span class="variable language_">this</span>.<span class="property">socket</span> = <span class="title function_">io</span>(&#123;</span><br><span class="line">      <span class="attr">path</span>: <span class="string">&#x27;/socket.io/webrtc&#x27;</span>,</span><br><span class="line">      <span class="attr">query</span>: &#123;</span><br><span class="line">        <span class="attr">token</span>: store.<span class="property">state</span>.<span class="property">token</span>,</span><br><span class="line">        presentorId</span><br><span class="line">      &#125;,</span><br><span class="line">      <span class="attr">reconnection</span>: <span class="literal">false</span></span><br><span class="line">    &#125;)</span><br><span class="line">    <span class="variable language_">this</span>.<span class="property">socket</span>.<span class="title function_">on</span>(<span class="string">&#x27;error&#x27;</span>, <span class="function"><span class="params">error</span> =&gt;</span> &#123;</span><br><span class="line">      <span class="variable language_">this</span>.<span class="title function_">emit</span>(<span class="string">&#x27;error&#x27;</span>, error)</span><br><span class="line">    &#125;)</span><br><span class="line">    <span class="variable language_">this</span>.<span class="property">socket</span>.<span class="title function_">on</span>(<span class="string">&#x27;connect_error&#x27;</span>, <span class="function"><span class="params">error</span> =&gt;</span> &#123;</span><br><span class="line">      <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&#x27;error&#x27;</span>)</span><br><span class="line">      <span class="variable language_">this</span>.<span class="title function_">emit</span>(<span class="string">&#x27;error&#x27;</span>, error)</span><br><span class="line">    &#125;)</span><br><span class="line">    <span class="variable language_">this</span>.<span class="property">videoDom</span> = videoDom</span><br><span class="line">    videoDom.<span class="title function_">addEventListener</span>(<span class="string">&#x27;canplay&#x27;</span>, <span class="variable language_">this</span>.<span class="property">_onVideoCanplay</span>)</span><br><span class="line">  &#125;</span><br><span class="line">  _onVideoCanplay = <span class="function"><span class="params">_</span> =&gt;</span> &#123;</span><br><span class="line">    <span class="variable language_">this</span>.<span class="title function_">emit</span>(<span class="string">&#x27;start&#x27;</span>)</span><br><span class="line">  &#125;</span><br><span class="line">  bindEvent = <span class="function">() =&gt;</span> &#123;</span><br><span class="line">    <span class="keyword">const</span> &#123; socket, webRtcPeer &#125; = <span class="variable language_">this</span></span><br><span class="line">    socket.<span class="title function_">on</span>(<span class="string">&#x27;startResponse&#x27;</span>, <span class="function">(<span class="params">&#123; sdpAnswer &#125;</span>) =&gt;</span> &#123;</span><br><span class="line">      <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&#x27;SDP answer received from server. Processing ...&#x27;</span>)</span><br><span class="line">      webRtcPeer.<span class="title function_">processAnswer</span>(sdpAnswer)</span><br><span class="line">    &#125;)</span><br><span class="line">    socket.<span class="title function_">on</span>(<span class="string">&#x27;iceCandidate&#x27;</span>, <span class="function">(<span class="params">&#123; candidate &#125;</span>) =&gt;</span> &#123;</span><br><span class="line">      <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&#x27;iceCandidate&#x27;</span>, candidate)</span><br><span class="line">      webRtcPeer.<span class="title function_">addIceCandidate</span>(candidate)</span><br><span class="line">    &#125;)</span><br><span class="line">    socket.<span class="title function_">on</span>(<span class="string">&#x27;presentorgone&#x27;</span>, <span class="function"><span class="params">_</span> =&gt;</span> &#123;</span><br><span class="line">      <span class="variable language_">this</span>.<span class="property">videoDom</span>.<span class="title function_">pause</span>()</span><br><span class="line">      <span class="variable language_">this</span>.<span class="property">videoDom</span>.<span class="property">srcObject</span> = <span class="literal">null</span></span><br><span class="line">      <span class="variable language_">this</span>.<span class="property">videoDom</span>.<span class="title function_">load</span>()</span><br><span class="line">      <span class="variable language_">this</span>.<span class="title function_">emit</span>(<span class="string">&#x27;presentorgone&#x27;</span>)</span><br><span class="line">      <span class="variable language_">this</span>.<span class="property">socket</span>.<span class="title function_">close</span>()</span><br><span class="line">      <span class="variable language_">this</span>.<span class="title function_">emit</span>(<span class="string">&#x27;stop&#x27;</span>)</span><br><span class="line">    &#125;)</span><br><span class="line">    <span class="variable language_">console</span>.<span class="title function_">log</span>(webRtcPeer)</span><br><span class="line">  &#125;</span><br><span class="line">  start = <span class="function">() =&gt;</span> &#123;</span><br><span class="line">    <span class="keyword">const</span> options = &#123;</span><br><span class="line">      <span class="attr">remoteVideo</span>: <span class="variable language_">this</span>.<span class="property">videoDom</span>,</span><br><span class="line">      <span class="attr">onicecandidate</span>: <span class="variable language_">this</span>.<span class="property">onIceCandidate</span>,</span><br><span class="line">      <span class="attr">configuration</span>: &#123;</span><br><span class="line">        iceServers</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">Promise</span>(<span class="function">(<span class="params">resolve, reject</span>) =&gt;</span> &#123;</span><br><span class="line">      <span class="variable language_">this</span>.<span class="property">webRtcPeer</span> = kurentoUtils.<span class="property">WebRtcPeer</span>.<span class="title class_">WebRtcPeerRecvonly</span>(options, <span class="function"><span class="params">error</span> =&gt;</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (error) <span class="keyword">return</span> <span class="title function_">reject</span>(error)</span><br><span class="line">        <span class="title function_">resolve</span>()</span><br><span class="line">      &#125;)</span><br><span class="line">    &#125;).<span class="title function_">then</span>(<span class="function"><span class="params">_</span> =&gt;</span> &#123;</span><br><span class="line">      <span class="variable language_">this</span>.<span class="title function_">bindEvent</span>()</span><br><span class="line">      <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">Promise</span>(<span class="function">(<span class="params">resolve, reject</span>) =&gt;</span> <span class="variable language_">this</span>.<span class="property">webRtcPeer</span>.<span class="title function_">generateOffer</span>(<span class="function">(<span class="params">error, sdp</span>) =&gt;</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (error) <span class="keyword">return</span> <span class="title function_">reject</span>(error)</span><br><span class="line">        <span class="title function_">resolve</span>(sdp)</span><br><span class="line">      &#125;))</span><br><span class="line">    &#125;).<span class="title function_">then</span>(<span class="function"><span class="params">sdp</span> =&gt;</span> &#123;</span><br><span class="line">      <span class="variable language_">console</span>.<span class="title function_">info</span>(<span class="string">&#x27;Invoking SDP offer callback function &#x27;</span> + location.<span class="property">host</span>)</span><br><span class="line">      <span class="variable language_">this</span>.<span class="property">socket</span>.<span class="title function_">emit</span>(<span class="string">&#x27;createViewer&#x27;</span>, &#123;</span><br><span class="line">        <span class="attr">sdpOffer</span>: sdp</span><br><span class="line">      &#125;)</span><br><span class="line">    &#125;)</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  stop = <span class="function">() =&gt;</span> &#123;</span><br><span class="line">    <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&#x27;Stopping viewer ...&#x27;</span>)</span><br><span class="line">    <span class="keyword">if</span> (<span class="variable language_">this</span>.<span class="property">webRtcPeer</span>) &#123;</span><br><span class="line">      <span class="variable language_">this</span>.<span class="property">webRtcPeer</span>.<span class="title function_">dispose</span>()</span><br><span class="line">      <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&#x27;dispose&#x27;</span>)</span><br><span class="line">      <span class="variable language_">this</span>.<span class="property">webRtcPeer</span> = <span class="literal">null</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="variable language_">this</span>.<span class="property">socket</span>.<span class="title function_">emit</span>(<span class="string">&#x27;stop&#x27;</span>)</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  onIceCandidate = <span class="function"><span class="params">candidate</span> =&gt;</span> &#123;</span><br><span class="line">    <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&#x27;Local candidate&#x27;</span> + <span class="title class_">JSON</span>.<span class="title function_">stringify</span>(candidate))</span><br><span class="line"></span><br><span class="line">    <span class="variable language_">this</span>.<span class="property">socket</span>.<span class="title function_">emit</span>(<span class="string">&#x27;onIceCandidate&#x27;</span>, &#123; candidate &#125;)</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  emit (name, ...args) &#123;</span><br><span class="line">    <span class="keyword">if</span> (!<span class="title class_">Object</span>.<span class="title function_">keys</span>(<span class="variable language_">this</span>.<span class="property">events</span>).<span class="title function_">includes</span>(name)) <span class="keyword">return</span></span><br><span class="line">    <span class="keyword">const</span> cbs = <span class="variable language_">this</span>.<span class="property">events</span>[name]</span><br><span class="line">    <span class="keyword">return</span> cbs.<span class="title function_">map</span>(<span class="function"><span class="params">func</span> =&gt;</span> <span class="title function_">func</span>(...args))</span><br><span class="line">  &#125;</span><br><span class="line">  on (name, cb) &#123;</span><br><span class="line">    <span class="keyword">if</span> (!<span class="title class_">Object</span>.<span class="title function_">keys</span>(<span class="variable language_">this</span>.<span class="property">events</span>).<span class="title function_">includes</span>(name)) <span class="keyword">return</span></span><br><span class="line">    <span class="keyword">const</span> cbs = <span class="variable language_">this</span>.<span class="property">events</span>[name]</span><br><span class="line">    <span class="keyword">if</span> (cbs.<span class="title function_">includes</span>(cb)) <span class="keyword">return</span></span><br><span class="line">    cbs.<span class="title function_">push</span>(cb)</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> <span class="title class_">Viewer</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// Viewer.vue</span></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> &#123;</span><br><span class="line">  ...</span><br><span class="line">  <span class="attr">methods</span>: &#123;</span><br><span class="line">    start () &#123;</span><br><span class="line">      <span class="variable language_">this</span>.<span class="property">status</span> = <span class="string">&#x27;starting&#x27;</span></span><br><span class="line">      viewer = <span class="keyword">new</span> <span class="title class_">Viewer</span>(<span class="variable language_">this</span>.<span class="property">$refs</span>.<span class="property">video</span>, <span class="variable language_">this</span>.<span class="property">$route</span>.<span class="property">params</span>.<span class="property">liveId</span>)</span><br><span class="line">      <span class="variable language_">console</span>.<span class="title function_">log</span>(viewer)</span><br><span class="line">      viewer.<span class="title function_">on</span>(<span class="string">&#x27;start&#x27;</span>, <span class="function">() =&gt;</span> &#123;</span><br><span class="line">        <span class="variable language_">this</span>.<span class="property">status</span> = <span class="string">&#x27;living&#x27;</span></span><br><span class="line">      &#125;)</span><br><span class="line">      viewer.<span class="title function_">start</span>()</span><br><span class="line">    &#125;,</span><br><span class="line">    ...</span><br><span class="line">  &#125;</span><br><span class="line">  ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="服务端的逻辑"><a href="#服务端的逻辑" class="headerlink" title="服务端的逻辑"></a>服务端的逻辑</h3><p>服务端使用 <code>nodejs + express + socket.io + kurento-utils-js + mysql + sequlize + redis</code> 来构建。其中 <code>mysql</code>、<code>sequelize</code> 和 <code>redis</code> 用来存储数据和管理用户登录状态，不再细叙这部分的逻辑，根据直播端和观众端的逻辑。相关的部分代码具体如下：</p>
+<figure class="highlight js"><table><tr><td class="code"><pre><span class="line"><span class="keyword">const</span> <span class="title class_">KurentoClient</span> = <span class="built_in">require</span>(<span class="string">&#x27;kurento-client&#x27;</span>)</span><br><span class="line"><span class="keyword">const</span> http = <span class="built_in">require</span>(<span class="string">&#x27;http&#x27;</span>)</span><br><span class="line"><span class="keyword">const</span> socketIO = <span class="built_in">require</span>(<span class="string">&#x27;socket.io&#x27;</span>)</span><br><span class="line"><span class="keyword">const</span> util = <span class="built_in">require</span>(<span class="string">&#x27;util&#x27;</span>)</span><br><span class="line"><span class="keyword">const</span> &#123; <span class="attr">kurentoClient</span>: client, presentors, userSocketMap, viewers &#125; = <span class="built_in">require</span>(<span class="string">&#x27;../global&#x27;</span>)</span><br><span class="line"><span class="keyword">const</span> <span class="title class_">Video</span> = <span class="built_in">require</span>(<span class="string">&#x27;../models&#x27;</span>).<span class="property">Video</span></span><br><span class="line"><span class="keyword">const</span> config = <span class="built_in">require</span>(<span class="string">&#x27;../config&#x27;</span>)()</span><br><span class="line"><span class="keyword">const</span> &#123; getUserByToken, checkUserOnline, formatTime &#125; = <span class="built_in">require</span>(<span class="string">&#x27;../utils&#x27;</span>)</span><br><span class="line"><span class="keyword">const</span> moment = <span class="built_in">require</span>(<span class="string">&#x27;moment&#x27;</span>)</span><br><span class="line"><span class="keyword">const</span> candidatesQueue = &#123;&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment"> * Management of WebSocket messages</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">const</span> <span class="title function_">bindEvent</span> = io =&gt; &#123;</span><br><span class="line">  io.<span class="title function_">on</span>(<span class="string">&#x27;connection&#x27;</span>, <span class="keyword">async</span> <span class="keyword">function</span> (<span class="params">socket</span>) &#123;</span><br><span class="line">    <span class="keyword">var</span> sessionId = socket.<span class="property">id</span></span><br><span class="line">    <span class="keyword">var</span> request = socket.<span class="property">request</span></span><br><span class="line">    <span class="keyword">const</span> self = <span class="keyword">await</span> <span class="title function_">getUserByToken</span>(socket.<span class="property">handshake</span>.<span class="property">query</span>.<span class="property">token</span>).<span class="title function_">catch</span>(<span class="function"><span class="params">err</span> =&gt;</span> &#123;</span><br><span class="line">      socket.<span class="title function_">emit</span>(<span class="string">&#x27;autherror&#x27;</span>)</span><br><span class="line">      socket.<span class="title function_">disconnect</span>(<span class="literal">true</span>)</span><br><span class="line">      <span class="keyword">throw</span> err</span><br><span class="line">    &#125;)</span><br><span class="line">    <span class="keyword">const</span> presentorId = socket.<span class="property">handshake</span>.<span class="property">query</span>.<span class="property">presentorId</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">const</span> ip = request.<span class="property">headers</span>[<span class="string">&#x27;x-real-ip&#x27;</span>] || request.<span class="property">socket</span>.<span class="property">remoteAddress</span></span><br><span class="line">    <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&#x27;request ip:&#x27;</span>, ip)</span><br><span class="line">    <span class="keyword">const</span> getLocationPromise = <span class="keyword">new</span> <span class="title class_">Promise</span>(<span class="function"><span class="params">resolve</span> =&gt;</span> http.<span class="title function_">get</span>(<span class="string">`http://ip-api.com/json/<span class="subst">$&#123;ip&#125;</span>?lang=zh-CN`</span>, resolve)).<span class="title function_">then</span>(<span class="function"><span class="params">res</span> =&gt;</span> &#123;</span><br><span class="line">      <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">Promise</span>(<span class="function"><span class="params">resolve</span> =&gt;</span> &#123;</span><br><span class="line">        <span class="keyword">let</span> data = <span class="string">&#x27;&#x27;</span></span><br><span class="line">        res.<span class="title function_">on</span>(<span class="string">&#x27;data&#x27;</span>, <span class="function"><span class="params">chunk</span> =&gt;</span> &#123;</span><br><span class="line">          data += chunk</span><br><span class="line">          <span class="keyword">return</span> data</span><br><span class="line">        &#125;)</span><br><span class="line">        res.<span class="title function_">on</span>(<span class="string">&#x27;end&#x27;</span>, <span class="function">() =&gt;</span> &#123;</span><br><span class="line">          <span class="title function_">resolve</span>(data)</span><br><span class="line">        &#125;)</span><br><span class="line">      &#125;)</span><br><span class="line">    &#125;).<span class="title function_">then</span>(<span class="function"><span class="params">data</span> =&gt;</span> &#123;</span><br><span class="line">      <span class="keyword">const</span> &#123; status, country, regionName, city &#125; = <span class="title class_">JSON</span>.<span class="title function_">parse</span>(data)</span><br><span class="line">      <span class="keyword">if</span> (status !== <span class="string">&#x27;success&#x27;</span>) <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">Error</span>(data)</span><br><span class="line">      <span class="variable language_">console</span>.<span class="title function_">log</span>(regionName + country + city)</span><br><span class="line">      <span class="keyword">return</span> <span class="string">`<span class="subst">$&#123;regionName&#125;</span><span class="subst">$&#123;country&#125;</span><span class="subst">$&#123;city&#125;</span>`</span></span><br><span class="line">    &#125;).<span class="title function_">catch</span>(<span class="function"><span class="params">_</span> =&gt;</span> &#123;</span><br><span class="line">      <span class="comment">// console.log(&#x27;get location error&#x27;, err)</span></span><br><span class="line">      <span class="keyword">return</span> <span class="string">&#x27;unknown&#x27;</span></span><br><span class="line">    &#125;)</span><br><span class="line">    <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">`socket <span class="subst">$&#123;sessionId&#125;</span> connected`</span>)</span><br><span class="line"></span><br><span class="line">    socket.<span class="title function_">on</span>(<span class="string">&#x27;error&#x27;</span>, <span class="function"><span class="params">_</span> =&gt;</span> &#123;</span><br><span class="line">      <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&#x27;Connection &#x27;</span> + sessionId + <span class="string">&#x27; error&#x27;</span>, _)</span><br><span class="line">      !presentorId &amp;&amp; <span class="title function_">stopPresentor</span>(sessionId)</span><br><span class="line">      presentorId &amp;&amp; <span class="title function_">stopViewer</span>()</span><br><span class="line">    &#125;)</span><br><span class="line"></span><br><span class="line">    socket.<span class="title function_">on</span>(<span class="string">&#x27;close&#x27;</span>, <span class="keyword">function</span> (<span class="params"></span>) &#123;</span><br><span class="line">      <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&#x27;Connection &#x27;</span> + sessionId + <span class="string">&#x27; closed&#x27;</span>)</span><br><span class="line">      !presentorId &amp;&amp; <span class="title function_">stopPresentor</span>(sessionId)</span><br><span class="line">      presentorId &amp;&amp; <span class="title function_">stopViewer</span>()</span><br><span class="line">    &#125;)</span><br><span class="line">    socket.<span class="title function_">on</span>(<span class="string">&#x27;createPresentor&#x27;</span>, <span class="function">(<span class="params">&#123; sdpOffer, invite &#125;</span>) =&gt;</span> &#123;</span><br><span class="line">      <span class="title function_">createPresentor</span>(socket, sdpOffer, getLocationPromise).<span class="title function_">then</span>(<span class="function"><span class="params">sdpAnswer</span> =&gt;</span> &#123;</span><br><span class="line">        socket.<span class="title function_">emit</span>(<span class="string">&#x27;startResponse&#x27;</span>, &#123; sdpAnswer &#125;)</span><br><span class="line">        invite &amp;&amp; <span class="title function_">inviteViewer</span>(self, invite, socket.<span class="property">id</span>)</span><br><span class="line">      &#125;).<span class="title function_">catch</span>(<span class="function"><span class="params">error</span> =&gt;</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> socket.<span class="title function_">emit</span>(<span class="string">&#x27;error&#x27;</span>, &#123; <span class="attr">message</span>: error.<span class="property">message</span> &#125;)</span><br><span class="line">      &#125;)</span><br><span class="line">    &#125;)</span><br><span class="line"></span><br><span class="line">    socket.<span class="title function_">on</span>(<span class="string">&#x27;createViewer&#x27;</span>, <span class="function"><span class="params">message</span> =&gt;</span> &#123;</span><br><span class="line">      sessionId = socket.<span class="property">id</span></span><br><span class="line">      <span class="title function_">createViewer</span>(presentorId, sessionId, socket, message.<span class="property">sdpOffer</span>).<span class="title function_">then</span>(<span class="function"><span class="params">viewer</span> =&gt;</span> &#123;</span><br><span class="line">        <span class="comment">// console.log(viewer)</span></span><br><span class="line">        <span class="keyword">const</span> roomid = viewer.<span class="property">presentor</span>.<span class="property">socket</span>.<span class="property">id</span></span><br><span class="line">        viewer.<span class="property">socket</span>.<span class="title function_">join</span>(roomid, <span class="function">() =&gt;</span> &#123;</span><br><span class="line">          socket.<span class="title function_">to</span>(roomid).<span class="title function_">emit</span>(<span class="string">&#x27;message&#x27;</span>, &#123;</span><br><span class="line">            <span class="attr">type</span>: <span class="string">&#x27;viewer-entry&#x27;</span>,</span><br><span class="line">            <span class="attr">time</span>: <span class="title function_">moment</span>(<span class="keyword">new</span> <span class="title class_">Date</span>()).<span class="title function_">format</span>(<span class="string">&#x27;HH:mm:ss&#x27;</span>),</span><br><span class="line">            <span class="attr">from</span>: &#123;</span><br><span class="line">              <span class="attr">nickname</span>: self.<span class="property">nickname</span>,</span><br><span class="line">              <span class="attr">avatar</span>: self.<span class="property">avatar</span></span><br><span class="line">            &#125;</span><br><span class="line">          &#125;)</span><br><span class="line">        &#125;)</span><br><span class="line">      &#125;).<span class="title function_">catch</span>(<span class="function"><span class="params">err</span> =&gt;</span> &#123;</span><br><span class="line">        <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">`create viewer for <span class="subst">$&#123;presentorId&#125;</span> error`</span>, err)</span><br><span class="line">      &#125;)</span><br><span class="line">    &#125;)</span><br><span class="line"></span><br><span class="line">    socket.<span class="title function_">on</span>(<span class="string">&#x27;online&#x27;</span>, <span class="function"><span class="params">_</span> =&gt;</span> &#123;</span><br><span class="line">      <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">`<span class="subst">$&#123;self.nickname&#125;</span> online`</span>)</span><br><span class="line">      userSocketMap[self.<span class="property">nickname</span>] = socket</span><br><span class="line">    &#125;)</span><br><span class="line">    socket.<span class="title function_">on</span>(<span class="string">&#x27;offline&#x27;</span>, <span class="function"><span class="params">_</span> =&gt;</span> &#123;</span><br><span class="line">      <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">`<span class="subst">$&#123;self.nickname&#125;</span> offline`</span>)</span><br><span class="line">      userSocketMap[self.<span class="property">nickname</span>] = <span class="literal">null</span></span><br><span class="line">    &#125;)</span><br><span class="line">    <span class="comment">// 接听对话, from：接听来自from的对话</span></span><br><span class="line">    socket.<span class="title function_">on</span>(<span class="string">&#x27;acceptcall&#x27;</span>, <span class="function">(<span class="params">&#123; <span class="keyword">from</span> &#125;</span>) =&gt;</span> &#123;</span><br><span class="line">      <span class="keyword">const</span> &#123; nickname &#125; = <span class="keyword">from</span></span><br><span class="line">      <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&#x27;acceptcall socket id&#x27;</span>, socket.<span class="property">id</span>)</span><br><span class="line">      <span class="keyword">const</span> friendSocket = userSocketMap[nickname]</span><br><span class="line">      friendSocket.<span class="title function_">emit</span>(<span class="string">&#x27;callaccepted&#x27;</span>, &#123; <span class="attr">to</span>: self, <span class="attr">linkId</span>: socket.<span class="property">id</span> &#125;)</span><br><span class="line">    &#125;)</span><br><span class="line">    <span class="comment">// 拒绝接听</span></span><br><span class="line">    socket.<span class="title function_">on</span>(<span class="string">&#x27;rejectcall&#x27;</span>, <span class="function">(<span class="params">&#123; <span class="keyword">from</span> &#125;</span>) =&gt;</span> &#123;</span><br><span class="line">      <span class="keyword">const</span> friendSocket = userSocketMap[<span class="keyword">from</span>.<span class="property">nickname</span>]</span><br><span class="line">      friendSocket.<span class="title function_">emit</span>(<span class="string">&#x27;callrejected&#x27;</span>, &#123; <span class="attr">to</span>: self &#125;)</span><br><span class="line">    &#125;)</span><br><span class="line"></span><br><span class="line">    socket.<span class="title function_">on</span>(<span class="string">&#x27;stopPresentor&#x27;</span>, <span class="function"><span class="params">message</span> =&gt;</span> &#123;</span><br><span class="line">      <span class="title function_">stopPresentor</span>(sessionId, getLocationPromise)</span><br><span class="line">    &#125;)</span><br><span class="line"></span><br><span class="line">    socket.<span class="title function_">on</span>(<span class="string">&#x27;stopViewer&#x27;</span>, <span class="function"><span class="params">_</span> =&gt;</span> &#123;</span><br><span class="line">      <span class="title function_">stopViewer</span>(socket, self)</span><br><span class="line">    &#125;)</span><br><span class="line"></span><br><span class="line">    socket.<span class="title function_">on</span>(<span class="string">&#x27;onIceCandidate&#x27;</span>, <span class="function"><span class="params">message</span> =&gt;</span> &#123;</span><br><span class="line">      <span class="title function_">onIceCandidate</span>(sessionId, message.<span class="property">candidate</span>, presentorId)</span><br><span class="line">    &#125;)</span><br><span class="line"></span><br><span class="line">    socket.<span class="title function_">on</span>(<span class="string">&#x27;inviteViewer&#x27;</span>, <span class="function">(<span class="params">&#123; nickname &#125;</span>) =&gt;</span> &#123;</span><br><span class="line">      userSocketMap[nickname].<span class="title function_">emit</span>(<span class="string">&#x27;call&#x27;</span>, &#123; <span class="attr">from</span>: self &#125;)</span><br><span class="line">    &#125;)</span><br><span class="line">  &#125;)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment"> * Definition of functions</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">createPresentor</span> (socket, sdpOffer, getLocationPromise) &#123;</span><br><span class="line">  <span class="keyword">const</span> sessionId = socket.<span class="property">id</span></span><br><span class="line">  <span class="keyword">if</span> (!sessionId) &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="title class_">Promise</span>.<span class="title function_">reject</span>(<span class="keyword">new</span> <span class="title class_">Error</span>(<span class="string">&#x27;Cannot use undefined sessionId&#x27;</span>))</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">`create presentor <span class="subst">$&#123;sessionId&#125;</span>`</span>)</span><br><span class="line">  <span class="keyword">return</span> <span class="title class_">Promise</span>.<span class="title function_">all</span>([</span><br><span class="line">    util.<span class="title function_">promisify</span>(client.<span class="property">create</span>)(<span class="string">&#x27;MediaPipeline&#x27;</span>),</span><br><span class="line">    getLocationPromise</span><br><span class="line">  ]).<span class="title function_">then</span>(<span class="function">(<span class="params">[ pipeline, location ]</span>) =&gt;</span> &#123;</span><br><span class="line">    <span class="keyword">const</span> &#123; mediaProfile, path &#125; = config.<span class="property">recordOptions</span></span><br><span class="line">    <span class="keyword">const</span> fileName = <span class="string">`<span class="subst">$&#123;formatTime(<span class="keyword">new</span> <span class="built_in">Date</span>())&#125;</span>.mp4`</span></span><br><span class="line">    <span class="keyword">const</span> uri = <span class="string">`<span class="subst">$&#123;path&#125;</span>/<span class="subst">$&#123;fileName&#125;</span>`</span></span><br><span class="line">    <span class="keyword">const</span> recordOptions = &#123;</span><br><span class="line">      mediaProfile,</span><br><span class="line">      uri</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="title class_">Promise</span>.<span class="title function_">all</span>([</span><br><span class="line">      util.<span class="title function_">promisify</span>(pipeline.<span class="property">create</span>)(<span class="string">&#x27;WebRtcEndpoint&#x27;</span>),</span><br><span class="line">      util.<span class="title function_">promisify</span>(pipeline.<span class="property">create</span>)(<span class="string">&#x27;RecorderEndpoint&#x27;</span>, recordOptions)</span><br><span class="line">    ]).<span class="title function_">then</span>(<span class="function">(<span class="params">[ webRtcEndpoint, recorderEndpoint ]</span>) =&gt;</span> &#123;</span><br><span class="line">      webRtcEndpoint.<span class="title function_">on</span>(<span class="string">&#x27;OnIceCandidate&#x27;</span>, <span class="keyword">function</span> (<span class="params">event</span>) &#123;</span><br><span class="line">        <span class="keyword">const</span> candidate = <span class="title class_">KurentoClient</span>.<span class="title function_">getComplexType</span>(<span class="string">&#x27;IceCandidate&#x27;</span>)(event.<span class="property">candidate</span>)</span><br><span class="line">        socket.<span class="title function_">emit</span>(<span class="string">&#x27;iceCandidate&#x27;</span>, &#123; candidate &#125;)</span><br><span class="line">      &#125;)</span><br><span class="line">      recorderEndpoint.<span class="title function_">on</span>(<span class="string">&#x27;Recording&#x27;</span>, <span class="keyword">function</span> (<span class="params">error</span>) &#123;</span><br><span class="line">        <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&#x27;recording&#x27;</span>, error)</span><br><span class="line">        presentors[sessionId].<span class="property">startTime</span> = <span class="title class_">Math</span>.<span class="title function_">round</span>(<span class="title class_">Date</span>.<span class="title function_">now</span>() / <span class="number">1000</span>)</span><br><span class="line">        presentors[sessionId].<span class="property">recorderPath</span> = recordOptions.<span class="property">uri</span></span><br><span class="line">      &#125;)</span><br><span class="line">      recorderEndpoint.<span class="title function_">on</span>(<span class="string">&#x27;Stopped&#x27;</span>, <span class="function"><span class="params">err</span> =&gt;</span> &#123;</span><br><span class="line">        <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&#x27;record stoped&#x27;</span>, err)</span><br><span class="line">        <span class="keyword">const</span> endTime = <span class="title class_">Math</span>.<span class="title function_">round</span>(<span class="title class_">Date</span>.<span class="title function_">now</span>() / <span class="number">1000</span>)</span><br><span class="line">        <span class="keyword">const</span> &#123; startTime &#125; = presentors[sessionId]</span><br><span class="line">        <span class="keyword">if</span> (!startTime || endTime - startTime &lt; <span class="number">1</span>) &#123;</span><br><span class="line">          <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&#x27;record time to short&#x27;</span>)</span><br><span class="line">          <span class="keyword">return</span></span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 数据存储到数据库中</span></span><br><span class="line">        getLocationPromise.<span class="title function_">then</span>(<span class="keyword">async</span> location =&gt; &#123;</span><br><span class="line">          <span class="title class_">Video</span>.<span class="title function_">create</span>(&#123;</span><br><span class="line">            location,</span><br><span class="line">            <span class="attr">uri</span>: <span class="keyword">await</span> recorderEndpoint.<span class="title function_">getUri</span>(),</span><br><span class="line">            <span class="attr">comments</span>: <span class="string">&#x27;&#x27;</span>,</span><br><span class="line">            <span class="attr">duration</span>: endTime - startTime</span><br><span class="line">          &#125;).<span class="title function_">then</span>(<span class="function"><span class="params">tableRow</span> =&gt;</span> &#123;</span><br><span class="line">            <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&#x27;video save to database success&#x27;</span>, tableRow)</span><br><span class="line">            <span class="keyword">return</span> tableRow.<span class="property">id</span></span><br><span class="line">          &#125;)</span><br><span class="line">        &#125;)</span><br><span class="line">      &#125;)</span><br><span class="line">      <span class="keyword">if</span> (candidatesQueue[sessionId]) &#123;</span><br><span class="line">        <span class="keyword">while</span> (candidatesQueue[sessionId].<span class="property">length</span>) &#123;</span><br><span class="line">          <span class="keyword">const</span> candidate = candidatesQueue[sessionId].<span class="title function_">shift</span>()</span><br><span class="line">          webRtcEndpoint.<span class="title function_">addIceCandidate</span>(candidate)</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">return</span> <span class="title class_">Promise</span>.<span class="title function_">all</span>([</span><br><span class="line">        webRtcEndpoint.<span class="title function_">connect</span>(recorderEndpoint),</span><br><span class="line">        <span class="comment">// 本地使用远程获取的视频流，可以实时观察到视频质量</span></span><br><span class="line">        webRtcEndpoint.<span class="title function_">connect</span>(webRtcEndpoint)</span><br><span class="line">      ]).<span class="title function_">then</span>(<span class="function"><span class="params">_</span> =&gt;</span> &#123;</span><br><span class="line">        recorderEndpoint.<span class="title function_">record</span>(<span class="keyword">function</span> (<span class="params">error</span>) &#123;</span><br><span class="line">          <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&#x27;record start&#x27;</span>, error)</span><br><span class="line">        &#125;)</span><br><span class="line">        <span class="keyword">return</span> webRtcEndpoint.<span class="title function_">processOffer</span>(sdpOffer)</span><br><span class="line">      &#125;).<span class="title function_">then</span>(<span class="keyword">async</span> sdpAnswer =&gt; &#123;</span><br><span class="line">        webRtcEndpoint.<span class="title function_">gatherCandidates</span>(<span class="keyword">function</span> (<span class="params">error</span>) &#123;</span><br><span class="line">          <span class="keyword">if</span> (error) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="title class_">Promise</span>.<span class="title function_">reject</span>(error)</span><br><span class="line">          &#125;</span><br><span class="line">        &#125;)</span><br><span class="line">        presentors[sessionId] = &#123;</span><br><span class="line">          <span class="attr">pipeline</span>: pipeline,</span><br><span class="line">          <span class="attr">webRtcEndpoint</span>: webRtcEndpoint,</span><br><span class="line">          <span class="attr">recorderEndpoint</span>: recorderEndpoint,</span><br><span class="line">          <span class="attr">socket</span>: socket,</span><br><span class="line">          <span class="attr">viewers</span>: &#123;&#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> sdpAnswer</span><br><span class="line">      &#125;)</span><br><span class="line">    &#125;)</span><br><span class="line">  &#125;)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">inviteViewer</span> (inviter, nickname, linkId) &#123;</span><br><span class="line">  <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&#x27;invite&#x27;</span>, nickname)</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> <span class="title function_">checkUserOnline</span>(nickname).<span class="title function_">then</span>(<span class="function"><span class="params">_</span> =&gt;</span> &#123;</span><br><span class="line">    userSocketMap[nickname].<span class="title function_">emit</span>(<span class="string">&#x27;call&#x27;</span>, &#123; <span class="attr">from</span>: inviter, linkId &#125;)</span><br><span class="line">  &#125;).<span class="title function_">catch</span>(<span class="function"><span class="params">error</span> =&gt;</span> &#123;</span><br><span class="line">    <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&#x27;invite error&#x27;</span>, error.<span class="property">message</span>)</span><br><span class="line">    userSocketMap[inviter.<span class="property">nickname</span>].<span class="title function_">emit</span>(<span class="string">&#x27;callerror&#x27;</span>, &#123; <span class="attr">message</span>: error.<span class="property">message</span> &#125;)</span><br><span class="line">  &#125;)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">createViewer</span> (presentorId, sessionId, socket, sdpOffer) &#123;</span><br><span class="line">  <span class="comment">// clearCandidatesQueue(sessionId)</span></span><br><span class="line">  <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">`create viewer for presentor <span class="subst">$&#123;presentorId&#125;</span> start`</span>)</span><br><span class="line">  <span class="keyword">if</span> (!presentors[presentorId]) <span class="keyword">return</span> <span class="title class_">Promise</span>.<span class="title function_">reject</span>(<span class="keyword">new</span> <span class="title class_">Error</span>(<span class="string">&#x27;no presentor&#x27;</span>))</span><br><span class="line">  <span class="keyword">const</span> &#123; pipeline, <span class="attr">webRtcEndpoint</span>: presentor, <span class="attr">viewers</span>: presentorViewers &#125; = presentors[presentorId]</span><br><span class="line">  <span class="keyword">if</span> (!pipeline) <span class="keyword">return</span> <span class="title class_">Promise</span>.<span class="title function_">reject</span>(<span class="keyword">new</span> <span class="title class_">Error</span>(<span class="string">&#x27;no presentor&#x27;</span>))</span><br><span class="line">  <span class="keyword">return</span> util.<span class="title function_">promisify</span>(pipeline.<span class="property">create</span>)(<span class="string">&#x27;WebRtcEndpoint&#x27;</span>).<span class="title function_">then</span>(<span class="function"><span class="params">webRtcEndpoint</span> =&gt;</span> &#123;</span><br><span class="line">    <span class="keyword">if</span> (candidatesQueue[sessionId]) &#123;</span><br><span class="line">      <span class="keyword">while</span> (candidatesQueue[sessionId].<span class="property">length</span>) &#123;</span><br><span class="line">        <span class="keyword">var</span> candidate = candidatesQueue[sessionId].<span class="title function_">shift</span>()</span><br><span class="line">        webRtcEndpoint.<span class="title function_">addIceCandidate</span>(candidate)</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    webRtcEndpoint.<span class="title function_">on</span>(<span class="string">&#x27;OnIceCandidate&#x27;</span>, <span class="keyword">function</span> (<span class="params">event</span>) &#123;</span><br><span class="line">      <span class="keyword">var</span> candidate = <span class="title class_">KurentoClient</span>.<span class="title function_">getComplexType</span>(<span class="string">&#x27;IceCandidate&#x27;</span>)(event.<span class="property">candidate</span>)</span><br><span class="line">      socket.<span class="title function_">emit</span>(<span class="string">&#x27;iceCandidate&#x27;</span>, &#123; candidate &#125;)</span><br><span class="line">    &#125;)</span><br><span class="line">    viewers[sessionId] = presentorViewers[sessionId] = &#123;</span><br><span class="line">      <span class="attr">webRtcEndpoint</span>: webRtcEndpoint,</span><br><span class="line">      <span class="attr">socket</span>: socket,</span><br><span class="line">      <span class="attr">presentor</span>: presentors[presentorId]</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> webRtcEndpoint</span><br><span class="line">  &#125;).<span class="title function_">then</span>(<span class="function"><span class="params">webRtcEndpoint</span> =&gt;</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> presentor.<span class="title function_">connect</span>(webRtcEndpoint).<span class="title function_">then</span>(<span class="function"><span class="params">_</span> =&gt;</span> &#123;</span><br><span class="line">      <span class="keyword">return</span> webRtcEndpoint.<span class="title function_">processOffer</span>(sdpOffer)</span><br><span class="line">    &#125;).<span class="title function_">then</span>(<span class="function"><span class="params">sdpAnswer</span> =&gt;</span> &#123;</span><br><span class="line">      socket.<span class="title function_">emit</span>(<span class="string">&#x27;startResponse&#x27;</span>, &#123; sdpAnswer &#125;)</span><br><span class="line">      <span class="keyword">return</span> webRtcEndpoint.<span class="title function_">gatherCandidates</span>()</span><br><span class="line">    &#125;).<span class="title function_">then</span>(<span class="function"><span class="params">_</span> =&gt;</span> &#123;</span><br><span class="line">      <span class="keyword">return</span> viewers[sessionId]</span><br><span class="line">    &#125;)</span><br><span class="line">  &#125;)</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">async</span> <span class="keyword">function</span> <span class="title function_">stopPresentor</span> (sessionId, getLocationPromise) &#123;</span><br><span class="line">  <span class="keyword">if</span> (presentors[sessionId]) &#123;</span><br><span class="line">    <span class="keyword">const</span> &#123; recorderEndpoint, pipeline, viewers, startTime, recorderPath &#125; = presentors[sessionId]</span><br><span class="line">    recorderEndpoint.<span class="title function_">stop</span>(<span class="keyword">function</span> (<span class="params">error</span>) &#123;</span><br><span class="line">      <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&#x27;stop record&#x27;</span>, error)</span><br><span class="line">      <span class="keyword">const</span> endTime = <span class="title class_">Math</span>.<span class="title function_">round</span>(<span class="title class_">Date</span>.<span class="title function_">now</span>() / <span class="number">1000</span>)</span><br><span class="line">      <span class="keyword">if</span> (!startTime || endTime - startTime &lt; <span class="number">1</span>) &#123;</span><br><span class="line">        <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&#x27;record time to short&#x27;</span>)</span><br><span class="line">        <span class="keyword">return</span></span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      <span class="comment">// 数据存储到数据库中</span></span><br><span class="line">      getLocationPromise.<span class="title function_">then</span>(<span class="keyword">async</span> location =&gt; &#123;</span><br><span class="line">        <span class="title class_">Video</span>.<span class="title function_">create</span>(&#123;</span><br><span class="line">          location,</span><br><span class="line">          <span class="attr">uri</span>: recorderPath,</span><br><span class="line">          <span class="attr">comments</span>: <span class="string">&#x27;&#x27;</span>,</span><br><span class="line">          <span class="attr">duration</span>: endTime - startTime</span><br><span class="line">        &#125;).<span class="title function_">then</span>(<span class="function"><span class="params">tableRow</span> =&gt;</span> &#123;</span><br><span class="line">          <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&#x27;video save to database success&#x27;</span>, tableRow.<span class="property">id</span>)</span><br><span class="line">          <span class="keyword">return</span> tableRow.<span class="property">id</span></span><br><span class="line">        &#125;)</span><br><span class="line">      &#125;)</span><br><span class="line">    &#125;)</span><br><span class="line">    <span class="variable language_">console</span>.<span class="title function_">info</span>(<span class="string">&#x27;Releasing pipeline&#x27;</span>)</span><br><span class="line">    pipeline.<span class="title function_">release</span>()</span><br><span class="line">    <span class="title class_">Object</span>.<span class="title function_">values</span>(viewers).<span class="title function_">forEach</span>(<span class="function"><span class="params">viewer</span> =&gt;</span> &#123;</span><br><span class="line">      viewer.<span class="property">socket</span>.<span class="title function_">emit</span>(<span class="string">&#x27;presentorgone&#x27;</span>)</span><br><span class="line">    &#125;)</span><br><span class="line">    <span class="keyword">delete</span> presentors[sessionId]</span><br><span class="line">    <span class="keyword">delete</span> candidatesQueue[sessionId]</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">stopViewer</span> (socket, self) &#123;</span><br><span class="line">  <span class="keyword">const</span> sessionId = socket.<span class="property">id</span></span><br><span class="line">  <span class="keyword">if</span> (!viewers[sessionId]) <span class="keyword">return</span></span><br><span class="line">  <span class="keyword">const</span> roomid = viewers[sessionId].<span class="property">presentor</span>.<span class="property">socket</span>.<span class="property">id</span></span><br><span class="line">  socket.<span class="title function_">to</span>(roomid).<span class="title function_">emit</span>(<span class="string">&#x27;message&#x27;</span>, &#123;</span><br><span class="line">    <span class="attr">type</span>: <span class="string">&#x27;viewer-leave&#x27;</span>,</span><br><span class="line">    <span class="attr">time</span>: <span class="title function_">moment</span>(<span class="keyword">new</span> <span class="title class_">Date</span>()).<span class="title function_">format</span>(<span class="string">&#x27;HH:mm:ss&#x27;</span>),</span><br><span class="line">    <span class="attr">from</span>: &#123; <span class="attr">nickname</span>: self.<span class="property">nickname</span>, <span class="attr">avatar</span>: self.<span class="property">avatar</span> &#125;</span><br><span class="line">  &#125;)</span><br><span class="line">  socket.<span class="title function_">leave</span>(roomid)</span><br><span class="line">  socket.<span class="title function_">disconnect</span>()</span><br><span class="line">  <span class="keyword">delete</span> viewers[sessionId].<span class="property">presentor</span>.<span class="property">viewers</span>[sessionId]</span><br><span class="line">  <span class="keyword">delete</span> viewers[sessionId]</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">onIceCandidate</span> (sessionId, _candidate, presentorId) &#123;</span><br><span class="line">  <span class="keyword">var</span> candidate = <span class="title class_">KurentoClient</span>.<span class="title function_">getComplexType</span>(<span class="string">&#x27;IceCandidate&#x27;</span>)(_candidate)</span><br><span class="line">  <span class="comment">// console.log(presentorId &amp;&amp; presentors[presentorId] &amp;&amp; presentors[presentorId].viewers[sessionId])</span></span><br><span class="line">  <span class="keyword">if</span> (presentorId &amp;&amp; presentors[presentorId] &amp;&amp; presentors[presentorId].<span class="property">viewers</span>[sessionId]) &#123;</span><br><span class="line">    <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&#x27;sending viewer candidate&#x27;</span>)</span><br><span class="line">    <span class="keyword">const</span> webRtcEndpoint = presentors[presentorId].<span class="property">viewers</span>[sessionId].<span class="property">webRtcEndpoint</span></span><br><span class="line">    webRtcEndpoint.<span class="title function_">addIceCandidate</span>(candidate)</span><br><span class="line">  &#125; <span class="keyword">else</span> <span class="keyword">if</span> (presentors[sessionId]) &#123;</span><br><span class="line">    <span class="variable language_">console</span>.<span class="title function_">info</span>(<span class="string">&#x27;Sending presentor candidate&#x27;</span>)</span><br><span class="line">    <span class="keyword">var</span> webRtcEndpoint = presentors[sessionId].<span class="property">webRtcEndpoint</span></span><br><span class="line">    webRtcEndpoint.<span class="title function_">addIceCandidate</span>(candidate)</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="variable language_">console</span>.<span class="title function_">info</span>(<span class="string">&#x27;Queueing candidate&#x27;</span>)</span><br><span class="line">    <span class="keyword">if</span> (!candidatesQueue[sessionId]) &#123;</span><br><span class="line">      candidatesQueue[sessionId] = []</span><br><span class="line">    &#125;</span><br><span class="line">    candidatesQueue[sessionId].<span class="title function_">push</span>(candidate)</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="variable language_">module</span>.<span class="property">exports</span> = <span class="keyword">function</span> (<span class="params">server</span>) &#123;</span><br><span class="line">  <span class="keyword">const</span> io = <span class="title function_">socketIO</span>(server, &#123;</span><br><span class="line">    <span class="attr">path</span>: <span class="string">&#x27;/socket.io/webrtc&#x27;</span></span><br><span class="line">  &#125;)</span><br><span class="line">  <span class="title function_">bindEvent</span>(io)</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h3 id="扩展实现通话功能"><a href="#扩展实现通话功能" class="headerlink" title="扩展实现通话功能"></a>扩展实现通话功能</h3><p>关于视频通话功能，根据上面的逻辑，所谓的视频通话，对通话的每一方来说，都有两个视频源，一个来自自己的直播端，也就是上面直播功能的实现，一个是对方的画面，也就是上面观众端功能的实现。</p>
+<p>所以视频通话功能，我们不需要再扩展任何webrtc相关的功能，只需要在用户登录的时候，维护一个 <code>WebSocket</code> 长连接，当被呼叫时，把呼叫信息实时的反馈到被呼叫端，被呼叫端作出的应答信息再反馈到呼叫端。这一部分的已经和webrtc不再相关了，不再细叙，相关的逻辑在上面的后端代码已经包含。</p>
+<h3 id="关于点播功能"><a href="#关于点播功能" class="headerlink" title="关于点播功能"></a>关于点播功能</h3><p><code>kurento</code> 提供了 <code>RecorderEndPoint</code> 来实现录制功能，只需要在webrtc开始直播的时候，把 <code>WebRtcEndPoint</code> 连接到 <code>RecorderEndPoint</code> 即可，然后在直播结束的时候，把时长，位置信息存入数据库即可，然后搭建一个前端页面，查询数据库，播放视频，这都是很简单的逻辑功能，不再详细描述。</p>
+<h3 id="源码相关"><a href="#源码相关" class="headerlink" title="源码相关"></a>源码相关</h3><p>关于本篇的全部源码，可直接查看 <code>github</code> 获取</p>
+<p>前端代码: <a href="https://github.com/qwertyyb/webrtc-front">https://github.com/qwertyyb/webrtc-front</a></p>
+<p>后端代码: <a href="https://github.com/qwertyyb/webrtc-server">https://github.com/qwertyyb/webrtc-server</a> (由于后端涉及到密码，密钥等安全相关的配置信息，后端代码权限目前为私密，后期脱密处理后会公开源码)</p>
+<p>部署配置仓库</p>
+<p>为了方便配置，我写了一份 <code>docker-compose.yml</code> 文件来一键配置这些相关服务，源码如下:<br><a href="https://github.com/qwertyyb/webrtc-configuration">https://github.com/qwertyyb/webrtc-configuration</a> (由于涉及到数据库密码，密钥文件等安全相关信息，目前权限为私密，后期脱密处理后会公开源码)</p>
+<h3 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h3><ol>
+<li><a href="https://doc-kurento.readthedocs.io/en/6.9.0/_static/client-jsdoc/index.html">kurento-client-js</a></li>
+<li><a href="https://doc-kurento.readthedocs.io/en/6.9.0/features/kurento_utils_js.html">kurento-utils-js</a></li>
+<li><a href="https://socket.io/docs/">socket.io</a></li>
+</ol>
+]]></content>
+  </entry>
+  <entry>
+    <title>实用工具</title>
+    <url>/2023/03/25/%E5%AE%9E%E7%94%A8%E5%B7%A5%E5%85%B7/</url>
+    <content><![CDATA[<p>实用工具收集</p>
+<span id="more"></span>
+
+<ul>
+<li>网络剪切板: <a href="https://netcut.cn/">https://netcut.cn</a> 数据暂存和传送的在线服务</li>
+<li>ngrok: <a href="https://ngrok.com/">https://ngrok.com</a> 内网穿透服务，暴露本地接口给外网</li>
+<li>游戏手柄测试: <a href="https://gamepad-tester.com/">https://gamepad-tester.com</a> 在线测试游戏手柄</li>
+</ul>
+]]></content>
+      <categories>
+        <category>工具</category>
+      </categories>
+      <tags>
+        <tag>工具</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>彻底搞懂字符编码</title>
+    <url>/2017/03/12/%E5%BD%BB%E5%BA%95%E6%90%9E%E6%87%82%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81/</url>
+    <content><![CDATA[<p>​	编码的相关知识还真是杂乱不堪，不少人对一些知识理解似乎也有些偏差，网上百度,google的内容，也有不少以讹传讹，根本就是错误的（例如说 unicode编码是两个字节），各种软件让你选择编码的时候，常常是很长的一个选单，让用户不知道该如何选。基于这样的问题，我就写下我的理解吧，一方面帮助一些需要帮助的人纠正认识，一方面作为自己以后备查的资料。</p>
+<span id="more"></span>
+<h2 id="字符编码的历史"><a href="#字符编码的历史" class="headerlink" title="字符编码的历史"></a>字符编码的历史</h2><h4 id="1-ASCII-American-Standard-Code-for-Information-Interchange"><a href="#1-ASCII-American-Standard-Code-for-Information-Interchange" class="headerlink" title="1. ASCII(American Standard Code for Information Interchange)"></a>1. ASCII(American Standard Code for Information Interchange)</h4><p>​	美国信息交换标准代码，这是计算机上最早使用的通用的编码方案。那个时候计算机还只是拉丁文字的专利，根本没有想到现在计算机的发展势头，如果想到了，可能一开始就会使用unicode了。当时绝大部分专家都认为，要用计算机，必须熟练掌握英文。这种编码占用7个Bit，在计算机中占用一个字节，8位，最高位没用，通讯的时候有时用作奇偶校验位。因此ASCII编码的取值范围实际上是：0x00-0x7f,只能表示128个字符。后来发现128个不太够用，做了扩展，叫做ASCII扩展编码，用足八位，取值范围变成：0x00-0xff,能表示256个字符。其实这种扩展意义不大，因为256个字符表示一些非拉丁文字远远不够，但是表示拉丁文字，又用不完。所以扩展的意义还是为了下面的ANSI编码服务。</p>
+<h4 id="2-ANSI（American-National-Standard-Institite-）"><a href="#2-ANSI（American-National-Standard-Institite-）" class="headerlink" title="2. ANSI（American National Standard Institite ）"></a>2. ANSI（American National Standard Institite ）</h4><p>​	美国国家标准协会，也就是说，每个国家（非拉丁语系国家）自己制定自己的文字的编码规则，并得到了ANSI认可，符合ANSI的标准，全世界在表示对应国家文字的时候都通用这种编码就叫ANSI编码。换句话说，中国的ANSI编码和在日本的ANSI的意思是不一样的，因为都代表自己国家的文字编码标准。比如中国的ANSI对应就是GB2312标准，日本就是JIT标准，香港，台湾对应的是BIG5标准等等。当然这个问题也比较复杂，微软从95开始，用就是自己搞的一个标准GBK。GB2312里面只有6763个汉字，682个符号，所以确实有时候不是很够用。GBK一直能和GB2312相互混淆并且相安无事的一个重要原因是GBK全面兼容GB2312，所以没有出现任何冲突，你用GB2312编码的文件通过GBK去解释一定能获得相同的显示效果，换句话说：GBK对GB2312就是，你有的，我也有，你没得的，我还有！</p>
+<p>​	好了，ANSI的标准是什么呢，首先是ASCII的代码你不能用！也就是说ASCII码在任何ANSI中应该都是相同的。其他的，你们自己扩展。所以呢，中国人就把ASCII码变成8位，0x7f之前我不动你的，我从0xa0开始编，0xa0到0xff才95个码位，对于中国字那简直是杯水车薪，因此，就用两个字节吧，此编码范围就从0xA1A1 - 0xFEFE，这个范围可以表示23901个汉字。基本够用了吧，GB2312才7000多个呢！GBK更猛，编码范围是从0x8140 - 0xFEFE,可以表示3万多个汉字。可以看出，这两种方案，都能保证汉字头一个字节在0x7f以上，从而和ASCII不会发生冲突。能够实现英文和汉字同时显示。</p>
+<p>​	BIG5，香港和台湾用的比较多，繁体，范围： 0xA140 - 0xF9FE, 0xA1A1 - 0xF9FE，每个字由两个字节组成，其第一字节编码范围为0xA1~0xF9，第二字节编码范围为0x40-0x7E与0xA1-0xFE，总计收入13868个字 (包括5401个常用字、7652 个次常用字、7个扩充字、以及808个各式符号)。</p>
+<p>​	那么到底ANSI是多少位呢？这个不一定！比如在GB2312和GBK，BIG5中，是两位！但是其他标准或者其他语言如果不够用，就完全可能不止两位！</p>
+<p>​	例如：GB18030:<br>​	GB18030-2000(GBK2K)在GBK的基础上进一步扩展了汉字，增加了藏、蒙等少数民族的字形。GBK2K从根本上解决了字位不够，字形不足的问题。它有几个特点：它并没有确定所有的字形，只是规定了编码范围，留待以后扩充。编码是变长的，其二字节部分与GBK兼容；四字节部分是扩充的字形、字位，其编码范围是首字节0x81-0xfe、二字节0x30-0x39、三字节0x81-0xfe、四字节0x30-0x39。它的推广是分阶段的，首先要求实现的是能够完全映射到Unicode3.0标准的所有字形。它是国家标准，是强制性的。</p>
+<p>​	搞懂了ANSI的含义，我们发现ANSI有个致命的缺陷，就是每个标准是各自为阵的，不保证能兼容。换句话说，要同时显示中文和日本文或者阿拉伯文，就完全可能会出现一个编码两个字符集里面都有对应，不知道该显示哪一个的问题，也就是编码重叠的问题。显然这样的方案不好，所以Unicode才会出现！</p>
+<h4 id="3-MBCS（Multi-Byte-Chactacter-System（Set-）"><a href="#3-MBCS（Multi-Byte-Chactacter-System（Set-）" class="headerlink" title="3. MBCS（Multi-Byte Chactacter System（Set)）"></a>3. MBCS（Multi-Byte Chactacter System（Set)）</h4><p>​	多字节字符系统或者字符集，基于ANSI编码的原理上，对一个字符的表示实际上无法确定他需要占用几个字节的，只能从编码本身来区分和解释。因此计算机在存储的时候，就是采用多字节存储的形式。也就是你需要几个字节我给你放几个字节，比如A我给你放一个字节，比如”中“，我就给你放两个字节，这样的字符表示形式就是MBCS。</p>
+<p>​	在基于GBK的windows中，不会超过2个字节，所以windows这种表示形式有叫做DBCS（Double-Byte Chactacter System），其实算是MBCS的一个特例。<a href="http://lib.csdn.net/base/c">C语言</a>默认存放字符串就是用的MBCS格式。从原理上来说，这样是非常经济的一种方式。</p>
+<h4 id="4-CodePage"><a href="#4-CodePage" class="headerlink" title="4. CodePage"></a>4. CodePage</h4><p>​	代码页，最早来自IBM，后来被微软，<a href="http://lib.csdn.net/base/oracle">Oracle</a> ,SAP等广泛采用。因为ANSI编码每个国家都不统一，不兼容，可能导致冲突，所以一个系统在处理文字的时候，必须要告诉计算机你的ANSI是哪个国家和地区的标准，这种国家和标准的代号（其实就是字符编码格式的代号），微软称为Codepage代码页，其实这个代码页和字符集编码的意思是一样的。告诉你代码页，本质就是告诉了你编码格式。</p>
+<p>​	但是不同厂家的代码页可能是完全不同，哪怕是同样的编码，比如， UTF-8字符编码 在IBM对应的代码页是1208，在微软对应的是65001,在德国的SAP公司对应的是 4110 。所以啊，其实本来就是一个东西，大家各自为政，搞那么多新名词，实在没必要！所以标准还是很重要的！！！</p>
+<p>​	比如GBK的在微软的代码页是936，告诉你代码页是936其实和告诉你我编码格式是GBK效果完全相同。那么处理文本的时候就不会有问题，不会去考虑某个代码是显示的韩文还是中文，同样，日文和韩文的代码页就和中文不同，这样就可以避免编码冲突导致计算机不知如何处理的问题。当然用这个也可以很容易的切换语言版本。但是这都是治标不治本的方法，还是无法解决同时显示多种语言的问题，所以最后还是都用unicode吧，永远不会有冲突了。</p>
+<h4 id="5-Unicode-Universal-Code"><a href="#5-Unicode-Universal-Code" class="headerlink" title="5. Unicode(Universal Code)"></a>5. Unicode(Universal Code)</h4><p>​	这是一个编码方案，说白了就是一张包含全世界所有文字的一个编码表，不管你用的上，用不上，不管是现在用的，还是以前用过的，只要这个世界上存在的文字符号，统统给你一个唯一的编码，这样就不可能有任何冲突了。不管你要同时显示任何文字，都没有问题。因此在这样的方案下，Unicode出现了。Unicode编码范围是：0-0x10FFFF，可以容纳1114112个字符，100多万啊。全世界的字符根本用不完了，Unicode 5.0版本中，才用了238605个码位。所以足够了。</p>
+<p>​	因此从码位范围看，严格的unicode需要3个字节来存储。但是考虑到理解性和计算机处理的方便性，理论上还是用4个字节来描述。Unicode采用的汉字相关编码用的是《CJK统一汉字编码字符集》— 国家标准 GB13000.1 是完全等同于国际标准《通用多八位编码字符集 (UCS)》 ISO 10646.1。《GB13000.1》中最重要的也经常被采用的是其双字节形式的基本多文种平面。在这65536个码位的空间中，定义了几乎所有国家或地区的语言文字和符号。其中从0x4E00到 0x9FA5 的连续区域包含了 20902 个来自中国（包括台湾）、日本、韩国的汉字，称为 CJK (Chinese Japanese Korean) 汉字。CJK是《GB2312-80》、《BIG5》等字符集的超集。</p>
+<p>  CJK包含了中国，日本，韩国，越南，香港，也就是CJKVH。这个在UNICODE的Charset chart中可以明显看到。  unicode的相关标准可以从unicode.org上面获得，目前已经进行到了6.0版本。</p>
+<p>下面这段描述来自百度百科：</p>
+<blockquote>
+<p> Unicode字符集可以简写为UCS（Unicode Character Set）。早期的  unicodeUnicode标准有UCS-2、UCS-4的说法。UCS-2用两个字节编码，UCS-4用4个字节编码。UCS-4根据最高位为0的最高字节分成2^7&#x3D;128个group。每个group再根据次高字节分为256个平面（plane）。每个平面根据第3个字节分为256行 （row），每行有256个码位（cell）。group 0的平面0被称作BMP（Basic Multilingual Plane）。将UCS-4的BMP去掉前面的两个零字节就得到了UCS-2。每个平面有2^16&#x3D;65536个码位。Unicode计划使用了17个平面，一共有17<em>65536&#x3D;1114112个码位。在Unicode 5.0.0版本中，已定义的码位只有238605个，分布在平面0、平面1、平面2、平面14、平面15、平面16。其中平面15和平面16上只是定义了两个各占65534个码位的专用区（Private Use Area），分别是0xF0000-0xFFFFD和0x100000-0x10FFFD。所谓专用区，就是保留给大家放自定义字符的区域，可以简写为PUA。 　　平面0也有一个专用区：0xE000-0xF8FF，有6400个码位。平面0的0xD800-0xDFFF，共2048个码位，是一个被称作代理区Surrogate）的特殊区域。代理区的目的用两个UTF-16字符表示BMP以外的字符。在介绍UTF-16编码时会介绍。如前所述在Unicode 5.0.0版本中，238605-65534</em>2-6400-2408&#x3D;99089。余下的99089个已定义码位分布在平面0、平面1、平面2和平面14上，它们对应着Unicode目前定义的99089个字符，其中包括71226个汉字。平面0、平面1、平面2和平面14上分别定义了52080、3419、43253和337个字符。平面2的43253个字符都是汉字。平面0上定义了27973个汉字。</p>
+</blockquote>
+<h2 id="Unicode编码"><a href="#Unicode编码" class="headerlink" title="Unicode编码"></a>Unicode编码</h2><h4 id="1-Unicode的实现方案"><a href="#1-Unicode的实现方案" class="headerlink" title="1. Unicode的实现方案"></a>1. Unicode的实现方案</h4><p>Unicode其实只是一张巨大的编码表。要在计算机里面实现，也出现了几种不同的方案。也就是说如何表示unicode编码的问题，下面是几种常见的方案：</p>
+<h5 id="1-UTF-8（UCS-Transformation-Format-8bit"><a href="#1-UTF-8（UCS-Transformation-Format-8bit" class="headerlink" title="(1) UTF-8（UCS Transformation Format 8bit)"></a>(1) UTF-8（UCS Transformation Format 8bit)</h5><p>​    	这个方案的意思以8位为单位来标识文字，注意并不是说一个文字用8位标识。他其实是一种MBCS方案，可变字节的。到底需要几个字节表示一个符号，这个要根据这个符号的unicode编码来决定，最多4个字节。</p>
+<p>编码规则如下：</p>
+<table>
+<thead>
+<tr>
+<th align="center">Unicode编码（16进制）</th>
+<th align="center">UTF-8字节流（二进制）</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">000000 - 00007F</td>
+<td align="center">0xxxxxxx</td>
+</tr>
+<tr>
+<td align="center">000080 - 0007FF</td>
+<td align="center">110xxxxx 10xxxxxx</td>
+</tr>
+<tr>
+<td align="center">000800 - 00FFFF</td>
+<td align="center">1110xxxx 10xxxxxx 10xxxxxx</td>
+</tr>
+<tr>
+<td align="center">010000 - 10FFFF</td>
+<td align="center">11110xxx 10xxxxxx 10xxxxxx 10xxxxxx</td>
+</tr>
+</tbody></table>
+<p>​	UTF-8的特点是对不同范围的字符使用不同长度的编码。对于0x00-0x7F之间的字符，UTF-8编码与ASCII编码完全相同。</p>
+<p>​	UTF-8编码的最大长度是4个字节。从上表可以看出，4字节模板有21个x，即可以容纳21位二进制数字。Unicode的最大码位0x10FFFF也只有21位。 　　</p>
+<p>​	例1：“汉”字的Unicode编码是0x6C49。0x6C49在0x0800-0xFFFF之间，使用用3字节模板了：1110xxxx 10xxxxxx 10xxxxxx。将0x6C49写成二进制是：0110 1100 0100 1001， 用这个比特流依次代替模板中的x，得到：11100110 10110001 10001001，即E6 B1 89。 　　</p>
+<p>​	例2：Unicode编码0x20C30在0x010000-0x10FFFF之间，使用用4字节模板了：11110xxx 10xxxxxx 10xxxxxx 10xxxxxx。</p>
+<p>​	将0x20C30写成21位二进制数字（不足21位就在前面补0）：0 0010 0000 1100 0011 0000，用这个比特流依次代替模板中的x，得到：11110000 10100000 10110000 10110000，即F0 A0 B0 B0。</p>
+<h5 id="2-UTF-16"><a href="#2-UTF-16" class="headerlink" title="(2) UTF-16"></a>(2) UTF-16</h5><p> UTF-16编码以16位无符号整数为单位。注意是16位为一个单位，不表示一个字符就只有16位。现在机器上的unicode编码一般指的就是UTF-16。绝大部分2个字节就够了，但是不能绝对的说所有字符都是2个字节。这个要看字符的unicode编码处于什么范围而定，有可能是2个字节，也可能是4个字节。这点请注意！</p>
+<p>下面<a href="http://lib.csdn.net/base/datastructure">算法</a>解释来自百度百科。</p>
+<blockquote>
+<p>我们把Unicode  unicode编码记作U。编码规则如下： </p>
+<p>​	如果U&lt;0x10000，U的UTF-16编码就是U对应的16位无符号整数（为书写简便，下文将16位无符号整数记作WORD）。如果U≥0x10000，我们先计算U’&#x3D;U-0x10000，然后将U’写成二进制形式：yyyy yyyy yyxx xxxx xxxx，U的UTF-16编码（二进制）就是：110110yyyyyyyyyy 110111xxxxxxxxxx。为什么U’可以被写成20个二进制位？Unicode的最大码位是0x10ffff，减去0x10000后，U’的最大值是0xfffff，所以肯定可以用20个二进制位表示。</p>
+<p>​	例如：Unicode编码0x20C30，减去0x10000后，得到0x10C30，写成二进制是：0001 0000 1100 0011 0000。用前10位依次替代模板中的y，用后10位依次替代模板中的x，就得到：1101100001000011 1101110000110000，即0xD8430xDC30。 　　</p>
+</blockquote>
+<p>​    按照上述规则，Unicode编码0x10000-0x10FFFF的UTF-16编码有两个WORD，第一个WORD的高6位是110110，第二个WORD的高6位是110111。可见，第一个WORD的取值范围（二进制）是11011000 00000000到11011011 11111111，即0xD800-0xDBFF。第二个WORD的取值范围（二进制）是11011100 00000000到11011111 11111111，即0xDC00-0xDFFF。为了将一个WORD的UTF-16编码与两个WORD的UTF-16编码区分开来，Unicode编码的设计者将0xD800-0xDFFF保留下来，并称为代理区（Surrogate）： </p>
+<p>　　</p>
+<table>
+<thead>
+<tr>
+<th align="center">高位替代(High Surrogates)</th>
+<th align="center">高位专用替代(High Private Use Surrogates)</th>
+<th align="center">低位替代(Low Surrogates)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">D800－DB7F</td>
+<td align="center">DB80－DBFF</td>
+<td align="center">DC00－DFFF</td>
+</tr>
+</tbody></table>
+<p>​    高位替代就是指这个范围的码位是两个WORD的UTF-16编码的第一个WORD。低位替代就是指这个范围的码位是两个WORD的UTF-16编码的第二个WORD。那么，高位专用替代是什么意思？我们来解答这个问题，顺便看看怎么由UTF-16编码推导Unicode编码。 　　</p>
+<p>   如果一个字符的UTF-16编码的第一个WORD在0xDB80到0xDBFF之间，那么它的Unicode编码在什么范围内？我们知道第二个WORD的取值范围是0xDC00-0xDFFF，所以这个字符的UTF-16编码范围应该是0xDB80 0xDC00到0xDBFF 0xDFFF。我们将这个范围写成二进制： 　　1101101110000000 11011100 00000000 - 1101101111111111 1101111111111111 　　按照编码的相反步骤，取出高低WORD的后10位，并拼在一起，得到 　　1110 0000 0000 0000 0000 - 1111 1111 11111111 1111  即0xe0000-0xfffff，按照编码的相反步骤再加上0x10000，得到0xf0000-0x10ffff。这就是UTF-16编码的第一个WORD在0xdb80到0xdbff之间的Unicode编码范围，即平面15和平面16。因为Unicode标准将平面15和平面16都作为专用区，所以0xDB80到0xDBFF之间的保留码位被称作高位专用替代。</p>
+<h5 id="2-UTF-32"><a href="#2-UTF-32" class="headerlink" title="(2) UTF-32"></a>(2) UTF-32</h5><p>这个就简单了，和Unicode码表基本一一对应，固定四个字节。<br>为什么不采用UTF-32呢，因为unicode定义的范围太大了，其实99%的人使用的字符编码不会超过2个字节，所以如同统一用4个字节，简单倒是简单了，但是数据冗余确实太大了，不好，所以16位是最好的。就算遇到超过16位能表示的字符，我们也可以通过上面讲到的代理技术，采用32位标识，这样的方案是最好的。所以现在绝大部分机器实现unicode还是采用的utf-16的方案。当然也有UTF-8的方案。比如windows用的就是UTF16方案，不少<a href="http://lib.csdn.net/base/linux">Linux</a>用的就是utf8方案。</p>
+<h4 id="2-编码存储差异"><a href="#2-编码存储差异" class="headerlink" title="2. 编码存储差异"></a>2. 编码存储差异</h4><p>这里就要引出两个名词：<br>LE（little endian):小字节字节序，意思就是一个单元在计算机中的存放时按照低位在前（低地址），高位在后（高地址）的模式存放。</p>
+<p>BE（big endian):大字节字节序，和LE相反，是高位在前，低位在后。</p>
+<p>​	比如一个unicode编码为：0x006C49，如果是LE，那么在文件中的存放顺序应该是：49 6c 00如果是BE ,那么顺序应该是：00 6c 49</p>
+<p>​	为了识别一个编码过的字符的存储顺序，必须用特殊字符来指示。Unicode字符中<strong>U+FEFF</strong>被用来指示这种存储顺序，被称作Byte Order Mark（<strong>BOM</strong>）。</p>
+<p>​	BOM在Big-Endian系统上存储为FE FF；而在Big-Endian系统上存储则为FF FE。所以在以Big-Endian存储的UTF-16（UTF-16BE）的文件的开头，用<strong>FEFF</strong>指示；以Little-Endian存储的UTF-16（UTF-16LE）的文件的开头，用<strong>FFFE</strong>指示。</p>
+<p>​        BOM的UTF-8编码为1110<em>1111</em> 10<em>111011</em>10*111111 *(<strong>EF BB BF</strong>)，所以一般EF BB BF被放在文本的开头，用来指示其编码为UTF-8。</p>
+<h4 id="3-Unicode编码实践"><a href="#3-Unicode编码实践" class="headerlink" title="3. Unicode编码实践"></a>3. Unicode编码实践</h4><p>​	在Windows的文本编辑工具记事本上，选择“另存为”的时候，用户可以选择不同的编码选项，对应编码选项有“ANSI”，“Unicode”，“Unicode big endian”，以及“UTF-8”。因为Windows的存储方式是Little-Endian，所以“Unicode”，“Unicode big endian”对应的分别是UTF-16LE和UTF-16BE。</p>
+<p>​        读者可以试着编写一串字符，然后分别用不同的编码保存，再用可以16进制编写的纯文本编辑工具（如，Ultra-edit）来检验一下具体的编码实现和存储顺序。下面是笔者将“田海立（U+7530, U+6D77, U+7ACB）”以不同编码方式保存，得到的结果：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">田海立_UTF-16BE.txt</span><br><span class="line"></span><br><span class="line">        FEFF75306D777ACB</span><br><span class="line"></span><br><span class="line">田海立_UTF-16LE.txt</span><br><span class="line"></span><br><span class="line">        FFFE3075776DCB7A</span><br><span class="line"></span><br><span class="line">田海立_UTF-8.txt</span><br><span class="line"></span><br><span class="line">        EFBBBFE794B0E6B5B7E7AB8B</span><br></pre></td></tr></table></figure>
+
+<p>​        为了明确起见，<strong>BOM</strong>的编码用粗体标注；田的编码用红色标注；海的编码用绿色标注；立的编码用蓝色标注。可以看到，记事本（Notepad）存储的Unicode编码的文件的开头位置，用BOM的相应编码指示了编码格式。</p>
+]]></content>
+      <categories>
+        <category>编程, 编码</category>
+      </categories>
+      <tags>
+        <tag>编码</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>微信浏览器视频播放器开发实践</title>
+    <url>/2018/09/30/%E5%BE%AE%E4%BF%A1%E6%B5%8F%E8%A7%88%E5%99%A8%E8%A7%86%E9%A2%91%E6%92%AD%E6%94%BE%E5%99%A8%E5%BC%80%E5%8F%91%E5%AE%9E%E8%B7%B5/</url>
+    <content><![CDATA[<p>在移动端页面中，video通常会被浏览器劫持，然后替换使用浏览器自定义的播放器。而由于微信有庞大的用户使用量，所以兼容微信就不可避免。在这里记录一下，项目开发过程中出现的问题和解决方法</p>
+<span id="more"></span>
+<p>初始代码：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">// index.html</span><br><span class="line">&lt;video src=&quot;xxx.mp4&quot; class=&quot;video&quot; /&gt;</span><br><span class="line"></span><br><span class="line">// index.css</span><br><span class="line">.video &#123;</span><br><span class="line">  width: 100vw;</span><br><span class="line">  height: auto;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="1-视频高度太高的问题-兼容问题的开始"><a href="#1-视频高度太高的问题-兼容问题的开始" class="headerlink" title="1. 视频高度太高的问题(兼容问题的开始)"></a>1. 视频高度太高的问题(兼容问题的开始)</h3><p>由于项目中使用的视频，宽高比不固定，有宽屏视频，也有高屏视频。而代码中只限制了视频的宽占比为屏幕宽，高度自由不限制。所以在手机屏幕高度比视频高度小的情况下，就会出现视频太高，而一屏不能完全显示，导致部分视频被遮住的情况<br>这个问题也很好解决，把高度限制一下就OK，如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">.video &#123;</span><br><span class="line">  width: 100vw;</span><br><span class="line">  height: auto;</span><br><span class="line">  max-height: 40vh;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>但是在测试过程中，一个新的问题出现了<br>在测试过程中发现，iphone和部分android手机上表现优秀，高视频会以最大高度40vh，宽度等比缩小，然后居中播放。<br>但是部分android手机上的视频，会出现高视频的宽度被横向拉伸的情况，出现的机率还挺高。</p>
+<h3 id="2-视频被拉伸的问题"><a href="#2-视频被拉伸的问题" class="headerlink" title="2. 视频被拉伸的问题"></a>2. 视频被拉伸的问题</h3><p>既然宽度被拉伸，那就设置视频的宽度看一下具体的表现，如下:</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">.video &#123;</span><br><span class="line">  width: 40vw;</span><br><span class="line">  height: auto;</span><br><span class="line">  max-height: 40vh;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>测试结果并不满意，因为宽度被设置，视频两边会有留白的情况，而且播放器下面的控制条的宽度也被缩小，效果很不好看。而且宽视频的问题也不能解决。但是在测试过程中，发现部分android手机会全屏播放，而全屏播放的视频宽高没有被拉伸。</p>
+<p>最后解决方案： iphone手机上内联播放，android手机上全屏播放，根据文档修改代码</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">// index.html</span><br><span class="line">&lt;video src=&quot;xxx.mpe&quot; class=&quot;video&quot;</span><br><span class="line">  webkit-playsinline playsinline  // IOS内联播放</span><br><span class="line">  x5-video-player-type=&quot;h5&quot; // 启用同层H5播放器</span><br><span class="line">  x5-video-player-fullscreen=&quot;true&quot; // 全屏播放</span><br><span class="line">/&gt;</span><br><span class="line">// index.css</span><br><span class="line">.video &#123;</span><br><span class="line">  width: 100vw;</span><br><span class="line">  height: auto;</span><br><span class="line">  max-height: 40vh;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>测试结果： android手机上和iphone手机上都如期表现，但是android的全屏播放不完全，虽然显示了全屏播放的界面，但是高度是40vh, 宽度也没有占满屏幕</p>
+<h3 id="3-全屏显示不满的问题"><a href="#3-全屏显示不满的问题" class="headerlink" title="3. 全屏显示不满的问题"></a>3. 全屏显示不满的问题</h3><p>解决办法，查询文档可知，微信在视频全屏的时候，会触发x5videoenterfullscreen，退出全屏时会触发x5videoexitfullscreen。所以可以监听这两个事件，全屏里不限制高度，退出全屏里还原回max-height</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">// index.js</span><br><span class="line">const video = document.querySelector(&#x27;.video&#x27;)</span><br><span class="line">video.addEventListener(&#x27;x5videoenterfullscreen&#x27;, () =&gt; &#123;</span><br><span class="line">  video.style.maxHeight = &#x27;&#x27;</span><br><span class="line">&#125;)</span><br><span class="line">video.addEventListener(&#x27;x5videoexitfullscreen&#x27;, () =&gt; &#123;</span><br><span class="line">  video.style.maxHeight = &#x27;40vh&#x27;</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+
+
+]]></content>
+  </entry>
+  <entry>
+    <title>编译微信二维码引擎到webAssembly实践</title>
+    <url>/2021/06/19/%E7%BC%96%E8%AF%91%E5%BE%AE%E4%BF%A1%E4%BA%8C%E7%BB%B4%E7%A0%81%E5%BC%95%E6%93%8E%E5%88%B0webAssembly%E5%AE%9E%E8%B7%B5/</url>
+    <content><![CDATA[<p>微信开源了二维码引擎，如何在web环境下使用此引擎，本篇文章就由此而始。</p>
+<span id="more"></span>
+
+<h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>我这边有一个基于Electron跨平台框架开发的工具类项目，需要做一个在PC端识别并解析二维码的插件。</p>
+<p>刚开始用的是zxing的webAssembly版本，在使用过程中，发现在一些边缘情况下(二维码很小或很大、图片倾斜等情况)，识别能力很差，耗时也比较久，而且还不支持一图多码。而从日常使用来看来看，微信对二维码的识别和解码能力可谓是登峰造极，识别率高，速度快，而且对一图多码的情况也有很好的支持，如果能把微信的这个能力迁移到PC上那是最完美的了。</p>
+<p>而微信的大数据也确实可怕，瞬间洞察我心，把微信的二维码识别解码能力开源了。微信团队开源了二维码引擎到opencv contrib项目中，此引擎基于zxing并做了大量的优化，加入了深度学习，卷积网络等各种优化，提高了二维码的识别和解码能力。而这篇文章就是记录一下在编译此引擎到webAssembly过程中遇到的一些问题和解决方案</p>
+<h2 id="opencv项目简介"><a href="#opencv项目简介" class="headerlink" title="opencv项目简介"></a>opencv项目简介</h2><p>opencv在业内大名鼎鼎，而微信就是把二维码引擎作为一个模块开源到了opencv contrib仓库，所以为了编译此模块，需要对opencv项目有一个大概的了解。</p>
+<p>opencv总体来说分为分为opencv主库和opencv contrib可选模块库。</p>
+<p>其中opencv主库下面主要关注两个目录——modules和platforms。</p>
+<p>modules目录下是主库的模块代码，比如core核心功能模块、dnn模型模块、imgproc图片处理模块、objdetect图像识别模块等等，也包含生成对应语言下的功能模块，比如说java、object-c、python、js等等，而这次编译主要处理逻辑也就集中在js目录下。</p>
+<p>platforms目录下是生成各个平台下可使用的库的入口，按平台命名，比如说android, ios, linux等等，这次我们的目光主要放在js目录下，这个目录是生成opencv的webAssembly版本的入口文件和配置所在。</p>
+<p>再来看下opencv的contrib库，这个库是在单独另外一个git仓库，在构建opencv时是可选的。这个仓库的结构比较简单，模块都在modules下，打开modules目录，就可以看到微信的二维码模块wechat_qrcode了。</p>
+<p>我这次就是要把opencv contrib仓库下的wechat_qrcode编译为webAssembly，使之可以运行在web浏览器中。</p>
+<h2 id="编译过程"><a href="#编译过程" class="headerlink" title="编译过程"></a>编译过程</h2><p>opencv提供了默认配置的webAssembly已构建版本，可以在opencv库的release页面下载。当然默认的构建版本是不包括微信二维码模块。所以我需要按照自己的需要自行构建webAssembly版本。</p>
+<h3 id="编译方式选择"><a href="#编译方式选择" class="headerlink" title="编译方式选择"></a>编译方式选择</h3><p>opencv官方也提供了<a href="https://docs.opencv.org/master/d4/da1/tutorial_js_setup.html">webAssembly的构建指南</a>。我这边使用的是Docker的方式来构建，也推荐使用Docker进行构建，原因如下: </p>
+<ol>
+<li>无须再安装编译所需的运行环境，如Emscripten。</li>
+<li>无须担心因为编译环境不同步导致的各种异常问题，防止被各种各样的环境问题坏了兴致。</li>
+</ol>
+<p>我这边的编译环境是</p>
+<ol>
+<li>Linux centos发行版</li>
+<li>Docker version 19.03.1, build 74b1e89</li>
+<li>opencv 4.5.2</li>
+<li>opencv_contrib commit 10d1020952f7924e94f5bab1659c328c599f1c61</li>
+</ol>
+<h3 id="尝试编译opencv项目"><a href="#尝试编译opencv项目" class="headerlink" title="尝试编译opencv项目"></a>尝试编译opencv项目</h3><p>把opencv, opencv_contrib仓库拉下来到本地目录ocv, 如下:</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">- ocv</span><br><span class="line">   + opencv/</span><br><span class="line">   + opencv_contrib/</span><br></pre></td></tr></table></figure>
+
+<p>首先当然是尝试直接按照官方文档指引，先啥也不改，就用默认配置直接构建，验证能否成功。避免直接上来就按一番魔改，改完之后编译不了，误以为是改动问题，调了半天之后才发现不是这种情况。</p>
+<p>根据官方文档，Emscripten 2.0.10版本是opencv官方验证通过的版本。所以这里也不使用最新版本，追求稳定就使用2.0.10版本来进行构建。构建命令如下:</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">cd</span> ocv</span><br><span class="line"></span><br><span class="line">sudo docker run --<span class="built_in">rm</span> -v $(<span class="built_in">pwd</span>):/src -u $(<span class="built_in">id</span> -u):$(<span class="built_in">id</span> -g) emscripten/emsdk:2.0.10 emcmake python3 ./opencv/platforms/js/build_js.py build_wasm --build_wasm --build_test</span><br></pre></td></tr></table></figure>
+
+<p>注意加了 <code>--build_wasm</code> 和 <code>--build_test</code> 参数用以构建webAssembly版本，并自动构建测试用例，方便在构建完成后直接进行测试</p>
+<p>在控制台一番疯狂的输出后，构建成功了，输出如下:</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">=====</span><br><span class="line">===== Build finished</span><br><span class="line">=====</span><br><span class="line">OpenCV.js location: /src/build_wasm/bin/opencv.js</span><br><span class="line">OpenCV.js tests location: /src/build_wasm/bin/tests.html</span><br></pre></td></tr></table></figure>
+
+<p>此时目录结构如下:</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">- ocv</span><br><span class="line">   + opencv/</span><br><span class="line">   + opencv_contrib/</span><br><span class="line">   - build_wasm/</span><br><span class="line">      ...</span><br><span class="line">      - bin/</span><br><span class="line">         - tests.html</span><br><span class="line">         - opencv.js</span><br><span class="line">      ...</span><br></pre></td></tr></table></figure>
+
+<p>build_wasm目录是构建生成的目录，tests.html是使用 <code>--build_test</code> 参数后会自动生成的文件，不可直接打开，需要通过http服务器用浏览器打开。我这边使用npm的http-server模块，安装命令如下</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">npm install -g http-server</span><br></pre></td></tr></table></figure>
+<p>然后在ocv目录下执行 <code>hs -p 5000</code> 命令，会以ocv目录为服务器根目录启动一个端口为5000的http-server服务，可以在浏览器中打开 <code>http://127.0.0.1:5000/build_wasm/bin/tests.html</code> 测试用例会自动运行，输出结果。</p>
+<p>由于这次编译并没有任何改动，所以预期测试用例全部通过，而结果也正如预期。</p>
+<h3 id="尝试编译opencv-contrib模块"><a href="#尝试编译opencv-contrib模块" class="headerlink" title="尝试编译opencv_contrib模块"></a>尝试编译opencv_contrib模块</h3><p>wechat_qrcode模块是在opencv_contrib仓库中，opencv官方也提供了编译contrib库的命令，需要在上一步的命令中添加一个参数 <code>--cmake_option=&quot;-DOPENCV_EXTRA_MODULES_PATH=/src/opencv_contrib/modules&quot;</code>，完整命令如下:</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">cd</span> ocv</span><br><span class="line"></span><br><span class="line">sudo docker run --<span class="built_in">rm</span> -v $(<span class="built_in">pwd</span>):/src -u $(<span class="built_in">id</span> -u):$(<span class="built_in">id</span> -g) emscripten/emsdk:2.0.10 emcmake python3 ./opencv/platforms/js/build_js.py build_wasm --build_wasm --build_test --cmake_option=<span class="string">&quot;-DOPENCV_EXTRA_MODULES_PATH=/src/opencv_contrib/modules&quot;</span></span><br></pre></td></tr></table></figure>
+<p>上面的命令仅会引入 <code>opencv_contrib</code> 库却不会编译到webAssembly文件中，因为暴露出没有调用入口，在构建的时候直接就优化没了，所以需要添加额外的配置，使wechat_qrcode模块的接口在编译后的webAssembly中暴露出来。这个配置文件在 <code>opencv/platforms/js/opencv_js.config.py</code> 文件中，这个文件定义了各个模块在编译后暴露出的API，这些API可以在JS中调用。</p>
+<p>为了添加wechat_qrcode模块，添加如下配置</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line"><span class="comment"># ...</span></span><br><span class="line"></span><br><span class="line">wechat_qrcode = &#123;</span><br><span class="line">  <span class="string">&#x27;wechat_qrcode_WeChatQRCode&#x27;</span>: [<span class="string">&#x27;WeChatQRCode&#x27;</span>, <span class="string">&#x27;detectAndDecode&#x27;</span>]</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">white_list = makeWhiteList([core, imgproc, objdetect, video, dnn, features2d, photo, aruco, calib3d, wechat_qrcode])</span><br></pre></td></tr></table></figure>
+<p>然后再执行上面的命令进行编译，如果顺利的话，编译通过就可以进行测试验证了。but everything has a but，但是编译过程中报错了。报错情况如下:</p>
+<p><img src="https://tva1.sinaimg.cn/large/008i3skNgy1gros8m5xf3j31a404mn00.jpg" alt="编译wechat_qrcode模块报错"></p>
+<h2 id="失败踩坑"><a href="#失败踩坑" class="headerlink" title="失败踩坑"></a>失败踩坑</h2><p>愿望是美好的，现实是残酷的，编译wechat_qrcode模块失败了，为了能在web中用上这个模块，需要一一定位并解决这些问题。</p>
+<h3 id="1-编译失败报错-no-memeber-named-‘vectorstd’-in-namespace-‘std’"><a href="#1-编译失败报错-no-memeber-named-‘vectorstd’-in-namespace-‘std’" class="headerlink" title="1. 编译失败报错 no memeber named ‘vectorstd’ in namespace ‘std’"></a>1. 编译失败报错 no memeber named ‘vectorstd’ in namespace ‘std’</h3><p>这里的报错信息非常清晰，可以看到是在生成的 <code>build_wasm/modules/js_bindings_generator/gen/bindings.cpp</code> 文件中的wechat_qrcode模块的detectAndDecode函数的返回类型不正常</p>
+<p>对比 <code>opencv_contrib/modules/wechat_qrcode/include/opencv2/wechat_qrcode.hpp</code> 中此函数的声明，发现原函数声明的返回类型为 <code>std::vector&lt;std::string&gt;</code>, 但是生成的函数的返回类型为 <code>std::vectorstd::string</code>，一对比就发现是在生成的过程中 <code>bindings.cpp</code> 时，把原返回类型中的两个 <code>&lt;&gt;</code> 符合吞掉了。</p>
+<p>知道了原因，需要定位生成这个函数声明的逻辑代码，显然是生成过程中出现了错误。</p>
+<p>追根溯源发现生成 <code>bindings.cpp</code> 文件的逻辑在 <code>opencv/modules/js/generator/embindgen.py</code> 文件中，所以我们可以直接简单粗暴的替换掉这个错误的返回类型，如下: </p>
+<p><img src="https://tva1.sinaimg.cn/large/008i3skNgy1grousq5puzj322q0legtr.jpg" alt="替换掉错误的返回值"></p>
+<p>替换的位置是在 <code>JSWrapperGenerator</code> 类下的 <code>gen_function_binding_with_wrapper</code> 方法中。</p>
+<p>替换完成后，再次执行编译，发现这个错误已经没有了。但是出现了另一个错误</p>
+<h3 id="2-编译失败报错-unknown-type-name-‘string’-did-you-mean-‘String’"><a href="#2-编译失败报错-unknown-type-name-‘string’-did-you-mean-‘String’" class="headerlink" title="2. 编译失败报错 unknown type name ‘string’; did you mean ‘String’"></a>2. 编译失败报错 unknown type name ‘string’; did you mean ‘String’</h3><p>错误截图如下所示:</p>
+<p><img src="https://tva1.sinaimg.cn/large/008i3skNgy1grovmbosxpj31900d0gvw.jpg" alt="错误截图"></p>
+<p>同样的文件，不同的问题，是因为生成的文件里面不包含命名空间 <code>std::</code> 前缀，所以我们也可以在对应的生成位置，简单粗暴的把这个错误的字符串替换掉，如下图:</p>
+<p><img src="https://tva1.sinaimg.cn/large/008i3skNgy1grovpzmd45j321k0m2dno.jpg" alt="替换掉错误的参数值"></p>
+<p>如此我们再进行编译，终于没再有错误出现，编译成功了。</p>
+<p>编译成功不意味着就能在web浏览器中正常运行了，我们需要在浏览器中能正常识别并解码二维码才算是大功告成。为此我们需要准备一段测试用的JS代码</p>
+<figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">var</span> img = <span class="variable language_">document</span>.<span class="title function_">createElement</span>(<span class="string">&#x27;img&#x27;</span>)</span><br><span class="line"><span class="comment">// 准备一张二维码图片放在ocv目录下，命名为qrcode.png</span></span><br><span class="line">img.<span class="property">src</span> = <span class="string">&#x27;/qrcode.png&#x27;</span></span><br><span class="line">img.<span class="property">onload</span> = <span class="function">() =&gt;</span> &#123;</span><br><span class="line">  <span class="comment">// 读取图片数据</span></span><br><span class="line">  <span class="keyword">var</span> imgdata = cv.<span class="title function_">imread</span>(img)</span><br><span class="line"></span><br><span class="line">  <span class="keyword">var</span> detector = <span class="keyword">new</span> cv.<span class="title function_">wechat_qrcode_WeChatQRCode</span>(</span><br><span class="line">    <span class="string">&quot;wechat_qrcode/detect.prototxt&quot;</span>,</span><br><span class="line">    <span class="string">&quot;wechat_qrcode/detect.caffemodel&quot;</span>,</span><br><span class="line">    <span class="string">&quot;wechat_qrcode/sr.prototxt&quot;</span>,</span><br><span class="line">    <span class="string">&quot;wechat_qrcode/sr.caffemodel&quot;</span></span><br><span class="line">  )</span><br><span class="line"></span><br><span class="line">  <span class="keyword">var</span> results = detector.<span class="title function_">detectAndDecode</span>(imgdata)</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 输出识别到的第一个二维码结果</span></span><br><span class="line">  <span class="variable language_">console</span>.<span class="title function_">log</span>(results.<span class="title function_">get</span>(<span class="number">0</span>))</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在准备这段代码的过程中，其实就会发现问题，实例化二维码引擎时，需要传入4个模型文件，但是这4个模型文件在C++中是从文件系统中读取的，但是编译为webAssembly后，怎么读这4个文件？</p>
+<h3 id="3-模型文件加载问题"><a href="#3-模型文件加载问题" class="headerlink" title="3. 模型文件加载问题"></a>3. 模型文件加载问题</h3><p>google发现webAssembly模拟了文件系统，可以把文件打包然后像读取文件系统一样，对文件进行读取操作。</p>
+<p>具体可以参考: <a href="https://www.cntofu.com/book/150/zh/ch3-runtime/ch3-03-fs.md">https://www.cntofu.com/book/150/zh/ch3-runtime/ch3-03-fs.md</a></p>
+<p>参考这篇文章，我这里使用了外挂文件包的方式把wechat_qrcode需要的4个模型文件打包成 <code>wechat_qrcode_files.js</code>，打包步骤如下: </p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line"><span class="built_in">cd</span> ocv</span><br><span class="line"></span><br><span class="line"><span class="comment"># 把emscripten仓库拉到本地</span></span><br><span class="line">git <span class="built_in">clone</span> https://github.com/emscripten-core/emscripten.git</span><br><span class="line"></span><br><span class="line"><span class="comment"># 是的，这4个模型文件都在build_wasm/downloads/wechat_qrcode目录下了，无须再去下载了</span></span><br><span class="line"><span class="built_in">cp</span> -r build_wasm/downloads/wechat_qrcode ./</span><br><span class="line"></span><br><span class="line"><span class="comment"># 打包文件</span></span><br><span class="line">sudo docker run --<span class="built_in">rm</span> -v /data/home/marchyang/mine/ocv:/src -u $(<span class="built_in">id</span> -u):$(<span class="built_in">id</span> -g) emscripten/emsdk python3 emscripten/tools/file_packager.py build_wasm/bin/wechat_qrcode_files.data --preload wechat_qrcode/ --js-output=build_wasm/bin/wechat_qrcode_files.js</span><br></pre></td></tr></table></figure>
+
+<p>打包完成后在 <code>build_wasm/bin/</code> 目录下会生成两个新的文件 <code>wechat_qrcode_files.data</code> 和 <code>wechat_qrcode_files.js</code>，这两个文件分别对应文件系统中的文件和模拟文件系统的js代码，接下来在 <code>tests.html</code> 文件中使用 <code>script</code> 引入 <code>wechat_qrcode_files.js</code> 即可，如图所示</p>
+<p><img src="https://tva1.sinaimg.cn/large/008i3skNgy1groyb8saxej312v0u0jxx.jpg" alt="修改tests.html"></p>
+<p>需要注意，一定要在 Module 声明之后再引入，就像图上那样。否则会出问题，因为 <code>wechat_qrcode_files.js</code> 文件中会在 <code>Module.preRun</code> 中插入一段代码来创建文件系统，如果在图中的 Module 声明之前引入，后面的Module中的preRun就会把前面的preRun覆盖，导致无法创建文件系统，从而就会导致读取文件时出现错误（血泪之谈啊）。</p>
+<p>然后刷新页面，打开JS运行控制台，再运行上面的测试代码，看效果如下图</p>
+<p><img src="https://tva1.sinaimg.cn/large/008i3skNgy1grwoffk01sj30sm11ejyw.jpg" alt="运行效果"></p>
+<p>排查发现这次的报错是在初始化类时报的错</p>
+<h3 id="4-运行报错-初始化类时-wechat-qrcode-WeChatQRCode-类时，报错处理"><a href="#4-运行报错-初始化类时-wechat-qrcode-WeChatQRCode-类时，报错处理" class="headerlink" title="4. 运行报错: 初始化类时 wechat_qrcode_WeChatQRCode 类时，报错处理"></a>4. 运行报错: 初始化类时 <code>wechat_qrcode_WeChatQRCode</code> 类时，报错处理</h3><p>在控制台看到这个错误，再看错误的堆栈信息，一阵头大，这个报错中什么都没有，自然没有办法获取到有用的信息，也无从猜测到底是源代码的哪一部分报错了。</p>
+<p>到这里为止，几乎要放弃了，觉得没有办法了。可是心中仍有一份希望，料想chrome如此强大，应该有调试webAssembly的办法吧，于是一番google, 果然不出我所料，chrome确实提供了调试方式，具体可以查看 <a href="https://developer.chrome.com/blog/wasm-debugging-2020/">这篇文章</a></p>
+<p>具体做法:</p>
+<ol>
+<li>编译时加上 <code>-g</code> 参数</li>
+<li>chrome 开发者工具打开 webAssembly 调试</li>
+<li>在Docker上编译时，需要映射路径</li>
+<li>打断点，调试</li>
+</ol>
+<p>根据文章，先加上编译参数，编译脚本在 <code>opencv/modules/js/CMakeLists.txt</code> 中，修改如下: </p>
+<p><img src="https://tva1.sinaimg.cn/large/008i3skNgy1grwpqe9vmej321k0f4tez.jpg" alt="修改编译脚本"></p>
+<p>然后重新编译，编译完成后再次执行测试脚本，报错信息如下: </p>
+<p><img src="https://tva1.sinaimg.cn/large/008i3skNgy1grwpsnrtmzj31800fm41s.jpg" alt="报错信息"></p>
+<p>可以看到错误堆栈中已经有了源代码信息。可是由于我这边是在远程开发机上使用Docker编译，然后把远程开发机端口映射到本地测试的，所以源代码无法显示出来，实为不美。</p>
+<p>根据错误堆栈，可以发现是因为在 <code>wechat_qrcode_WeChatQRCode</code>的初始化函数中，调用了 <code>cv::utils::fs::exists</code> ，而后面的函数报错了导致。</p>
+<p>明明文件系统已经加载映射了，为什么 <code>cv::utils::fs::exists</code> 会报错失败呢？真是百思不得其解，在这里卡了好久。</p>
+<p>忽然灵光一现，想到有没有可能是 <code>cv::utils::fs::exists</code> 这个方法在编译为webAssembly时不兼容导致的呢？随即一想，感觉又不太可能，因为从这个方法的命名就可知晓，这个方法是 opencv 工具类库中的方法，应该会比较稳定，不应该出现这种问题才对。</p>
+<p>然而，虽然觉得不太可能，但是由于实在找不到头绪，只能先按这个思路排查。</p>
+<p>分析 <code>wechat_qrcode_WeChatQRCode</code> 的构造函数可知，在构造函数中，会先去调用 <code>cv::utils::fs::exits</code> 方法判断传入的文件路径对应的文件是否存在，然后会调用 <code>cv::dnn::readNetFromCaffe</code> 传入文件路径初始化 detector 模型。</p>
+<p>所以如果我们跳过检测文件，直接去调用 <code>cv::dnn::readNetFromCaffe</code> , 如果成功，不就可以证明 <code>cv::utils::fs::exists</code> 确实有问题了吗？而刚好，在编译配置中，<code>cv::dnn::readNetFromCaffe</code> 方法也导出了，所以可以在console中直接调用此方法来验证即可，如下图: </p>
+<p><img src="https://tva1.sinaimg.cn/large/008i3skNgy1grwqgj648rj310404gaaz.jpg" alt="readNetFromCaffe"></p>
+<p>卧槽，我看到什么，直接调用竟然成功了。虽然不愿意相信，但是事实摆在眼前，<code>cv::utils::fs::exists</code> 确实是有问题。</p>
+<p>知道了问题所在，就比较容易解决了。可以把 <code>opencv_contrib/modules/wechat_qrcode/src/wechat_qrcode.cpp</code> 文件中对 &#96;cv::utils::fs::exists｀ 的调用注释掉即可，如下图：</p>
+<p><img src="https://tva1.sinaimg.cn/large/008i3skNgy1grwqm0in8yj31n70u0ws5.jpg" alt="删除cv::utils::fs::exists的调用"></p>
+<p>然后重新编译，运行测试代码验证。运行效果如下图</p>
+<p><img src="https://tva1.sinaimg.cn/large/008i3skNgy1groyy7b8iij31ea0sc10r.jpg" alt="运行效果"></p>
+<p>可以发现，<code>wechat_qrcode_WeChatQRCode</code> 已经初始化成功了，图中的报错是在调用实例的 <code>detectAndDecode</code> 方法时报的异常。</p>
+<p>P.S.<br>    在分析构造函数时发现，如果传入4个空的字符串，就不会再判断文件存在也不会读取模型文件了，所以 <code>var wr = new cv.wechat_qrcode_WeChartQRCode(&#39;&#39;, &#39;&#39;, &#39;&#39;, &#39;&#39;)</code> 也是可以成功实例化并调用 <code>wr.detectAndDecode</code> 的。当然检测并解析二维码的时候也就不能用训练出的模型了，识别解码效果可能会打折扣。</p>
+<h3 id="4-运行报错：-detectAndDecode报错，UnboundTypeError"><a href="#4-运行报错：-detectAndDecode报错，UnboundTypeError" class="headerlink" title="4. 运行报错： detectAndDecode报错，UnboundTypeError"></a>4. 运行报错： detectAndDecode报错，UnboundTypeError</h3><p>分析错误信息发现，此函数原返回类型为 <code>std::vector&lt;std::string&gt;</code> 而报错的Unbound类型和这个类型颇为相似，所以猜测此异常可能是 <code>std::vector&lt;std::string&gt;</code> 类型未在编译为webAssembly时导出导致的。</p>
+<p>原以为这个问题可能不太好解决，但是研究发现在 <code>core_bindings.cpp</code> 中有一个 <code>register_vector</code> 的函数,如下图: </p>
+<p><img src="https://tva1.sinaimg.cn/large/008i3skNgy1grozb8qc20j317c0u0gt1.jpg" alt="register_vector"></p>
+<p>看上去像是一个注册 <code>vector</code> 类型为对应JS类的方法，所以可以试试注册一个 <code>vector&lt;std::string&gt;</code> 的类型看是否OK。最终改动此文件如下: </p>
+<p><img src="https://tva1.sinaimg.cn/large/008i3skNgy1grozgh2y1fj31zo0je48c.jpg" alt="注册StringVector类型"></p>
+<p>然后再重新执行编译命令进行编译，无报错。刷新页面，重新在控制台执行测试代码，结果如下: </p>
+<p><img src="https://tva1.sinaimg.cn/large/008i3skNgy1groznnndx8j30sy0ligq0.jpg" alt="执行结果"></p>
+<p>可以发现已经输出了二维码的内容，也没有报错，跟我们的期望结果一致。至此，微信二维码识别模块终于在web页面上跑起来了。</p>
+<h2 id="减少文件大小"><a href="#减少文件大小" class="headerlink" title="减少文件大小"></a>减少文件大小</h2><p>至此，已经成功编译并在Web环境中运行了微信的二维码引擎，但是从network可以发现，编译生成的opencv.js文件很大，有11.5M, 实在是过大了。在生产环境中使用时，需要减小包的大小</p>
+<p>分为两步: </p>
+<ol>
+<li><p>打包时去掉 <code>-g</code> 参数，这个参数是在调试webAssembly时加上的，使chrome的开发者工具可以显示并调试webAssembly，加上此参数，会大大增加opencv.js文件的大小，如果在生产环境中使用，去掉此参数，可大大减小包文件的大小，实测如果把 <code>-g</code> 参数去掉后，文件大小由11.5M减小到了8.9M, 减小了2.6M, 22%的大小</p>
+</li>
+<li><p>修改 <code>opencv/platforms/js/opencv_config.js.py</code> 文件，whitelist 只保留 wechat_qrcode, 如下图:</p>
+</li>
+</ol>
+<p><img src="https://tva1.sinaimg.cn/large/008i3skNgy1grp1tj65wej31w00iun44.jpg" alt="opencv_config.js.py"></p>
+<p>这步的修改，可以把8.9M的文件，再次精简至4.6M, 又减小了4.3M, 在上一步的基础了，减小了近50％的文件大小。可以说很惊人了</p>
+<h2 id="Demo页面"><a href="#Demo页面" class="headerlink" title="Demo页面"></a>Demo页面</h2><p>编译成功之后，把编译产物拿出来做了一个demo页面，地址是:  <a href="https://qwertyyb.github.io/wechat_qrcode_webassembly/demo.html">https://qwertyyb.github.io/wechat_qrcode_webassembly/demo.html</a> </p>
+<p>此页面也输出了图片中二维码的位置信息，具体的使用方法可以参考源码</p>
+<h2 id="下一步"><a href="#下一步" class="headerlink" title="下一步"></a>下一步</h2><p>到目前为止，成功的把微信二维码引擎编译成了webAssembly，可以在web中运行并成功的解码二维码内容。</p>
+<p>之所以构建编译此版本，是因为我需要在一个基于electron的项目中使用，所以接下来，会在此工具中引入，看是否有坑。</p>
+<p>另外，在编译过程中，遇到的这些问题也可以再深入研究一下，看下能否向opencv提个mr。</p>
+]]></content>
+      <categories>
+        <category>webAssembly, opencv</category>
+      </categories>
+      <tags>
+        <tag>webAssembly, opencv</tag>
+      </tags>
+  </entry>
+</search>

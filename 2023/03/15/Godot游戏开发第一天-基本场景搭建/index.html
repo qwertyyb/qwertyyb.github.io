@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 5.4.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/avatar.jpg">
+  <link rel="mask-icon" href="/images/avatar.jpg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha256-HtsXJanqjKTc8vVQjO4YMhiqFoXkfBsjBWcX91T1jr8=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"qwertyyb.github.io","root":"/","images":"/images","scheme":"Pisces","darkmode":true,"version":"8.15.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="使用Godot游戏引擎开发一款2D游戏，第一天，基本场景搭建">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Godot游戏开发第一天-基本场景搭建">
+<meta property="og:url" content="https://qwertyyb.github.io/2023/03/15/Godot%E6%B8%B8%E6%88%8F%E5%BC%80%E5%8F%91%E7%AC%AC%E4%B8%80%E5%A4%A9-%E5%9F%BA%E6%9C%AC%E5%9C%BA%E6%99%AF%E6%90%AD%E5%BB%BA/index.html">
+<meta property="og:site_name" content="虚幻">
+<meta property="og:description" content="使用Godot游戏引擎开发一款2D游戏，第一天，基本场景搭建">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://i.328888.xyz/2023/03/20/P8tO8.png">
+<meta property="og:image" content="https://i.328888.xyz/2023/03/20/PhBnp.png">
+<meta property="og:image" content="https://i.328888.xyz/2023/03/20/Phcxk.png">
+<meta property="og:image" content="https://i.328888.xyz/2023/03/20/PhmLL.png">
+<meta property="og:image" content="https://i.328888.xyz/2023/03/20/PG1eA.png">
+<meta property="og:image" content="https://i.328888.xyz/2023/03/20/PdGDd.png">
+<meta property="og:image" content="https://i.328888.xyz/2023/03/20/Pd6KV.png">
+<meta property="og:image" content="https://i.328888.xyz/2023/03/20/PhARC.png">
+<meta property="og:image" content="https://i.328888.xyz/2023/03/20/PhDSP.png">
+<meta property="og:image" content="https://user-images.githubusercontent.com/16240729/226806621-8926ba09-ecf9-4e75-bcea-51826c4b1e21.png">
+<meta property="og:image" content="https://user-images.githubusercontent.com/16240729/226806663-c8188445-033f-4dec-94e1-843646921026.png">
+<meta property="og:image" content="https://user-images.githubusercontent.com/16240729/226806950-4908fd43-4722-4100-a000-75bf52611483.png">
+<meta property="og:image" content="https://user-images.githubusercontent.com/16240729/226808705-263a262e-4b64-4234-9d5b-a0d44e147ecc.gif">
+<meta property="og:image" content="https://user-images.githubusercontent.com/16240729/226808698-407d534e-7ec6-4825-8c95-81c62c21ccfe.gif">
+<meta property="og:image" content="https://user-images.githubusercontent.com/16240729/226806673-c4ceb4bc-58cd-438b-9c25-e5167d27cee2.png">
+<meta property="og:image" content="https://user-images.githubusercontent.com/16240729/226806686-cd455e3b-0276-45f4-9c1e-d28e49d19106.png">
+<meta property="og:image" content="https://user-images.githubusercontent.com/16240729/226808713-5ea87759-a8e9-458a-96df-c88f53e29adc.gif">
+<meta property="article:published_time" content="2023-03-15T09:24:00.000Z">
+<meta property="article:modified_time" content="2023-04-12T05:28:21.011Z">
+<meta property="article:author" content="虚幻">
+<meta property="article:tag" content="游戏, godot">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.328888.xyz/2023/03/20/P8tO8.png">
+
+
+<link rel="canonical" href="https://qwertyyb.github.io/2023/03/15/Godot%E6%B8%B8%E6%88%8F%E5%BC%80%E5%8F%91%E7%AC%AC%E4%B8%80%E5%A4%A9-%E5%9F%BA%E6%9C%AC%E5%9C%BA%E6%99%AF%E6%90%AD%E5%BB%BA/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://qwertyyb.github.io/2023/03/15/Godot%E6%B8%B8%E6%88%8F%E5%BC%80%E5%8F%91%E7%AC%AC%E4%B8%80%E5%A4%A9-%E5%9F%BA%E6%9C%AC%E5%9C%BA%E6%99%AF%E6%90%AD%E5%BB%BA/","path":"2023/03/15/Godot游戏开发第一天-基本场景搭建/","title":"Godot游戏开发第一天-基本场景搭建"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>Godot游戏开发第一天-基本场景搭建 | 虚幻</title>
+  
+
+  <script src="/js/third-party/analytics/baidu-analytics.js"></script>
+  <script async src="https://hm.baidu.com/hm.js?512529800174ec76de81bf92990fed78"></script>
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">虚幻</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">陪伴像幼蝉钻进土壤，无声却能生长</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-sitemap"><a href="/sitemap.xml" rel="section"><i class="fa fa-sitemap fa-fw"></i>站点地图</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%8E%AF%E5%A2%83"><span class="nav-number">1.</span> <span class="nav-text">环境</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9F%BA%E6%9C%AC%E6%80%9D%E8%B7%AF"><span class="nav-number">2.</span> <span class="nav-text">基本思路</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Godot-2D-%E4%B8%AD%E7%9A%84%E7%89%A9%E7%90%86%E5%AD%A6"><span class="nav-number">3.</span> <span class="nav-text">Godot 2D 中的物理学</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA%E6%BB%91%E9%81%93-%E5%9C%B0%E9%9D%A2"><span class="nav-number">4.</span> <span class="nav-text">创建滑道(地面)</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B7%BB%E5%8A%A0%E7%89%A9%E7%90%86%E5%9C%B0%E9%9D%A2"><span class="nav-number">4.1.</span> <span class="nav-text">添加物理地面</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BB%99%E5%9C%B0%E9%9D%A2%E4%BB%A5%E5%BD%A2%E7%8A%B6"><span class="nav-number">4.2.</span> <span class="nav-text">给地面以形状</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BB%99%E5%BD%A2%E7%8A%B6%E4%BC%A0%E9%80%92%E7%82%B9%E9%9B%86"><span class="nav-number">4.3.</span> <span class="nav-text">给形状传递点集</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%8D%E7%BD%AE%E5%81%8F%E7%A7%BB%E7%9A%84%E5%A4%84%E7%90%86"><span class="nav-number">4.4.</span> <span class="nav-text">位置偏移的处理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BB%99%E5%9C%B0%E9%9D%A2%E4%B8%8A%E8%89%B2"><span class="nav-number">4.5.</span> <span class="nav-text">给地面上色</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B7%BB%E5%8A%A0%E4%BA%BA%E7%89%A9"><span class="nav-number">5.</span> <span class="nav-text">添加人物</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B7%BB%E5%8A%A0"><span class="nav-number">5.1.</span> <span class="nav-text">添加</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%81%87%E5%88%B0%E9%97%AE%E9%A2%98"><span class="nav-number">5.2.</span> <span class="nav-text">遇到问题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A7%A3%E5%86%B3%E9%97%AE%E9%A2%98"><span class="nav-number">5.3.</span> <span class="nav-text">解决问题</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%8B%E4%B8%80%E6%AD%A5"><span class="nav-number">6.</span> <span class="nav-text">下一步</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="虚幻"
+      src="https://avatars.githubusercontent.com/u/16240729?v=4">
+  <p class="site-author-name" itemprop="name">虚幻</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">14</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/qwertyyb" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;qwertyyb" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://qwertyyb.github.io/2023/03/15/Godot%E6%B8%B8%E6%88%8F%E5%BC%80%E5%8F%91%E7%AC%AC%E4%B8%80%E5%A4%A9-%E5%9F%BA%E6%9C%AC%E5%9C%BA%E6%99%AF%E6%90%AD%E5%BB%BA/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://avatars.githubusercontent.com/u/16240729?v=4">
+      <meta itemprop="name" content="虚幻">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="虚幻">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="Godot游戏开发第一天-基本场景搭建 | 虚幻">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Godot游戏开发第一天-基本场景搭建<a href="https://github.com/qwertyyb/qwertyyb.github.io/tree/master/source/_posts/Godot%E6%B8%B8%E6%88%8F%E5%BC%80%E5%8F%91%E7%AC%AC%E4%B8%80%E5%A4%A9-%E5%9F%BA%E6%9C%AC%E5%9C%BA%E6%99%AF%E6%90%AD%E5%BB%BA.md" class="post-edit-link" title="编辑" rel="noopener" target="_blank"><i class="fa fa-pen-nib"></i></a>
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2023-03-15 17:24:00" itemprop="dateCreated datePublished" datetime="2023-03-15T17:24:00+08:00">2023-03-15</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-04-12 13:28:21" itemprop="dateModified" datetime="2023-04-12T13:28:21+08:00">2023-04-12</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%B8%B8%E6%88%8F-godot/" itemprop="url" rel="index"><span itemprop="name">游戏, godot</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>使用Godot游戏引擎开发一款2D游戏，第一天，基本场景搭建</p>
+<span id="more"></span>
+
+<blockquote>
+<p>Godot 是一款开源的游戏开发引擎，支持 2D 和 3D 游戏的开发，脚本可以使用类似 <code>python</code> 语法的 <code>gdscript</code> 或微软的 <code>C#</code>，从文档上来看，<code>Godot</code> 相比 <code>Unity</code> 要轻量许多</p>
+</blockquote>
+<p>本次开发使用的 <code>Godot</code> 的 3.5.x 版本。虽然刚好 4.0 版本已经正式发布了，但是 4.0 版本的发布明显仓促，官方 4.0 版本的英文文档尚不完全，中文文档仍然是在 3.5 的版本，而且 4.0 作为新版本必定带着新的 Bug，最后官方也承诺 3.x 版本作为 LTS 会继续进行维护。所以这次就使用 3.5.2 版本进行开发，暂不去尝鲜 4.0 版本。</p>
+<p>这次只是 <code>Godot</code> 的初使用，所以先模仿做一个简单的游戏来学习一下。Alto’s Adventure 是一个不错的选择。</p>
+<p><a href="http://altosadventure.com/" title="Alto&#39;s Adventure">Alto’s Adventure</a> 是一个 2D 的滑雪游戏。</p>
+<p><img src="https://i.328888.xyz/2023/03/20/P8tO8.png" alt="Alto&#39;s Adventure"></p>
+<p>现在开始吧</p>
+<h2 id="环境"><a href="#环境" class="headerlink" title="环境"></a>环境</h2><ul>
+<li><code>Godot</code> 3.5.2</li>
+<li><code>MacOS</code> 13.2.1</li>
+</ul>
+<h2 id="基本思路"><a href="#基本思路" class="headerlink" title="基本思路"></a>基本思路</h2><p>先做一个简单的滑道(地面)和人物，使用 <code>Godot</code> 的物理引擎，开始时给人物一个初始速度，让人物在重力场景下沿着滑道进行滑动。</p>
+<p>这里有几个概念: 物理引擎、地面和人物</p>
+<h2 id="Godot-2D-中的物理学"><a href="#Godot-2D-中的物理学" class="headerlink" title="Godot 2D 中的物理学"></a>Godot 2D 中的物理学</h2><p>Godot 2D 涉及到物理体的主要有<code>Area2D</code>、<code>StaticBody2D</code>、<code>RigidBody2D</code>、<code>KimentBody2D</code>。</p>
+<ul>
+<li>Area2D: 可以用来检测另一个物理体对当前 Area2D 实例的碰撞，也可用于覆盖物理属性, 例如一定区域内的重力或阻尼。</li>
+<li>StaticBody2D: 物理引擎不移动的主体. 它参与碰撞检测, 但不会响应碰撞而移动. 它们通常用于属于环境的对象或不需要任何动态行为的对象，比如地面</li>
+<li>RigidBody2D: 有质量，受重力和阻力等物理影响的物体，类比现实中的物体。你不能直接改变它的状态，而是在其中施加力，由物理引擎来计算速度</li>
+<li>KinematicBody2D: 没有质量，不受物理引擎的约束，但是可以检测和其它物理体的碰撞，它的移动和碰撞响应必须通过代码控制</li>
+</ul>
+<p>基本上认识以上四种物理物体就足够使用了</p>
+<p>在此游戏中，滑道是不移动的，人物在其上进行滑动。所以地面是一个 <code>StaticBody2D</code>, 而人物是一个 <code>RigidBody2D</code>。</p>
+<h2 id="创建滑道-地面"><a href="#创建滑道-地面" class="headerlink" title="创建滑道(地面)"></a>创建滑道(地面)</h2><h3 id="添加物理地面"><a href="#添加物理地面" class="headerlink" title="添加物理地面"></a>添加物理地面</h3><p>首先往场景中添加一个 <code>StaticBody2D</code>，命名为 <code>Ground</code>，如下图。</p>
+<p><img src="https://i.328888.xyz/2023/03/20/PhBnp.png" alt="添加Ground节点"></p>
+<p>有一个配置警告，提示需要添加一个 <code>CollisionShape2D</code> 或 <code>CollisionPolygon2D</code> 为其子节点，而且添加了 <code>StaticBody2D</code> 后，预览场景也并没有任何变化，这是怎么回事？</p>
+<h3 id="给地面以形状"><a href="#给地面以形状" class="headerlink" title="给地面以形状"></a>给地面以形状</h3><p><code>StaticBody2D</code> 有摩擦力等物理属性，但是目前并没有一个确切的形状来描述 <code>Ground</code>，那人物怎么知道应该停留在哪个位置是地面呢？而所谓的 <code>CollisionShape2D</code> 和 <code>CollisonPolygon2D</code> 也就是碰撞体形状和碰撞体多边形，就是用来给 <code>Ground</code> 分配形状的，只有有了形状，物理引擎才能按物品的形状来检测碰撞。</p>
+<p>那 <code>CollisionShape2D</code> 和 <code>CollisionPolygon2D</code> 应该使用哪个呢？</p>
+<ul>
+<li><code>CollisionShape2D</code> 预定义了椭圆、圆、凹多边形、凸多边形、矩形、线形、线段这几个形状，如果物品的形状是这几种，或者这几种形状可以叠加出来的形状，那可以使用一个或多个<code>CollisionShape2D</code> 作为子节点</li>
+<li><code>CollisionPolygon2D</code> 是把一些点连起来，作为碰撞形状的，所以相对于<code>CollisionShape2D</code>来说更加自由方便，需要提供一个顶点的列表作为 <code>polygon</code> 属性，然后 <code>CollisionPolygon2D</code> 将按顺序，第一个点连第二个点，第二个点连第三个点，以此类推，直到最后的最后最后一个点连第一个点，形式一个闭合的形状</li>
+</ul>
+<p>那作为此游戏中的滑道(地面)，正如下图所示，主要复杂在，它有一条曲线，而这条曲线确定了最好使用 <code>CollisionPolygon2D</code>。添加一个 <code>CollisionPolygon2D</code> 节点到 <code>Ground</code> 中，命名为<code>GroundShape</code>。</p>
+<p>在 <code>GroundShape</code> 右边有一个警告提示，提示 <code>polygon</code> 属性为空，不起作用，而 <code>polygon</code> 属性就是这个多边形的顶点，那么这个形状的点如何确定呢？手工填写吗？未免太低效，后续也不方便调试，这里可以使用 <code>Path2D</code> 节点</p>
+<p><img src="https://i.328888.xyz/2023/03/20/Phcxk.png" alt="添加GroundShape"></p>
+<h3 id="给形状传递点集"><a href="#给形状传递点集" class="headerlink" title="给形状传递点集"></a>给形状传递点集</h3><p><code>Path2D</code> 节点可以生成曲线，先在 <code>GroundShape</code> 中添加 <code>Path2D</code> 子节点，命名为 <code>GroundShapePath</code>。然后随便画个曲线如下(可以不用闭合，<code>GroundShape</code> 会自动帮助我们闭合)。下一步要做的就是把 <code>GroundShapePath</code> 中的点集取出来传递给 <code>GroundShapePath</code>。</p>
+<p><img src="https://i.328888.xyz/2023/03/20/PhmLL.png" alt="添加GroundShapePath"></p>
+<p>查看 <code>Path2D</code> 的文档，发现曲线信息存储在 <code>curve</code> 属性上，而 <code>curve</code> 属性是一个 <code>Curve2D</code> 实例，<code>Curve2D</code> 上有 <code>get_baked_points</code> 会返回曲线上的点，所以我们通过 <code>GroundShapePath.curve.get_baked_points()</code> 就能得到曲线上的点，下一步，把曲线上的点传给 <code>GroundShape</code> 的 <code>polygon</code> 属性，为此，需要写一点脚本。</p>
+<p>右键单击 <code>GroundShape</code> 节点 -&gt; 添加脚本，在 <code>GroundShape.gd</code> 中填入以下代码</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">tool</span><br><span class="line">extends CollisionPolygon2D</span><br><span class="line"></span><br><span class="line">func _ready():</span><br><span class="line">	polygon = get_node(&quot;GroundShapePath&quot;).curve.get_baked_points()</span><br></pre></td></tr></table></figure>
+
+<p>代码很简单，节点ready的时候，获取子节点 <code>GroundShapePath</code> 的曲线点集，赋值给 <code>GroundShape</code> 的 <code>polygon</code> 属性。这里需要注意的是，子节点的 <code>_ready</code> 调用在父节点之前。在 <code>gdscript.gd</code> 的第一行添加 <code>tool</code> 是为了方便在编辑器中也能预览效果。现在保存脚本内容，保存场景为 <code>Game.tscn</code>，然后关闭场景，重新打开此场景，现在应该就能看到 <code>GroundShape</code> 的提示消失了，并且能够看到它的形状。如下图所示，彩色部分就是 <code>GroundShape</code> 的开关了，点击可以看到开关的点</p>
+<p><img src="https://i.328888.xyz/2023/03/20/PG1eA.png" alt="GroundShape"></p>
+<h3 id="位置偏移的处理"><a href="#位置偏移的处理" class="headerlink" title="位置偏移的处理"></a>位置偏移的处理</h3><p>正常情况下，<code>GroundShape</code> 的边会刚好和 <code>GroundShapePath</code> 的边完全重合，预览区域会向上面一样只显示一条曲线。但是如果在上述步骤或后面的步骤中，移动了 <code>GroundShapePath</code> 或 <code>GroundShape</code> 的位置，那就会像下面这样出现两条曲线。这时因为 <code>GroundShapePath</code> 和 <code>GroundShape</code> 的位置出现了偏移。</p>
+<p><img src="https://i.328888.xyz/2023/03/20/PdGDd.png" alt="位置偏移"></p>
+<p>而出现偏移的原因是因为 <code>Godot</code> 中的每个节点都有一个 <code>transform</code> 属性，记录了节点的偏移、缩放和旋转信息，也称之为变换，如果对 <code>GroundShapePath</code> 进行了变换，那曲线上的点就都会在渲染时，应用对应的变换，注意这里只是渲染时应用了变换，通过 <code>GroundShapePath</code> 拿到的点的信息，仍然是没有变换的位置，最终在赋值给其父节点 <code>GroundShape</code> 时，就会有一个偏移。这里可以通过在编辑器中查看 <code>GroundShapePath</code> 的 <code>transform</code> 属性进行确认。这里的解决方式也很简单，只要保持 <code>GroundShapePath</code> 没有进行任何变换就可以了，可以点击输入框左边的图标恢复默认值。</p>
+<p><img src="https://i.328888.xyz/2023/03/20/Pd6KV.png" alt="节点的变换"></p>
+<h3 id="给地面上色"><a href="#给地面上色" class="headerlink" title="给地面上色"></a>给地面上色</h3><p>现在点击左上角运行场景，发现场景中什么都没有，不像编辑器中有一个彩色的图标标注地面。这是因为 <code>GroundShape</code> 只有形状没有颜色，而在编辑器中之所以能看到了，是为了方便调试预览，在实际的场景中是看不到的。为了能够在实际运行时看到和编辑器中一样的效果，可以在调试菜单中勾选  “显示碰撞区域” 的选项，然后再运行，就会发现运行效果中显示出了和编辑器一样的彩色。如果只勾选 “显示导航”，就会看到 <code>GroundShapePath</code> 了。</p>
+<p>虽然可以使用上面两个调试菜单项，但是这两个菜单毕竟只是为了方便调试，只是节目效果，并非地面真的有了颜色。所以还需要往 <code>Ground</code> 上填充真正的颜色，可以打开 <code>gdscript.gd</code> 脚本中添加如下函数。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">func _draw():</span><br><span class="line">  draw_polygon(polygon, [Color(1, 1, 1)])</span><br></pre></td></tr></table></figure>
+
+<p>这里使用顶点数据，向顶点闭合的图形中填充了白色，如此去掉调试的两个勾选项之后，再运行场景，就发现地面有了白色，在编辑器中关闭场景后重新启动，预览区域 <code>GroundShape</code> 也有了白色填充。</p>
+<p><img src="https://i.328888.xyz/2023/03/20/PhARC.png" alt="运行效果"></p>
+<p><img src="https://i.328888.xyz/2023/03/20/PhDSP.png" alt="编辑器效果"></p>
+<p>可以选中 <code>GroundShapePath</code>，然后点击预览区域上方的锁图标，点击锁定位置，这样就不用担心 <code>GroundShapePath</code> 被意外移动了。</p>
+<h2 id="添加人物"><a href="#添加人物" class="headerlink" title="添加人物"></a>添加人物</h2><h3 id="添加"><a href="#添加" class="headerlink" title="添加"></a>添加</h3><p>有了添加地面的经验，人物的添加就会顺畅很多，按下面步骤添加即可:</p>
+<ol>
+<li><p>先在根节点下添加 <code>RigidBody2D</code> 节点，命名为 <code>Player</code>，此时会提示没有碰撞形状节点</p>
+</li>
+<li><p>不着急添加碰撞开关，可以先在 <code>Player</code> 节点下添加 <code>Sprite</code> 节点，设置 <code>Sprite</code> 的 <code>Texture</code> 属性。</p>
+</li>
+<li><p>选中 <code>Sprite</code> 节点，点击预览区域上方的 <code>Sprite</code> 打开转换菜单，点击 <strong>创建CollisionPolygon2D</strong> 兄弟节点，然后在弹窗中点击右下角的 <strong>创建CollisionPolygon2D</strong> 此时，会在 <code>Sprite</code> 的同级添加 <code>CollisonPolygon2D</code> 节点，而且 <code>Player</code> 节点也没有了错误提示。这一步是把 <code>Sprite</code> 转换为 <code>RigidBody2D</code> 所需要的 <code>CollisionPolygon2D</code>。修改 <code>CollisionPolygon2D</code> 命名为 <code>PlayerBody</code>。</p>
+<p> <img src="https://user-images.githubusercontent.com/16240729/226806621-8926ba09-ecf9-4e75-bcea-51826c4b1e21.png" alt="创建CollisionPolygon2D子节点"></p>
+<p> <img src="https://user-images.githubusercontent.com/16240729/226806663-c8188445-033f-4dec-94e1-843646921026.png" alt="CollisionPolygon2D子节点"></p>
+</li>
+<li><p>此时我们人物就已经添加OK了</p>
+<p> <img src="https://user-images.githubusercontent.com/16240729/226806950-4908fd43-4722-4100-a000-75bf52611483.png" alt="Player"></p>
+</li>
+</ol>
+<p>点击右上角运行当前场景，看看效果。</p>
+<p><img src="https://user-images.githubusercontent.com/16240729/226808705-263a262e-4b64-4234-9d5b-a0d44e147ecc.gif" alt="运行效果"></p>
+<h3 id="遇到问题"><a href="#遇到问题" class="headerlink" title="遇到问题"></a>遇到问题</h3><p>可能会遇到以下几个问题:</p>
+<ol>
+<li><p>人物在左上角，被遮挡了一半。</p>
+</li>
+<li><p>人物落下后，静止了，没有沿着地面滑动。</p>
+</li>
+</ol>
+<p>  <img src="https://user-images.githubusercontent.com/16240729/226808698-407d534e-7ec6-4825-8c95-81c62c21ccfe.gif" alt="遮挡、静止"></p>
+<ol start="3">
+<li><p>如上运行效果所示，人物落下后，沿着地面翻滚。</p>
+</li>
+<li><p>整个画面没有跟随人物移动，人物最终会滑出画面。</p>
+</li>
+</ol>
+<h3 id="解决问题"><a href="#解决问题" class="headerlink" title="解决问题"></a>解决问题</h3><ol>
+<li><p>第一个问题可以通过在编辑器中挪动 <code>Player</code> 节点的位置，把 <code>Player</code> 节点挪到编辑器中蓝色区域内的地面上方即可，蓝色区域就是运行时的可见区域。</p>
+</li>
+<li><p>落下后静止了，可能有两个原因</p>
+<ul>
+<li><p>地面坡度问题，这个可以通过调整 <code>GroundShapePath</code> 曲线来解决</p>
+</li>
+<li><p>摩擦力的问题，这个人与地面的摩擦力太大，导致人物静止，不会沿地面滑动。所以我们可以调整 <code>Ground</code> 和 <code>Player</code> 的摩擦系数，都调整为0。调整方式为选择节点，在属性面板的 <code>Physics Material Override</code> 点击 <strong>新建PhysicsMaterial</strong>，然后把 <code>friction</code> 设置为 0,  <code>Ground</code> 或 <code>Player</code> 最好都按上面的方式调整。</p>
+<p> <img src="https://user-images.githubusercontent.com/16240729/226806673-c4ceb4bc-58cd-438b-9c25-e5167d27cee2.png" alt="调整摩擦系数"></p>
+</li>
+</ul>
+</li>
+<li><p>人物落下后翻滚有两个原因</p>
+<ul>
+<li><p>摩擦力的问题，摩擦力太大，导致无法滑动，人物只能翻滚，这个解决方案与上面一致。</p>
+</li>
+<li><p>碰撞体形状问题，可能是人物 <code>Sprite</code> 生成的碰撞形状底部不够平滑，导致滑动过程中多次碰撞，造成人物的翻滚。为此当然可以把碰撞形状 <code>PlayerShape</code> 的底部调平滑，但是这里使用另一种方式，在 <code>Player</code> 下添加 <code>CollisionShape2D</code> 作为子节点，与 <code>PlayerShape</code> 同级，命名为 <code>BoardShape</code>。在属性面板添加 <code>CapsuleShape2D</code> 胶囊形状，也即椭圆形，调整 <code>BoardShape</code> 的位置和大小，调整至如下图，让人物碰撞形状的底部足够光滑。这样 <code>Player</code> 的碰撞形状，实际上就是由 <code>PlayerShape</code> 和 <code>BoardShape</code> 组合而成的。</p>
+</li>
+<li><p><code>Player</code> 的重心太高，众所周知重心太高，也会导致翻滚，为此需要降低 <code>Player</code> 的重心，而通过 <code>Godot</code> 的文档，了解到 <code>RigidBody2D</code> 的重心就是其原点，也就是点击 <code>Player</code> 时出现的十字光标的位置，这个光标的位置不能移动，但是可以移动其内部的子节点的位置，所以可以把 <code>Player</code> 的三个子节点 <code>Sprite</code>, <code>PlayerShape</code> 和 <code>BoardShape</code> 向上平移同样的距离，使重心下降。可以调整三个节点的 <code>transform</code> 属性中 y 的位置，也可以在预览区域拖动挪动位置。最后调整后如图所示</p>
+<p> <img src="https://user-images.githubusercontent.com/16240729/226806686-cd455e3b-0276-45f4-9c1e-d28e49d19106.png" alt="调整重心"></p>
+</li>
+</ul>
+</li>
+</ol>
+<p>处理完后上面的三个问题后，再运行测试，发现人物已经能沿着滑道滑动了。</p>
+<p>  <img src="https://user-images.githubusercontent.com/16240729/226808713-5ea87759-a8e9-458a-96df-c88f53e29adc.gif" alt="最终效果"></p>
+<ol start="4">
+<li><code>Godot</code> 提供了一种非常方便的方式，让整个画面能跟随人物一起移动—— <code>Camera2D</code>, 我们只需要把 <code>Camera2D</code> 添加为 <code>Player</code> 的子节点，再次运行就会发现画面可以跟随人物移动了。</li>
+</ol>
+<h2 id="下一步"><a href="#下一步" class="headerlink" title="下一步"></a>下一步</h2><p>项目的基本场景已经搭建OK了，剩余的就是不断完善。下一步，将会完善滑道，让滑道无限随机生成。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          
+
+<div class="post-copyright">
+<ul>
+  <li class="post-copyright-author">
+      <strong>本文作者： </strong>虚幻
+  </li>
+  <li class="post-copyright-link">
+      <strong>本文链接：</strong>
+      <a href="https://qwertyyb.github.io/2023/03/15/Godot%E6%B8%B8%E6%88%8F%E5%BC%80%E5%8F%91%E7%AC%AC%E4%B8%80%E5%A4%A9-%E5%9F%BA%E6%9C%AC%E5%9C%BA%E6%99%AF%E6%90%AD%E5%BB%BA/" title="Godot游戏开发第一天-基本场景搭建">https://qwertyyb.github.io/2023/03/15/Godot游戏开发第一天-基本场景搭建/</a>
+  </li>
+  <li class="post-copyright-license">
+      <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/%E6%B8%B8%E6%88%8F-godot/" rel="tag"><i class="fa fa-tag"></i> 游戏, godot</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2023/03/15/Godot%E6%B8%B8%E6%88%8F%E5%BC%80%E5%8F%91%E7%AC%AC%E4%BA%8C%E5%A4%A9-%E9%9A%8F%E6%9C%BA%E5%9C%B0%E5%9B%BE%E7%94%9F%E6%88%90/" rel="prev" title="Godot游戏开发第二天-随机地图生成">
+                  <i class="fa fa-chevron-left"></i> Godot游戏开发第二天-随机地图生成
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2023/03/25/%E5%AE%9E%E7%94%A8%E5%B7%A5%E5%85%B7/" rel="next" title="实用工具">
+                  实用工具 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 2015 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">虚幻</span>
+</div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/pisces/" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"none","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js"></script>
+
+
+
+</body>
+</html>

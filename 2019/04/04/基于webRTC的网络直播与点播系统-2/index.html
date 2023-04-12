@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 5.4.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/avatar.jpg">
+  <link rel="mask-icon" href="/images/avatar.jpg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha256-HtsXJanqjKTc8vVQjO4YMhiqFoXkfBsjBWcX91T1jr8=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"qwertyyb.github.io","root":"/","images":"/images","scheme":"Pisces","darkmode":true,"version":"8.15.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="WebRTC是在两个浏览器之间建立点对点实时通信的技术，在双方进行通信时不需要中心服务器的参与。然而在通信开始前，双方需要交换一些会话信息，所以需要知道彼此双方的IP地址和端口。 而目前的网络环境下，通信的两台主机往往位于局域网中，并不会分配到公网IP地址，仅有私网IP地址，两台主机是没有办法进行通信的，为此需要NAT穿透服务，把私网IP映射到公网IP上，以此来实现双方的通信。NAT穿透的原理请">
+<meta property="og:type" content="article">
+<meta property="og:title" content="基于webRTC的网络直播与点播系统-2">
+<meta property="og:url" content="https://qwertyyb.github.io/2019/04/04/%E5%9F%BA%E4%BA%8EwebRTC%E7%9A%84%E7%BD%91%E7%BB%9C%E7%9B%B4%E6%92%AD%E4%B8%8E%E7%82%B9%E6%92%AD%E7%B3%BB%E7%BB%9F-2/index.html">
+<meta property="og:site_name" content="虚幻">
+<meta property="og:description" content="WebRTC是在两个浏览器之间建立点对点实时通信的技术，在双方进行通信时不需要中心服务器的参与。然而在通信开始前，双方需要交换一些会话信息，所以需要知道彼此双方的IP地址和端口。 而目前的网络环境下，通信的两台主机往往位于局域网中，并不会分配到公网IP地址，仅有私网IP地址，两台主机是没有办法进行通信的，为此需要NAT穿透服务，把私网IP映射到公网IP上，以此来实现双方的通信。NAT穿透的原理请">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2019-04-04T03:08:25.000Z">
+<meta property="article:modified_time" content="2023-04-12T05:28:21.012Z">
+<meta property="article:author" content="虚幻">
+<meta property="article:tag" content="webRTC, 信令服务器, NAT穿透服务, Cotun">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://qwertyyb.github.io/2019/04/04/%E5%9F%BA%E4%BA%8EwebRTC%E7%9A%84%E7%BD%91%E7%BB%9C%E7%9B%B4%E6%92%AD%E4%B8%8E%E7%82%B9%E6%92%AD%E7%B3%BB%E7%BB%9F-2/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://qwertyyb.github.io/2019/04/04/%E5%9F%BA%E4%BA%8EwebRTC%E7%9A%84%E7%BD%91%E7%BB%9C%E7%9B%B4%E6%92%AD%E4%B8%8E%E7%82%B9%E6%92%AD%E7%B3%BB%E7%BB%9F-2/","path":"2019/04/04/基于webRTC的网络直播与点播系统-2/","title":"基于webRTC的网络直播与点播系统-2"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>基于webRTC的网络直播与点播系统-2 | 虚幻</title>
+  
+
+  <script src="/js/third-party/analytics/baidu-analytics.js"></script>
+  <script async src="https://hm.baidu.com/hm.js?512529800174ec76de81bf92990fed78"></script>
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">虚幻</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">陪伴像幼蝉钻进土壤，无声却能生长</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-sitemap"><a href="/sitemap.xml" rel="section"><i class="fa fa-sitemap fa-fw"></i>站点地图</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AE%80%E4%BB%8B"><span class="nav-number">1.</span> <span class="nav-text">简介</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%89%E8%A3%85%E8%BF%87%E7%A8%8B"><span class="nav-number">2.</span> <span class="nav-text">安装过程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E4%B8%8B%E8%BD%BD"><span class="nav-number">2.1.</span> <span class="nav-text">1. 下载</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E9%85%8D%E7%BD%AE"><span class="nav-number">2.2.</span> <span class="nav-text">2.配置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E8%BF%90%E8%A1%8C"><span class="nav-number">2.3.</span> <span class="nav-text">3. 运行</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-%E6%B5%8B%E8%AF%95%E8%BF%90%E8%A1%8C"><span class="nav-number">2.4.</span> <span class="nav-text">4. 测试运行</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-%E9%85%8D%E7%BD%AEkurento%E6%9C%8D%E5%8A%A1%E7%9A%84%E7%A9%BF%E9%80%8F%E6%9C%8D%E5%8A%A1"><span class="nav-number">2.5.</span> <span class="nav-text">5. 配置kurento服务的穿透服务</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="虚幻"
+      src="https://avatars.githubusercontent.com/u/16240729?v=4">
+  <p class="site-author-name" itemprop="name">虚幻</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">14</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/qwertyyb" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;qwertyyb" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://qwertyyb.github.io/2019/04/04/%E5%9F%BA%E4%BA%8EwebRTC%E7%9A%84%E7%BD%91%E7%BB%9C%E7%9B%B4%E6%92%AD%E4%B8%8E%E7%82%B9%E6%92%AD%E7%B3%BB%E7%BB%9F-2/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://avatars.githubusercontent.com/u/16240729?v=4">
+      <meta itemprop="name" content="虚幻">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="虚幻">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="基于webRTC的网络直播与点播系统-2 | 虚幻">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          基于webRTC的网络直播与点播系统-2<a href="https://github.com/qwertyyb/qwertyyb.github.io/tree/master/source/_posts/%E5%9F%BA%E4%BA%8EwebRTC%E7%9A%84%E7%BD%91%E7%BB%9C%E7%9B%B4%E6%92%AD%E4%B8%8E%E7%82%B9%E6%92%AD%E7%B3%BB%E7%BB%9F-2.md" class="post-edit-link" title="编辑" rel="noopener" target="_blank"><i class="fa fa-pen-nib"></i></a>
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2019-04-04 11:08:25" itemprop="dateCreated datePublished" datetime="2019-04-04T11:08:25+08:00">2019-04-04</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-04-12 13:28:21" itemprop="dateModified" datetime="2023-04-12T13:28:21+08:00">2023-04-12</time>
+    </span>
+
+  
+    <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>WebRTC是在两个浏览器之间建立点对点实时通信的技术，在双方进行通信时不需要中心服务器的参与。然而在通信开始前，双方需要交换一些会话信息，所以需要知道彼此双方的IP地址和端口。</p>
+<p>而目前的网络环境下，通信的两台主机往往位于局域网中，并不会分配到公网IP地址，仅有私网IP地址，两台主机是没有办法进行通信的，为此需要NAT穿透服务，把私网IP映射到公网IP上，以此来实现双方的通信。NAT穿透的原理请参考</p>
+<p>本节主要说明NAT穿透服务coturn的搭建</p>
+<span id="more"></span>
+<h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p><code>coturn</code> 是一个免费的开源的 <code>TURN/STUN</code> 服务器。coturn 服务器完整的实现了 <code>STUN/TURN/ICE</code> 协议，支持 P2P 穿透防火墙。</p>
+<p>STUN 服务器用于获取设备的外部网络地址<br>TURN 服务器是在点对点失败后用于通信中继。<br><code>WebRTC</code> 建立连接的步骤大概是这样的：</p>
+<p>客户端（浏览器）直接尝试直连；<br>如果如果直连则通过 STUN 服务器进行穿透；<br>如果无法穿透则通过 TURN 服务器进行中转。</p>
+<h2 id="安装过程"><a href="#安装过程" class="headerlink" title="安装过程"></a>安装过程</h2><p>安装方式，apt-get二进制文件安装</p>
+<h3 id="1-下载"><a href="#1-下载" class="headerlink" title="1. 下载"></a>1. 下载</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get install coturn</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-配置"><a href="#2-配置" class="headerlink" title="2.配置"></a>2.配置</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo vim /etc/turnserver.conf</span><br></pre></td></tr></table></figure>
+<p>配置项有很多，都以#开头，表示注释，也说明默认配置或配置示例<br>配置如下：(没有列出的配置不用修改，列出的配置去掉前面的#取消注释并修改如下)</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">listening-ip=&lt;内网IP&gt;</span><br><span class="line">reply-ip=&lt;内网IP&gt;</span><br><span class="line">external-ip=&lt;外网IP&gt;</span><br><span class="line">fingerprint</span><br><span class="line">lt-cred-mech</span><br><span class="line">realm=kurento.org</span><br><span class="line">user=&lt;username&gt;:&lt;password&gt;</span><br></pre></td></tr></table></figure>
+<p>这在段配置可以参考 <a href="https://doc-kurento.readthedocs.io/en/6.9.0/user/faq.html"><code>kurento</code> 文档中的配置</a></p>
+<p><strong>配置说明</strong></p>
+<p>内网IP: 云服务器一般也处于服务商的内网中，一般以10开头，可通过运行命令 <code>ifconfig</code> 查看</p>
+<p>外网IP: 云服务器一般会有一个外网IP地址，可在服务商平台查看</p>
+<p>username: turn转发服务的用户名</p>
+<p>password: turn转发服务的密码，这里采用最简单的静态密码，所以密码不能以0x开头，否则会被以为是一个密钥，具体的配置说明可查看 <a href="https://github.com/coturn/coturn/wiki/turnserver">coturn的配置文档</a></p>
+<p>然后执行命令</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo vim /etc/default/coturn</span><br></pre></td></tr></table></figure>
+<p>在 <code>TURNSERVER_ENABLED=1</code> 前面加#注释掉这一行，然后即可随系统自动启动</p>
+<h3 id="3-运行"><a href="#3-运行" class="headerlink" title="3. 运行"></a>3. 运行</h3><p>在控制台执行命令</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo systemctl start coturn</span><br></pre></td></tr></table></figure>
+<p><strong>注意</strong></p>
+<p>coturn穿透服务需要随机使用UDP端口，所以需要放开服务器的49152到65535(coturn的默认使用的端口范围)的UDP服务的端口，或许需要在服务器或服务商的安全组中进行调整</p>
+<h3 id="4-测试运行"><a href="#4-测试运行" class="headerlink" title="4. 测试运行"></a>4. 测试运行</h3><p>测试coturn服务是正常运行的方法，只需要向服务器发起ICE请求，若返回了请求主机的IP地址就证明coturn服务已正常运行，可在<br><a href="https://webrtc.github.io/samples/src/content/peerconnection/trickle-ice/">Trickle ICE</a> 进行测试<br>在URI处填入turn:&lt;服务器外网IP&gt;:3478,再填入用户名和密码，添加后Gather candidates, 看是否显示出了当前的主机IP地址</p>
+<h3 id="5-配置kurento服务的穿透服务"><a href="#5-配置kurento服务的穿透服务" class="headerlink" title="5. 配置kurento服务的穿透服务"></a>5. 配置kurento服务的穿透服务</h3><p>在上一步，已经使用 <code>docker</code> 的方式安装了 <code>kurento</code> 媒体服务器，现在只需要修改 <code>docker-compose.yml</code> 文件如下:</p>
+<figure class="highlight yml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">version:</span> <span class="string">&quot;3&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="attr">services:</span></span><br><span class="line">  <span class="attr">kms:</span></span><br><span class="line">    <span class="attr">container_name:</span> <span class="string">kms</span></span><br><span class="line">    <span class="attr">image:</span> <span class="string">kurento/kurento-media-server:xenial-latest</span></span><br><span class="line">    <span class="attr">ports:</span></span><br><span class="line">       <span class="bullet">-</span> <span class="string">&quot;8888:8888&quot;</span></span><br><span class="line">    <span class="attr">volumes:</span></span><br><span class="line">       <span class="bullet">-</span> <span class="string">./WebRtcEndpoint.conf.ini:/etc/kurento/modules/kurento/WebRtcEndpoint.conf.ini</span></span><br></pre></td></tr></table></figure>
+<p>然后在 <code>docker-compose.yml</code> 的同级目录下新增文件 <code>WebRtcEndpoint.conf.ini</code> 文件，内容如下:</p>
+<figure class="highlight yml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">turnURL=&lt;username&gt;:&lt;password&gt;@&lt;serverIP&gt;:&lt;serverPort&gt;</span></span><br></pre></td></tr></table></figure>
+<p><strong>说明</strong></p>
+<ul>
+<li>username: turn服务的用户名，在上面配置的</li>
+<li>password: turn服务用户名对应的密码，上面已经配置</li>
+<li>serverIp: turn服务运行的服务器的公网IP</li>
+<li>serverPort: turn服务运行的端口，如果没有修改过coturn的默认配置，则默认端口为3478</li>
+</ul>
+<p>执行命令</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker-compose restart kms</span><br></pre></td></tr></table></figure>
+<p>重启kurento media server使配置生效，至此，本章完成</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          
+
+<div class="post-copyright">
+<ul>
+  <li class="post-copyright-author">
+      <strong>本文作者： </strong>虚幻
+  </li>
+  <li class="post-copyright-link">
+      <strong>本文链接：</strong>
+      <a href="https://qwertyyb.github.io/2019/04/04/%E5%9F%BA%E4%BA%8EwebRTC%E7%9A%84%E7%BD%91%E7%BB%9C%E7%9B%B4%E6%92%AD%E4%B8%8E%E7%82%B9%E6%92%AD%E7%B3%BB%E7%BB%9F-2/" title="基于webRTC的网络直播与点播系统-2">https://qwertyyb.github.io/2019/04/04/基于webRTC的网络直播与点播系统-2/</a>
+  </li>
+  <li class="post-copyright-license">
+      <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/webRTC-%E4%BF%A1%E4%BB%A4%E6%9C%8D%E5%8A%A1%E5%99%A8-NAT%E7%A9%BF%E9%80%8F%E6%9C%8D%E5%8A%A1-Cotun/" rel="tag"><i class="fa fa-tag"></i> webRTC, 信令服务器, NAT穿透服务, Cotun</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2019/04/03/%E5%9F%BA%E4%BA%8EwebRTC%E7%9A%84%E7%BD%91%E7%BB%9C%E7%9B%B4%E6%92%AD%E4%B8%8E%E7%82%B9%E6%92%AD%E7%B3%BB%E7%BB%9F-1/" rel="prev" title="基于webRTC的网络直播与点播系统(1)">
+                  <i class="fa fa-chevron-left"></i> 基于webRTC的网络直播与点播系统(1)
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2019/04/06/%E5%9F%BA%E4%BA%8EwebRTC%E7%9A%84%E7%BD%91%E7%BB%9C%E7%9B%B4%E6%92%AD%E4%B8%8E%E7%82%B9%E6%92%AD%E7%B3%BB%E7%BB%9F-3/" rel="next" title="基于webRTC的网络直播与点播系统-3（业务功能实现)">
+                  基于webRTC的网络直播与点播系统-3（业务功能实现) <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 2015 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">虚幻</span>
+</div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/pisces/" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"none","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js"></script>
+
+
+
+</body>
+</html>
