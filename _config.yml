@@ -84,3 +84,12 @@ search:
   field: post
   content: true
   format: html
+
+# sitemap
+# Dependencies: https://github.com/hexojs/hexo-generator-sitemap
+sitemap:
+  path: 
+    - sitemap.xml
+  rel: false
+  tags: true
+  categories: true
