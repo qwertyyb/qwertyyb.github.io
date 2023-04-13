@@ -1,8 +1,11 @@
 ---
 title: 在github上把master分支的内容作为Github Pages站点
 date: 2017-03-11 13:31:21
-tags: github, Github Pages
-categories: 项目管理
+tags: 
+  - github
+  - Github Pages
+categories:
+  - [项目管理, Github, Github Pages]
 ---
 
 在github上把master分支的内容作为Github Pages站点，有两种方法

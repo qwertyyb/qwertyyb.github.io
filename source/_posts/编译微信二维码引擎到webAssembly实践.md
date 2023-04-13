@@ -1,8 +1,11 @@
 ---
 title: 编译微信二维码引擎到webAssembly实践
 date: 2021-06-19 18:55:20
-tags: webAssembly, opencv
-categories: webAssembly, opencv
+tags:
+  - webAssembly
+  - opencv
+categories: 
+  - [前端, webAssembly, opencv]
 ---
 
 微信开源了二维码引擎，如何在web环境下使用此引擎，本篇文章就由此而始。

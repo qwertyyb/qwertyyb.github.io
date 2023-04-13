@@ -1,11 +1,14 @@
 ---
 title: 基于webRTC的网络直播与点播系统(1)
 date: 2019-04-03 17:02:07
-tags: webRTC, kuretno, 媒体服务器
+tags: 
+  - 前端
+  - WebRTC
 categories:
+  - [前端, WebRTC]
 ---
 ## 简介
-本项目基于webRTC技术，实现点对点直播，采用的框架和技术：
+本项目基于webRTC技术，实现点对点直播，采用的框架和技术：
 ```
 1. kurento——媒体服务器
 2. 基于nodejs的服务器，实现信令传递，浏览器和媒体服务器交互和用户常规逻辑的后端

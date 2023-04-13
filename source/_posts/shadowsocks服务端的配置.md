@@ -1,7 +1,9 @@
 ---
 title: shadowsocks服务端的配置
 date: 2017-05-28 20:54:06
-tags: Linux, shadowsocks
+tags:
+	- Linux
+	- shadowsocks
 categories: Linux
 ---
 

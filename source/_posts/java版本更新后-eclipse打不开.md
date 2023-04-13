@@ -1,7 +1,7 @@
 ---
 title: java版本更新后,eclipse打不开
 date: 2017-11-02 20:29:33
-tags: java, eclipse
+tags: java
 categories: java
 ---
 

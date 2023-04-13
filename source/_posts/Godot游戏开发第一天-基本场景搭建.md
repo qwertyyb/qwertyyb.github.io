@@ -1,8 +1,10 @@
 ---
 title: Godot游戏开发第一天-基本场景搭建
 date: 2023-03-15 17:24
-tags: 游戏, godot
-categories: 游戏, godot
+tags:
+  - 游戏开发
+categories:
+  - [游戏, godot]
 ---
 
 使用Godot游戏引擎开发一款2D游戏，第一天，基本场景搭建

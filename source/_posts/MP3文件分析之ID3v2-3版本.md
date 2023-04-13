@@ -1,8 +1,10 @@
 ---
 title: MP3文件分析之ID3v2.3版本
 date: 2017-03-18 16:36:01
-tags: ID3, Audio
+tags: 
+  - 音乐
 categories:
+  - [音乐, 格式]
 ---
 
 # MP3文件分析之ID3v2.3版本
