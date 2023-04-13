@@ -123,10 +123,11 @@
 <h2 id="下一步"><a href="#下一步" class="headerlink" title="下一步"></a>下一步</h2><p>项目的基本场景已经搭建OK了，剩余的就是不断完善。下一步，将会完善滑道，让滑道无限随机生成。</p>
 ]]></content>
       <categories>
-        <category>游戏, godot</category>
+        <category>游戏</category>
+        <category>godot</category>
       </categories>
       <tags>
-        <tag>游戏, godot</tag>
+        <tag>游戏开发</tag>
       </tags>
   </entry>
   <entry>
@@ -230,10 +231,11 @@
 <p><img src="https://user-images.githubusercontent.com/16240729/228729561-924714a3-fe22-4ffd-9f08-3a0a651d5724.gif" alt="无限地图"></p>
 ]]></content>
       <categories>
-        <category>游戏, godot</category>
+        <category>游戏</category>
+        <category>godot</category>
       </categories>
       <tags>
-        <tag>游戏, godot</tag>
+        <tag>游戏开发</tag>
       </tags>
   </entry>
   <entry>
@@ -330,8 +332,12 @@
 </ol>
 <p>关于更多文字编码的知识可以看这里：<a href="/2017/03/12/%E5%BD%BB%E5%BA%95%E6%90%9E%E6%87%82%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81/index.html">彻底搞懂字符编码</a>;</p>
 ]]></content>
+      <categories>
+        <category>音乐</category>
+        <category>格式</category>
+      </categories>
       <tags>
-        <tag>ID3, Audio</tag>
+        <tag>音乐</tag>
       </tags>
   </entry>
   <entry>
@@ -356,9 +362,12 @@
 ]]></content>
       <categories>
         <category>项目管理</category>
+        <category>Github</category>
+        <category>Github Pages</category>
       </categories>
       <tags>
-        <tag>github, Github Pages</tag>
+        <tag>github</tag>
+        <tag>Github Pages</tag>
       </tags>
   </entry>
   <entry>
@@ -481,7 +490,7 @@
         <category>java</category>
       </categories>
       <tags>
-        <tag>java, eclipse</tag>
+        <tag>java</tag>
       </tags>
   </entry>
   <entry>
@@ -522,13 +531,14 @@
         <category>Linux</category>
       </categories>
       <tags>
-        <tag>Linux, shadowsocks</tag>
+        <tag>Linux</tag>
+        <tag>shadowsocks</tag>
       </tags>
   </entry>
   <entry>
     <title>基于webRTC的网络直播与点播系统(1)</title>
     <url>/2019/04/03/%E5%9F%BA%E4%BA%8EwebRTC%E7%9A%84%E7%BD%91%E7%BB%9C%E7%9B%B4%E6%92%AD%E4%B8%8E%E7%82%B9%E6%92%AD%E7%B3%BB%E7%BB%9F-1/</url>
-    <content><![CDATA[<h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>本项目基于webRTC技术，实现点对点直播，采用的框架和技术：</p>
+    <content><![CDATA[<h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>本项目基于webRTC技术，实现点对点直播，采用的框架和技术：</p>
 <figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">1. kurento——媒体服务器</span><br><span class="line">2. 基于nodejs的服务器，实现信令传递，浏览器和媒体服务器交互和用户常规逻辑的后端</span><br><span class="line">3. 前端vuejs，搭建用户界面</span><br></pre></td></tr></table></figure>
 <p>本节是关于kurento媒体服务器的搭建</p>
 <span id="more"></span>
@@ -557,8 +567,13 @@
 即证明服务已正常运行</li>
 </ol>
 ]]></content>
+      <categories>
+        <category>前端</category>
+        <category>WebRTC</category>
+      </categories>
       <tags>
-        <tag>webRTC, kuretno, 媒体服务器</tag>
+        <tag>前端</tag>
+        <tag>WebRTC</tag>
       </tags>
   </entry>
   <entry>
@@ -606,8 +621,16 @@
 <figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">docker-compose restart kms</span><br></pre></td></tr></table></figure>
 <p>重启kurento media server使配置生效，至此，本章完成</p>
 ]]></content>
+      <categories>
+        <category>前端</category>
+        <category>WebRTC</category>
+      </categories>
       <tags>
-        <tag>webRTC, 信令服务器, NAT穿透服务, Cotun</tag>
+        <tag>前端</tag>
+        <tag>WebRTC</tag>
+        <tag>信令服务器</tag>
+        <tag>NAT穿透</tag>
+        <tag>Cotun</tag>
       </tags>
   </entry>
   <entry>
@@ -674,6 +697,14 @@
 <li><a href="https://socket.io/docs/">socket.io</a></li>
 </ol>
 ]]></content>
+      <categories>
+        <category>前端</category>
+        <category>WebRTC</category>
+      </categories>
+      <tags>
+        <tag>前端</tag>
+        <tag>WebRTC</tag>
+      </tags>
   </entry>
   <entry>
     <title>实用工具</title>
@@ -789,7 +820,7 @@
 <p>​        为了明确起见，<strong>BOM</strong>的编码用粗体标注；田的编码用红色标注；海的编码用绿色标注；立的编码用蓝色标注。可以看到，记事本（Notepad）存储的Unicode编码的文件的开头位置，用BOM的相应编码指示了编码格式。</p>
 ]]></content>
       <categories>
-        <category>编程, 编码</category>
+        <category>编码</category>
       </categories>
       <tags>
         <tag>编码</tag>
@@ -817,6 +848,14 @@
 
 
 ]]></content>
+      <categories>
+        <category>前端</category>
+        <category>微信</category>
+      </categories>
+      <tags>
+        <tag>前端</tag>
+        <tag>微信</tag>
+      </tags>
   </entry>
   <entry>
     <title>编译微信二维码引擎到webAssembly实践</title>
@@ -953,10 +992,13 @@
 <p>另外，在编译过程中，遇到的这些问题也可以再深入研究一下，看下能否向opencv提个mr。</p>
 ]]></content>
       <categories>
-        <category>webAssembly, opencv</category>
+        <category>前端</category>
+        <category>webAssembly</category>
+        <category>opencv</category>
       </categories>
       <tags>
-        <tag>webAssembly, opencv</tag>
+        <tag>webAssembly</tag>
+        <tag>opencv</tag>
       </tags>
   </entry>
 </search>

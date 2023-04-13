@@ -164,21 +164,28 @@
 
   
   <url>
-    <loc>https://qwertyyb.github.io/tags/%E6%B8%B8%E6%88%8F-godot/</loc>
+    <loc>https://qwertyyb.github.io/tags/%E6%B8%B8%E6%88%8F%E5%BC%80%E5%8F%91/</loc>
     <lastmod>2023-04-13</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
-    <loc>https://qwertyyb.github.io/tags/ID3-Audio/</loc>
+    <loc>https://qwertyyb.github.io/tags/%E9%9F%B3%E4%B9%90/</loc>
     <lastmod>2023-04-13</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
-    <loc>https://qwertyyb.github.io/tags/github-Github-Pages/</loc>
+    <loc>https://qwertyyb.github.io/tags/github/</loc>
+    <lastmod>2023-04-13</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>https://qwertyyb.github.io/tags/Github-Pages/</loc>
     <lastmod>2023-04-13</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
@@ -192,28 +199,56 @@
   </url>
   
   <url>
-    <loc>https://qwertyyb.github.io/tags/java-eclipse/</loc>
+    <loc>https://qwertyyb.github.io/tags/java/</loc>
     <lastmod>2023-04-13</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
-    <loc>https://qwertyyb.github.io/tags/Linux-shadowsocks/</loc>
+    <loc>https://qwertyyb.github.io/tags/Linux/</loc>
     <lastmod>2023-04-13</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
-    <loc>https://qwertyyb.github.io/tags/webRTC-kuretno-%E5%AA%92%E4%BD%93%E6%9C%8D%E5%8A%A1%E5%99%A8/</loc>
+    <loc>https://qwertyyb.github.io/tags/shadowsocks/</loc>
     <lastmod>2023-04-13</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
-    <loc>https://qwertyyb.github.io/tags/webRTC-%E4%BF%A1%E4%BB%A4%E6%9C%8D%E5%8A%A1%E5%99%A8-NAT%E7%A9%BF%E9%80%8F%E6%9C%8D%E5%8A%A1-Cotun/</loc>
+    <loc>https://qwertyyb.github.io/tags/%E5%89%8D%E7%AB%AF/</loc>
+    <lastmod>2023-04-13</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>https://qwertyyb.github.io/tags/WebRTC/</loc>
+    <lastmod>2023-04-13</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>https://qwertyyb.github.io/tags/%E4%BF%A1%E4%BB%A4%E6%9C%8D%E5%8A%A1%E5%99%A8/</loc>
+    <lastmod>2023-04-13</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>https://qwertyyb.github.io/tags/NAT%E7%A9%BF%E9%80%8F/</loc>
+    <lastmod>2023-04-13</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>https://qwertyyb.github.io/tags/Cotun/</loc>
     <lastmod>2023-04-13</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
@@ -234,7 +269,21 @@
   </url>
   
   <url>
-    <loc>https://qwertyyb.github.io/tags/webAssembly-opencv/</loc>
+    <loc>https://qwertyyb.github.io/tags/%E5%BE%AE%E4%BF%A1/</loc>
+    <lastmod>2023-04-13</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>https://qwertyyb.github.io/tags/webAssembly/</loc>
+    <lastmod>2023-04-13</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>https://qwertyyb.github.io/tags/opencv/</loc>
     <lastmod>2023-04-13</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
@@ -243,7 +292,14 @@
 
   
   <url>
-    <loc>https://qwertyyb.github.io/categories/%E6%B8%B8%E6%88%8F-godot/</loc>
+    <loc>https://qwertyyb.github.io/categories/%E6%B8%B8%E6%88%8F/</loc>
+    <lastmod>2023-04-13</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>https://qwertyyb.github.io/categories/%E9%9F%B3%E4%B9%90/</loc>
     <lastmod>2023-04-13</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
@@ -251,6 +307,13 @@
   
   <url>
     <loc>https://qwertyyb.github.io/categories/%E9%A1%B9%E7%9B%AE%E7%AE%A1%E7%90%86/</loc>
+    <lastmod>2023-04-13</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>https://qwertyyb.github.io/categories/%E6%B8%B8%E6%88%8F/godot/</loc>
     <lastmod>2023-04-13</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
@@ -271,6 +334,20 @@
   </url>
   
   <url>
+    <loc>https://qwertyyb.github.io/categories/%E5%89%8D%E7%AB%AF/</loc>
+    <lastmod>2023-04-13</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>https://qwertyyb.github.io/categories/%E9%9F%B3%E4%B9%90/%E6%A0%BC%E5%BC%8F/</loc>
+    <lastmod>2023-04-13</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
     <loc>https://qwertyyb.github.io/categories/%E5%B7%A5%E5%85%B7/</loc>
     <lastmod>2023-04-13</lastmod>
     <changefreq>weekly</changefreq>
@@ -278,14 +355,49 @@
   </url>
   
   <url>
-    <loc>https://qwertyyb.github.io/categories/%E7%BC%96%E7%A8%8B-%E7%BC%96%E7%A0%81/</loc>
+    <loc>https://qwertyyb.github.io/categories/%E9%A1%B9%E7%9B%AE%E7%AE%A1%E7%90%86/Github/</loc>
     <lastmod>2023-04-13</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
-    <loc>https://qwertyyb.github.io/categories/webAssembly-opencv/</loc>
+    <loc>https://qwertyyb.github.io/categories/%E7%BC%96%E7%A0%81/</loc>
+    <lastmod>2023-04-13</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>https://qwertyyb.github.io/categories/%E5%89%8D%E7%AB%AF/WebRTC/</loc>
+    <lastmod>2023-04-13</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>https://qwertyyb.github.io/categories/%E9%A1%B9%E7%9B%AE%E7%AE%A1%E7%90%86/Github/Github-Pages/</loc>
+    <lastmod>2023-04-13</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>https://qwertyyb.github.io/categories/%E5%89%8D%E7%AB%AF/%E5%BE%AE%E4%BF%A1/</loc>
+    <lastmod>2023-04-13</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>https://qwertyyb.github.io/categories/%E5%89%8D%E7%AB%AF/webAssembly/</loc>
+    <lastmod>2023-04-13</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>https://qwertyyb.github.io/categories/%E5%89%8D%E7%AB%AF/webAssembly/opencv/</loc>
     <lastmod>2023-04-13</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
