@@ -2,6 +2,15 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>https://qwertyyb.github.io/categories/index.html</loc>
+    
+    <lastmod>2023-04-13</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
     <loc>https://qwertyyb.github.io/tags/index.html</loc>
     
     <lastmod>2023-04-13</lastmod>
@@ -66,6 +75,15 @@
   
   <url>
     <loc>https://qwertyyb.github.io/2017/05/28/shadowsocks%E6%9C%8D%E5%8A%A1%E7%AB%AF%E7%9A%84%E9%85%8D%E7%BD%AE/</loc>
+    
+    <lastmod>2023-04-13</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://qwertyyb.github.io/2023/04/13/%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A6%81%E4%BD%BF%E7%94%A8%E4%B8%9A%E7%81%AB%E8%BE%93%E5%85%A5%E6%B3%95/</loc>
     
     <lastmod>2023-04-13</lastmod>
     
@@ -145,15 +163,6 @@
     <priority>0.6</priority>
   </url>
   
-  <url>
-    <loc>https://qwertyyb.github.io/categories/index.html</loc>
-    
-    <lastmod>2023-04-13</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
 
   <url>
     <loc>https://qwertyyb.github.io/</loc>
@@ -214,6 +223,27 @@
   
   <url>
     <loc>https://qwertyyb.github.io/tags/shadowsocks/</loc>
+    <lastmod>2023-04-13</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>https://qwertyyb.github.io/tags/MacOS/</loc>
+    <lastmod>2023-04-13</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>https://qwertyyb.github.io/tags/%E4%BA%94%E7%AC%94%E8%BE%93%E5%85%A5%E6%B3%95/</loc>
+    <lastmod>2023-04-13</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>https://qwertyyb.github.io/tags/%E5%BC%80%E6%BA%90%E9%A1%B9%E7%9B%AE/</loc>
     <lastmod>2023-04-13</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
@@ -334,7 +364,7 @@
   </url>
   
   <url>
-    <loc>https://qwertyyb.github.io/categories/%E5%89%8D%E7%AB%AF/</loc>
+    <loc>https://qwertyyb.github.io/categories/MacOS/</loc>
     <lastmod>2023-04-13</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
@@ -348,7 +378,7 @@
   </url>
   
   <url>
-    <loc>https://qwertyyb.github.io/categories/%E5%B7%A5%E5%85%B7/</loc>
+    <loc>https://qwertyyb.github.io/categories/%E5%89%8D%E7%AB%AF/</loc>
     <lastmod>2023-04-13</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
@@ -362,7 +392,21 @@
   </url>
   
   <url>
+    <loc>https://qwertyyb.github.io/categories/%E5%B7%A5%E5%85%B7/</loc>
+    <lastmod>2023-04-13</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
     <loc>https://qwertyyb.github.io/categories/%E7%BC%96%E7%A0%81/</loc>
+    <lastmod>2023-04-13</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>https://qwertyyb.github.io/categories/MacOS/%E4%BA%94%E7%AC%94%E8%BE%93%E5%85%A5%E6%B3%95/</loc>
     <lastmod>2023-04-13</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
@@ -391,6 +435,13 @@
   
   <url>
     <loc>https://qwertyyb.github.io/categories/%E5%89%8D%E7%AB%AF/webAssembly/</loc>
+    <lastmod>2023-04-13</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>https://qwertyyb.github.io/categories/%E5%BC%80%E6%BA%90%E9%A1%B9%E7%9B%AE/</loc>
     <lastmod>2023-04-13</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
