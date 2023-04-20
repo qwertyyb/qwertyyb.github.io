@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 5.4.2">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/avatar.jpg">
+  <link rel="mask-icon" href="/images/avatar.jpg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha256-HtsXJanqjKTc8vVQjO4YMhiqFoXkfBsjBWcX91T1jr8=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"qwertyyb.github.io","root":"/","images":"/images","scheme":"Pisces","darkmode":true,"version":"8.15.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="背景首先我有一个托管于Github Pages 的 个人网站，所以我想在写一篇文章的时候，能先发到我的个人网站，然后同步到微信公众号。这就是我最初的目的，但是很快我就发现这一过程并不顺利。  基于作为一个开发者的身份，再加上对排版的不太拿手，这里我首选的格式肯定是Markdown。 Markdown到微信公众号排版的转换很快第一个问题就摆在了我的面前，我的个人网站是基于 Hexo 搭建的静态网站，">
+<meta property="og:type" content="article">
+<meta property="og:title" content="零成本把Markdown文章发到微信公众号">
+<meta property="og:url" content="https://qwertyyb.github.io/2023/04/20/%E9%9B%B6%E6%88%90%E6%9C%AC%E6%8A%8AMarkdown%E6%96%87%E7%AB%A0%E5%8F%91%E5%88%B0%E5%BE%AE%E4%BF%A1%E5%85%AC%E4%BC%97%E5%8F%B7/index.html">
+<meta property="og:site_name" content="虚幻">
+<meta property="og:description" content="背景首先我有一个托管于Github Pages 的 个人网站，所以我想在写一篇文章的时候，能先发到我的个人网站，然后同步到微信公众号。这就是我最初的目的，但是很快我就发现这一过程并不顺利。  基于作为一个开发者的身份，再加上对排版的不太拿手，这里我首选的格式肯定是Markdown。 Markdown到微信公众号排版的转换很快第一个问题就摆在了我的面前，我的个人网站是基于 Hexo 搭建的静态网站，">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://user-images.githubusercontent.com/16240729/233107334-2db61aca-17ef-48a5-8f02-db0e1fb47432.png">
+<meta property="og:image" content="https://user-images.githubusercontent.com/16240729/233108450-d26d9af7-eac5-4c5a-ac85-ddc265de3b2e.png">
+<meta property="og:image" content="https://user-images.githubusercontent.com/16240729/233079919-e72f94fd-4772-4d21-b5a4-ecbc4cad9c26.png">
+<meta property="og:image" content="https://user-images.githubusercontent.com/16240729/233111375-efe6e3f5-9a82-4be8-b93d-4caafac24322.png">
+<meta property="og:image" content="https://user-images.githubusercontent.com/16240729/233120085-7b87bffe-f1a0-43f7-881c-58a01954979c.png">
+<meta property="article:published_time" content="2023-04-20T13:17:00.000Z">
+<meta property="article:modified_time" content="2023-04-20T05:18:51.748Z">
+<meta property="article:author" content="虚幻">
+<meta property="article:tag" content="微信">
+<meta property="article:tag" content="Markdown">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://user-images.githubusercontent.com/16240729/233107334-2db61aca-17ef-48a5-8f02-db0e1fb47432.png">
+
+
+<link rel="canonical" href="https://qwertyyb.github.io/2023/04/20/%E9%9B%B6%E6%88%90%E6%9C%AC%E6%8A%8AMarkdown%E6%96%87%E7%AB%A0%E5%8F%91%E5%88%B0%E5%BE%AE%E4%BF%A1%E5%85%AC%E4%BC%97%E5%8F%B7/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://qwertyyb.github.io/2023/04/20/%E9%9B%B6%E6%88%90%E6%9C%AC%E6%8A%8AMarkdown%E6%96%87%E7%AB%A0%E5%8F%91%E5%88%B0%E5%BE%AE%E4%BF%A1%E5%85%AC%E4%BC%97%E5%8F%B7/","path":"2023/04/20/零成本把Markdown文章发到微信公众号/","title":"零成本把Markdown文章发到微信公众号"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>零成本把Markdown文章发到微信公众号 | 虚幻</title>
+  
+
+  <script src="/js/third-party/analytics/baidu-analytics.js"></script>
+  <script async src="https://hm.baidu.com/hm.js?512529800174ec76de81bf92990fed78"></script>
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">虚幻</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">陪伴像幼蝉钻进土壤，无声却能生长</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-业火输入法"><a href="/Fire/index.html" rel="section"><i class="fa fa-fire-flame-curved fa-fw"></i>业火输入法</a></li><li class="menu-item menu-item-ypaste"><a href="/YPaste/index.html" rel="section"><i class="fa fa-paste fa-fw"></i>YPaste</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%83%8C%E6%99%AF"><span class="nav-number">1.</span> <span class="nav-text">背景</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Markdown%E5%88%B0%E5%BE%AE%E4%BF%A1%E5%85%AC%E4%BC%97%E5%8F%B7%E6%8E%92%E7%89%88%E7%9A%84%E8%BD%AC%E6%8D%A2"><span class="nav-number">2.</span> <span class="nav-text">Markdown到微信公众号排版的转换</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%B2%98%E8%B4%B4%E5%9B%BE%E7%89%87%E5%A4%B1%E8%B4%A5%E9%97%AE%E9%A2%98"><span class="nav-number">3.</span> <span class="nav-text">粘贴图片失败问题</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9B%BE%E7%89%87%E4%B8%8A%E4%BC%A0%E5%88%B0%E5%BE%AE%E4%BF%A1%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9A%84%E5%8E%9F%E7%90%86%E5%8F%8A%E5%A4%B1%E8%B4%A5%E5%8E%9F%E5%9B%A0"><span class="nav-number">3.1.</span> <span class="nav-text">图片上传到微信服务器的原理及失败原因</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A7%A3%E5%86%B3%E6%80%9D%E8%B7%AF"><span class="nav-number">3.2.</span> <span class="nav-text">解决思路</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E7%9B%B4%E6%8E%A5%E6%8A%8A%E5%9B%BE%E7%89%87%E6%94%BE%E5%88%B0%E8%85%BE%E8%AE%AF%E4%BA%91COS%E4%B8%8A"><span class="nav-number">3.3.</span> <span class="nav-text">为什么不直接把图片放到腾讯云COS上</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E7%9B%B4%E6%8E%A5%E6%8A%8A%E5%9B%BE%E7%89%87%E4%B8%8A%E4%BC%A0%E5%88%B0%E5%BE%AE%E4%BF%A1%E5%85%AC%E4%BC%97%E5%8F%B7%E4%B8%8A"><span class="nav-number">3.4.</span> <span class="nav-text">为什么不直接把图片上传到微信公众号上</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88"><span class="nav-number">3.5.</span> <span class="nav-text">解决方案</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%90%8E%E7%BB%AD%E4%BC%98%E5%8C%96"><span class="nav-number">4.</span> <span class="nav-text">后续优化</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="虚幻"
+      src="https://avatars.githubusercontent.com/u/16240729?v=4">
+  <p class="site-author-name" itemprop="name">虚幻</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">16</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">20</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">22</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/qwertyyb" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;qwertyyb" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://qwertyyb.github.io/2023/04/20/%E9%9B%B6%E6%88%90%E6%9C%AC%E6%8A%8AMarkdown%E6%96%87%E7%AB%A0%E5%8F%91%E5%88%B0%E5%BE%AE%E4%BF%A1%E5%85%AC%E4%BC%97%E5%8F%B7/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://avatars.githubusercontent.com/u/16240729?v=4">
+      <meta itemprop="name" content="虚幻">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="虚幻">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="零成本把Markdown文章发到微信公众号 | 虚幻">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          零成本把Markdown文章发到微信公众号<a href="https://github.com/qwertyyb/qwertyyb.github.io/tree/master/source/_posts/%E9%9B%B6%E6%88%90%E6%9C%AC%E6%8A%8AMarkdown%E6%96%87%E7%AB%A0%E5%8F%91%E5%88%B0%E5%BE%AE%E4%BF%A1%E5%85%AC%E4%BC%97%E5%8F%B7.md" class="post-edit-link" title="编辑" rel="noopener" target="_blank"><i class="fa fa-pen-nib"></i></a>
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2023-04-20 13:17:00 / 修改时间：05:18:51" itemprop="dateCreated datePublished" datetime="2023-04-20T13:17:00+00:00">2023-04-20</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E5%BE%AE%E4%BF%A1/" itemprop="url" rel="index"><span itemprop="name">微信</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>首先我有一个托管于<code>Github Pages</code> 的 <a href="https://qwertyyb.github.io/">个人网站</a>，所以我想在写一篇文章的时候，能先发到我的个人网站，然后同步到微信公众号。这就是我最初的目的，但是很快我就发现这一过程并不顺利。</p>
+<p><img src="https://user-images.githubusercontent.com/16240729/233107334-2db61aca-17ef-48a5-8f02-db0e1fb47432.png" alt="Markdown导入公众号"></p>
+<p>基于作为一个开发者的身份，再加上对排版的不太拿手，这里我首选的格式肯定是<code>Markdown</code>。</p>
+<h2 id="Markdown到微信公众号排版的转换"><a href="#Markdown到微信公众号排版的转换" class="headerlink" title="Markdown到微信公众号排版的转换"></a>Markdown到微信公众号排版的转换</h2><p>很快第一个问题就摆在了我的面前，我的个人网站是基于 <code>Hexo</code> 搭建的静态网站，所以天然支持 <code>Markdown</code> 格式，出问题的是微信，微信的恶心向来是出了名，所以微信也必然不支持 <code>Markdown</code> 格式的文章，微信官方只支持使用它的富文本编辑器。</p>
+<p>然而只能说 <code>Markdown</code> 相当受欢迎，所以即使官方不支持，但是在网络上随便一搜索仍然能找到如何用 <code>Markdown</code> 来排版微信公众号。</p>
+<p>它的基本原理是，把 <code>Markdown</code> 内容使用 <code>HTML</code> 进行排版渲染，然后把 <code>HTML</code> 的内容写到剪切版，再复制到微信公众号的编辑器中即可。因为微信的富文本归根到底也是 <code>HTML</code> 渲染，所以这样是完全OK的。</p>
+<p><img src="https://user-images.githubusercontent.com/16240729/233108450-d26d9af7-eac5-4c5a-ac85-ddc265de3b2e.png" alt="Markdown导入微信公众号原理"></p>
+<p>推荐一下 <a href="https://markdown.com.cn/editor/">这个站点</a>，可以很方便的进行排版，排版出来的主题也很不错。唯一有一点不好的是，它的默认主题会在两边有边距，导致复制到微信公众号发布后，只能显示窄窄的一条，所以需要使用它的自定义主题的能力，自定义一下css, 把边距给移除掉。</p>
+<h2 id="粘贴图片失败问题"><a href="#粘贴图片失败问题" class="headerlink" title="粘贴图片失败问题"></a>粘贴图片失败问题</h2><h3 id="图片上传到微信服务器的原理及失败原因"><a href="#图片上传到微信服务器的原理及失败原因" class="headerlink" title="图片上传到微信服务器的原理及失败原因"></a>图片上传到微信服务器的原理及失败原因</h3><p>事情不会这么顺利，很快就遇到了把渲染后的内容后粘贴到微信后，微信出现了粘贴失败的情况。</p>
+<p><img src="https://user-images.githubusercontent.com/16240729/233079919-e72f94fd-4772-4d21-b5a4-ecbc4cad9c26.png" alt="粘贴后图片加载失败"></p>
+<p>这里刚开始我以为是我网络不好，导致图片上传失败了，但是打开控制台看了一下网络请求，才发现跟我网络没关系。</p>
+<p>这里的原理是在粘贴的时候，微信会把原图片上传到微信的服务器，然后把图片地址替换成上传到微信服务器后的图片地址，而这一上传过程是前端把原图片的地址传给微信服务器后台，微信服务端去下载原图片，再上传到微信服务器的，所以这里的失败是微信服端下载原图的时候失败了，并不是前端直接获取原图后再上传到微信服务器的，所以跟我当前的网络没关系。</p>
+<p>那这里微信服务端下载失败的原因就是因为我的原图片在 <code>Github</code> 的服务器上，而微信的服务器必然是在国内要经过 <code>GFW</code> 或经过微信严柯的校验，自然就下载失败了。</p>
+<p><img src="https://user-images.githubusercontent.com/16240729/233111375-efe6e3f5-9a82-4be8-b93d-4caafac24322.png" alt="粘贴时图片失败的原因"></p>
+<h3 id="解决思路"><a href="#解决思路" class="headerlink" title="解决思路"></a>解决思路</h3><p>那这里我们就需要把原来的图片重新上传到国内的云服务中，让微信服务器能成功下载图片即可。经过实验，发现把图片上传到腾讯云的cos对象存储后，微信即可成功下载。腾讯云cos提供了10G的免费存储和流量，作为中转基本上也够用了。</p>
+<h3 id="为什么不直接把图片放到腾讯云COS上"><a href="#为什么不直接把图片放到腾讯云COS上" class="headerlink" title="为什么不直接把图片放到腾讯云COS上"></a>为什么不直接把图片放到腾讯云COS上</h3><p>这里要解释一下，为啥不直接把原图片直接放到腾讯云cos中，主要还是出于成本的考量。首先腾讯云cos虽然提供了10G的存储空间和每月10G的流量，但是相对来说，还是感觉还是太少。其次是必须要考虑到流量盗刷的可能性，如果把所有的图片都放在cos上，我觉得流量盗刷可能会导致更多的支出。接着就是稳定性，相比个人维护的cos，显然Github要稳定得多。总结来说就是穷，想白嫖，所以这些图片最好就是放在<code>Github</code>上，而不是在腾讯云cos。</p>
+<p>这里的图片放在<code>Github</code>上，也并不是说把这些图片直接放在<code>Github</code>的仓库中，而是通过在<code>issue</code>的表单中上传图片获得图片地址，这样仓库中就没有图片了，仓库很小，就能承载更多的内容。</p>
+<h3 id="为什么不直接把图片上传到微信公众号上"><a href="#为什么不直接把图片上传到微信公众号上" class="headerlink" title="为什么不直接把图片上传到微信公众号上"></a>为什么不直接把图片上传到微信公众号上</h3><p>这里也要解释一下为什么不直接把图片上传到微信公众号上，微信公众号有提供上传素材的接口，甚至提供了 <a href="https://developers.weixin.qq.com/doc/offiaccount/Asset_Management/Adding_Permanent_Assets.html">上传图文消息内的图片获取URL</a> 的接口。</p>
+<p>但是，首先微信的上传接口需要 <code>Access Token</code> ，而 <code>Acess Token</code> 的获取需要在公众号后台添加IP白名单，是的，就是这么恶心，需要添加IP白名单，而IP白名单不能填写 <code>CIDR</code> 类型的IP地址范围，所以这也就决定了首先你得有一台服务器来获取 <code>Access Token</code>，无法使用IP地址不固定的 <code>Github Actions</code> 服务，也就意味着你要额外付费才行，不符合白嫖的原则。</p>
+<p>其次即使直接把图片上传到微信公众号的素材库里面，但是<a href="https://developers.weixin.qq.com/doc/offiaccount/Asset_Management/Adding_Permanent_Assets.html">上传后的图片也只能在腾讯系内使用，其它页面都不可使用</a>，微信的防盗链真是天衣无缝，而我还要在我的个人网站使用，所以这显然不可行。</p>
+<h3 id="解决方案"><a href="#解决方案" class="headerlink" title="解决方案"></a>解决方案</h3><p>再回到图片上传的问题，这里的解决方案已经比较清楚了：</p>
+<ol>
+<li>把原 <code>Markdown</code> 文件中的图片上传至腾讯云cos中</li>
+<li>然后替换 <code>Markdown</code> 中原图片的地址为对应的腾讯云cos地址</li>
+<li>再把替换后图片地址的 <code>Markdown</code> 内容粘贴到排版页面，复制出排版后的内容</li>
+<li>把排版后的内容粘贴到微信公众号编辑器中</li>
+</ol>
+<p>这里如果是手动去操作第一步、第二步，显然是很耗费时间的，所以期望是能把第一步、第二步自动化。</p>
+<p>于是 <code>Github Actions</code> 有了用武之地。</p>
+<p>我开发了 <a href="https://github.com/qwertyyb/replace-md-images-action"><code>replace-md-images-action</code></a> <code>Github Action</code>，可以在把 <code>Markdown</code> 文件推送到 <code>Github</code> 后 把 <code>Markdown</code> 中的图片上传到腾讯云cos并替换图片地址，然后把替换后的 <code>Markdown</code> 文件通过通知送达，进行第三步、第四步的操作，具体的可以<a href="https://github.com/qwertyyb/qwertyyb.github.io">参考此仓库</a>。</p>
+<p><img src="https://user-images.githubusercontent.com/16240729/233120085-7b87bffe-f1a0-43f7-881c-58a01954979c.png" alt="解决方案"></p>
+<p>P.S. 这里我把cos上对应的目录设置为1天有效期，1天后上传的图片自动删除，彻底避免了流量盗刷的问题</p>
+<h2 id="后续优化"><a href="#后续优化" class="headerlink" title="后续优化"></a>后续优化</h2><p>这里目前来看，还是有优化空间的。比如说：</p>
+<ol>
+<li><p>从 <code>Markdown</code> 内容渲染到粘贴到微信公众号这一过程仍然是手动，不够优秀，最好是能够把一流程再加上预览的能力也全部自动化，这是一个待优化的项</p>
+</li>
+<li><p>容灾的处理，虽然图片目前是放在Github上，但是毕竟不是放在仓库中，所以必须要考虑到图片被屏蔽的情况，要做好容灾处理，目前的想法是在个人网站仓库中写一个脚本，当运行此脚本时，就自动把远程图片下载下来放在仓库中，并自动修改Markdown中图片的引用地址</p>
+</li>
+</ol>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          
+
+<div class="post-copyright">
+<ul>
+  <li class="post-copyright-author">
+      <strong>本文作者： </strong>虚幻
+  </li>
+  <li class="post-copyright-link">
+      <strong>本文链接：</strong>
+      <a href="https://qwertyyb.github.io/2023/04/20/%E9%9B%B6%E6%88%90%E6%9C%AC%E6%8A%8AMarkdown%E6%96%87%E7%AB%A0%E5%8F%91%E5%88%B0%E5%BE%AE%E4%BF%A1%E5%85%AC%E4%BC%97%E5%8F%B7/" title="零成本把Markdown文章发到微信公众号">https://qwertyyb.github.io/2023/04/20/零成本把Markdown文章发到微信公众号/</a>
+  </li>
+  <li class="post-copyright-license">
+      <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/%E5%BE%AE%E4%BF%A1/" rel="tag"><i class="fa fa-tag"></i> 微信</a>
+              <a href="/tags/Markdown/" rel="tag"><i class="fa fa-tag"></i> Markdown</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2023/04/13/%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A6%81%E4%BD%BF%E7%94%A8%E4%B8%9A%E7%81%AB%E8%BE%93%E5%85%A5%E6%B3%95/" rel="prev" title="为什么要使用业火输入法">
+                  <i class="fa fa-chevron-left"></i> 为什么要使用业火输入法
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 2015 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">虚幻</span>
+</div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/pisces/" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"none","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js"></script>
+
+
+
+</body>
+</html>
