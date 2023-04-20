@@ -20,12 +20,12 @@
 
 <script class="next-config" data-name="main" type="application/json">{"hostname":"qwertyyb.github.io","root":"/","images":"/images","scheme":"Pisces","darkmode":true,"version":"8.15.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
 
-    <meta name="description" content="背景首先我有一个托管于Github Pages 的 个人网站，所以我想在写一篇文章的时候，能先发到我的个人网站，然后同步到微信公众号。这就是我最初的目的，但是很快我就发现这一过程并不顺利。  基于作为一个开发者的身份，再加上对排版的不太拿手，这里我首选的格式肯定是Markdown。 Markdown到微信公众号排版的转换很快第一个问题就摆在了我的面前，我的个人网站是基于 Hexo 搭建的静态网站，">
+    <meta name="description" content="如何零成本把Markdown文章同步发到微信公众号，解决图片上传的问题">
 <meta property="og:type" content="article">
 <meta property="og:title" content="零成本把Markdown文章发到微信公众号">
 <meta property="og:url" content="https://qwertyyb.github.io/2023/04/20/%E9%9B%B6%E6%88%90%E6%9C%AC%E6%8A%8AMarkdown%E6%96%87%E7%AB%A0%E5%8F%91%E5%88%B0%E5%BE%AE%E4%BF%A1%E5%85%AC%E4%BC%97%E5%8F%B7/index.html">
 <meta property="og:site_name" content="虚幻">
-<meta property="og:description" content="背景首先我有一个托管于Github Pages 的 个人网站，所以我想在写一篇文章的时候，能先发到我的个人网站，然后同步到微信公众号。这就是我最初的目的，但是很快我就发现这一过程并不顺利。  基于作为一个开发者的身份，再加上对排版的不太拿手，这里我首选的格式肯定是Markdown。 Markdown到微信公众号排版的转换很快第一个问题就摆在了我的面前，我的个人网站是基于 Hexo 搭建的静态网站，">
+<meta property="og:description" content="如何零成本把Markdown文章同步发到微信公众号，解决图片上传的问题">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://user-images.githubusercontent.com/16240729/233107334-2db61aca-17ef-48a5-8f02-db0e1fb47432.png">
 <meta property="og:image" content="https://user-images.githubusercontent.com/16240729/233108450-d26d9af7-eac5-4c5a-ac85-ddc265de3b2e.png">
@@ -33,7 +33,7 @@
 <meta property="og:image" content="https://user-images.githubusercontent.com/16240729/233111375-efe6e3f5-9a82-4be8-b93d-4caafac24322.png">
 <meta property="og:image" content="https://user-images.githubusercontent.com/16240729/233120085-7b87bffe-f1a0-43f7-881c-58a01954979c.png">
 <meta property="article:published_time" content="2023-04-20T13:17:00.000Z">
-<meta property="article:modified_time" content="2023-04-20T05:18:51.748Z">
+<meta property="article:modified_time" content="2023-04-20T05:24:54.198Z">
 <meta property="article:author" content="虚幻">
 <meta property="article:tag" content="微信">
 <meta property="article:tag" content="Markdown">
@@ -238,7 +238,7 @@
       <span class="post-meta-item-text">发表于</span>
       
 
-      <time title="创建时间：2023-04-20 13:17:00 / 修改时间：05:18:51" itemprop="dateCreated datePublished" datetime="2023-04-20T13:17:00+00:00">2023-04-20</time>
+      <time title="创建时间：2023-04-20 13:17:00 / 修改时间：05:24:54" itemprop="dateCreated datePublished" datetime="2023-04-20T13:17:00+00:00">2023-04-20</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -267,14 +267,17 @@
     
     
     <div class="post-body" itemprop="articleBody">
-        <h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>首先我有一个托管于<code>Github Pages</code> 的 <a href="https://qwertyyb.github.io/">个人网站</a>，所以我想在写一篇文章的时候，能先发到我的个人网站，然后同步到微信公众号。这就是我最初的目的，但是很快我就发现这一过程并不顺利。</p>
+        <p>如何零成本把Markdown文章同步发到微信公众号，解决图片上传的问题</p>
+<span id="more"></span>
+
+<h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>首先我有一个托管于<code>Github Pages</code> 的 <a href="https://qwertyyb.github.io/">个人网站</a>，所以我想在写一篇文章的时候，能先发到我的个人网站，然后同步到微信公众号。这就是我最初的目的，但是很快我就发现这一过程并不顺利。</p>
 <p><img src="https://user-images.githubusercontent.com/16240729/233107334-2db61aca-17ef-48a5-8f02-db0e1fb47432.png" alt="Markdown导入公众号"></p>
 <p>基于作为一个开发者的身份，再加上对排版的不太拿手，这里我首选的格式肯定是<code>Markdown</code>。</p>
 <h2 id="Markdown到微信公众号排版的转换"><a href="#Markdown到微信公众号排版的转换" class="headerlink" title="Markdown到微信公众号排版的转换"></a>Markdown到微信公众号排版的转换</h2><p>很快第一个问题就摆在了我的面前，我的个人网站是基于 <code>Hexo</code> 搭建的静态网站，所以天然支持 <code>Markdown</code> 格式，出问题的是微信，微信的恶心向来是出了名，所以微信也必然不支持 <code>Markdown</code> 格式的文章，微信官方只支持使用它的富文本编辑器。</p>
 <p>然而只能说 <code>Markdown</code> 相当受欢迎，所以即使官方不支持，但是在网络上随便一搜索仍然能找到如何用 <code>Markdown</code> 来排版微信公众号。</p>
 <p>它的基本原理是，把 <code>Markdown</code> 内容使用 <code>HTML</code> 进行排版渲染，然后把 <code>HTML</code> 的内容写到剪切版，再复制到微信公众号的编辑器中即可。因为微信的富文本归根到底也是 <code>HTML</code> 渲染，所以这样是完全OK的。</p>
 <p><img src="https://user-images.githubusercontent.com/16240729/233108450-d26d9af7-eac5-4c5a-ac85-ddc265de3b2e.png" alt="Markdown导入微信公众号原理"></p>
-<p>推荐一下 <a href="https://markdown.com.cn/editor/">这个站点</a>，可以很方便的进行排版，排版出来的主题也很不错。唯一有一点不好的是，它的默认主题会在两边有边距，导致复制到微信公众号发布后，只能显示窄窄的一条，所以需要使用它的自定义主题的能力，自定义一下css, 把边距给移除掉。</p>
+<p>推荐一下 <a href="https://markdown.com.cn/editor/">这个站点</a>，可以很方便的进行排版，排版出来的主题也很不错，已经<a href="https://github.com/mdnice/markdown-nice">在Github上开源</a>。唯一有一点不好的是，它的默认主题会在两边有边距，导致复制到微信公众号发布后，只能显示窄窄的一条，所以需要使用它的自定义主题的能力，自定义一下css, 把边距给移除掉。</p>
 <h2 id="粘贴图片失败问题"><a href="#粘贴图片失败问题" class="headerlink" title="粘贴图片失败问题"></a>粘贴图片失败问题</h2><h3 id="图片上传到微信服务器的原理及失败原因"><a href="#图片上传到微信服务器的原理及失败原因" class="headerlink" title="图片上传到微信服务器的原理及失败原因"></a>图片上传到微信服务器的原理及失败原因</h3><p>事情不会这么顺利，很快就遇到了把渲染后的内容后粘贴到微信后，微信出现了粘贴失败的情况。</p>
 <p><img src="https://user-images.githubusercontent.com/16240729/233079919-e72f94fd-4772-4d21-b5a4-ecbc4cad9c26.png" alt="粘贴后图片加载失败"></p>
 <p>这里刚开始我以为是我网络不好，导致图片上传失败了，但是打开控制台看了一下网络请求，才发现跟我网络没关系。</p>
