@@ -8,6 +8,10 @@ categories:
   - 微信
 ---
 
+如何零成本把Markdown文章同步发到微信公众号，解决图片上传的问题
+
+<!-- more -->
+
 ## 背景
 
 首先我有一个托管于`Github Pages` 的 [个人网站](https://qwertyyb.github.io)，所以我想在写一篇文章的时候，能先发到我的个人网站，然后同步到微信公众号。这就是我最初的目的，但是很快我就发现这一过程并不顺利。
@@ -25,7 +29,7 @@ categories:
 
 ![Markdown导入微信公众号原理](https://user-images.githubusercontent.com/16240729/233108450-d26d9af7-eac5-4c5a-ac85-ddc265de3b2e.png)
 
-推荐一下 [这个站点](https://markdown.com.cn/editor/)，可以很方便的进行排版，排版出来的主题也很不错。唯一有一点不好的是，它的默认主题会在两边有边距，导致复制到微信公众号发布后，只能显示窄窄的一条，所以需要使用它的自定义主题的能力，自定义一下css, 把边距给移除掉。
+推荐一下 [这个站点](https://markdown.com.cn/editor/)，可以很方便的进行排版，排版出来的主题也很不错，已经[在Github上开源](https://github.com/mdnice/markdown-nice)。唯一有一点不好的是，它的默认主题会在两边有边距，导致复制到微信公众号发布后，只能显示窄窄的一条，所以需要使用它的自定义主题的能力，自定义一下css, 把边距给移除掉。
 
 ## 粘贴图片失败问题
 
