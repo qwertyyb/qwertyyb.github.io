@@ -132,7 +132,7 @@
   </entry>
   <entry>
     <title>Godot游戏开发第二天-随机地图生成</title>
-    <url>/2023/03/15/Godot%E6%B8%B8%E6%88%8F%E5%BC%80%E5%8F%91%E7%AC%AC%E4%BA%8C%E5%A4%A9-%E9%9A%8F%E6%9C%BA%E5%9C%B0%E5%9B%BE%E7%94%9F%E6%88%90/</url>
+    <url>/2023/03/16/Godot%E6%B8%B8%E6%88%8F%E5%BC%80%E5%8F%91%E7%AC%AC%E4%BA%8C%E5%A4%A9-%E9%9A%8F%E6%9C%BA%E5%9C%B0%E5%9B%BE%E7%94%9F%E6%88%90/</url>
     <content><![CDATA[<p>使用Godot游戏引擎开发一款2D游戏，第二天，在前一天，搭建了基本场景，包含有一个很短滑道和游戏人物，并且让人物在物理引擎的作用下沿滑道滑动，今天来研究并生成一个随机且无限长的滑道。</p>
 <span id="more"></span>
 
