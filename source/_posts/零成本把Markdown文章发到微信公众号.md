@@ -5,7 +5,7 @@ tags:
   - Markdown
   - 微信
 categories:
-  - 微信
+  - [微信]
 ---
 
 如何零成本把Markdown文章同步发到微信公众号，解决图片上传的问题

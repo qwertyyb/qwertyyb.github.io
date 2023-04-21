@@ -97,6 +97,7 @@ open_graph:
 menu:
   home: / || fa fa-home
   categories: /categories/ || fa fa-th
+  moment: /moment/ || fa fa-pencil
   archives: /archives/ || fa fa-archive
   tags: /tags/ || fa fa-tags
   about: /about/ || fa fa-user
@@ -852,7 +853,7 @@ local_search:
   # If manual, trigger search by pressing enter key or search button.
   trigger: auto
   # Show top n results per article, show all results by setting to -1
-  top_n_per_article: 1
+  top_n_per_article: -1
   # Unescape html strings to the readable one.
   unescape: false
   # Preload the search data when the page loads.
