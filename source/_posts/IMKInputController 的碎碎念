@@ -1,11 +1,13 @@
 ---
-title: 关于 `IMKInputController` 一些需要关注的点
+title: IMKInputController 的碎碎念
 date: 2023-04-23 13:55
 tags:
   - MacOS
   - 业火输入法
+  - InputMethodKit
 categories:
   - [MacOS, 业火输入法]
+  - [MacOS, InputMethodKit]
 ---
 
 在开发业火输入法的过程中，发现 `IMKInputController` 有一些文档没提到，又容易搞错的点，记录一下
