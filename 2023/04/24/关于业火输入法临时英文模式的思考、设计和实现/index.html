@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 5.4.2">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/avatar.jpg">
+  <link rel="mask-icon" href="/images/avatar.jpg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha256-HtsXJanqjKTc8vVQjO4YMhiqFoXkfBsjBWcX91T1jr8=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"qwertyyb.github.io","root":"/","images":"/images","scheme":"Pisces","darkmode":true,"version":"8.15.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":-1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="关于业火输入法临时英文模式的由来、思考、设计、开发和总结。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="关于业火输入法临时英文模式的思考、设计和实现">
+<meta property="og:url" content="https://qwertyyb.github.io/2023/04/24/%E5%85%B3%E4%BA%8E%E4%B8%9A%E7%81%AB%E8%BE%93%E5%85%A5%E6%B3%95%E4%B8%B4%E6%97%B6%E8%8B%B1%E6%96%87%E6%A8%A1%E5%BC%8F%E7%9A%84%E6%80%9D%E8%80%83%E3%80%81%E8%AE%BE%E8%AE%A1%E5%92%8C%E5%AE%9E%E7%8E%B0/index.html">
+<meta property="og:site_name" content="虚幻">
+<meta property="og:description" content="关于业火输入法临时英文模式的由来、思考、设计、开发和总结。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://user-images.githubusercontent.com/16240729/234012766-ef2526e1-c1ef-4f5d-8150-9613545524fe.png">
+<meta property="og:image" content="https://user-images.githubusercontent.com/16240729/234012779-76017f2f-e1be-4705-9006-8c286763f07e.png">
+<meta property="og:image" content="https://user-images.githubusercontent.com/16240729/234019008-fc192fc8-0796-43f3-bd02-5df146dd72f9.png">
+<meta property="og:image" content="https://user-images.githubusercontent.com/16240729/234021526-cd7507dd-af67-4f26-b555-c8dbd2942b66.png">
+<meta property="article:published_time" content="2023-04-24T22:56:00.000Z">
+<meta property="article:modified_time" content="2023-04-24T15:01:19.819Z">
+<meta property="article:author" content="虚幻">
+<meta property="article:tag" content="MacOS">
+<meta property="article:tag" content="业火输入法">
+<meta property="article:tag" content="InputMethodKit">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://user-images.githubusercontent.com/16240729/234012766-ef2526e1-c1ef-4f5d-8150-9613545524fe.png">
+
+
+<link rel="canonical" href="https://qwertyyb.github.io/2023/04/24/%E5%85%B3%E4%BA%8E%E4%B8%9A%E7%81%AB%E8%BE%93%E5%85%A5%E6%B3%95%E4%B8%B4%E6%97%B6%E8%8B%B1%E6%96%87%E6%A8%A1%E5%BC%8F%E7%9A%84%E6%80%9D%E8%80%83%E3%80%81%E8%AE%BE%E8%AE%A1%E5%92%8C%E5%AE%9E%E7%8E%B0/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://qwertyyb.github.io/2023/04/24/%E5%85%B3%E4%BA%8E%E4%B8%9A%E7%81%AB%E8%BE%93%E5%85%A5%E6%B3%95%E4%B8%B4%E6%97%B6%E8%8B%B1%E6%96%87%E6%A8%A1%E5%BC%8F%E7%9A%84%E6%80%9D%E8%80%83%E3%80%81%E8%AE%BE%E8%AE%A1%E5%92%8C%E5%AE%9E%E7%8E%B0/","path":"2023/04/24/关于业火输入法临时英文模式的思考、设计和实现/","title":"关于业火输入法临时英文模式的思考、设计和实现"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>关于业火输入法临时英文模式的思考、设计和实现 | 虚幻</title>
+  
+
+  <script src="/js/third-party/analytics/baidu-analytics.js"></script>
+  <script async src="https://hm.baidu.com/hm.js?512529800174ec76de81bf92990fed78"></script>
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">虚幻</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">陪伴像幼蝉钻进土壤，无声却能生长</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-moment"><a href="/moment/" rel="section"><i class="fa fa-pencil fa-fw"></i>moment</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-业火输入法"><a href="/Fire/index.html" rel="section"><i class="fa fa-fire-flame-curved fa-fw"></i>业火输入法</a></li><li class="menu-item menu-item-ypaste"><a href="/YPaste/index.html" rel="section"><i class="fa fa-paste fa-fw"></i>YPaste</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%B4%E6%97%B6%E5%8D%8A%E8%A7%92%E7%AC%A6%E5%8F%B7"><span class="nav-number">1.</span> <span class="nav-text">临时半角符号</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E4%BD%BF%E7%94%A8%E5%88%86%E5%8F%B7%E4%BD%9C%E4%B8%BA%E8%A7%A6%E5%8F%91%E6%8C%89%E9%94%AE"><span class="nav-number">1.1.</span> <span class="nav-text">为什么使用分号作为触发按键</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%B4%E6%97%B6%E8%8B%B1%E6%96%87%E6%A8%A1%E5%BC%8F"><span class="nav-number">2.</span> <span class="nav-text">临时英文模式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%B7%E4%BD%93%E5%AE%9E%E7%8E%B0"><span class="nav-number">3.</span> <span class="nav-text">具体实现</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A4%84%E7%90%86%E6%8F%90%E7%A4%BA%E7%9A%84%E6%98%BE%E7%A4%BA%E9%97%AE%E9%A2%98"><span class="nav-number">3.1.</span> <span class="nav-text">处理提示的显示问题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A4%84%E7%90%86%E8%87%AA%E5%8A%A8%E4%B8%8A%E5%B1%8F%E5%92%8C%E4%B8%B4%E6%97%B6%E8%8B%B1%E6%96%87%E7%9A%84%E5%86%B2%E7%AA%81"><span class="nav-number">3.2.</span> <span class="nav-text">处理自动上屏和临时英文的冲突</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%B3%E4%BA%8E%E4%B8%B4%E6%97%B6%E8%8B%B1%E6%96%87%E7%9A%84%E9%80%82%E7%94%A8%E5%9C%BA%E6%99%AF"><span class="nav-number">4.</span> <span class="nav-text">关于临时英文的适用场景</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="虚幻"
+      src="https://avatars.githubusercontent.com/u/16240729?v=4">
+  <p class="site-author-name" itemprop="name">虚幻</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">18</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">22</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">24</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/qwertyyb" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;qwertyyb" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://qwertyyb.github.io/2023/04/24/%E5%85%B3%E4%BA%8E%E4%B8%9A%E7%81%AB%E8%BE%93%E5%85%A5%E6%B3%95%E4%B8%B4%E6%97%B6%E8%8B%B1%E6%96%87%E6%A8%A1%E5%BC%8F%E7%9A%84%E6%80%9D%E8%80%83%E3%80%81%E8%AE%BE%E8%AE%A1%E5%92%8C%E5%AE%9E%E7%8E%B0/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://avatars.githubusercontent.com/u/16240729?v=4">
+      <meta itemprop="name" content="虚幻">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="虚幻">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="关于业火输入法临时英文模式的思考、设计和实现 | 虚幻">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          关于业火输入法临时英文模式的思考、设计和实现<a href="https://github.com/qwertyyb/qwertyyb.github.io/tree/master/source/_posts/%E5%85%B3%E4%BA%8E%E4%B8%9A%E7%81%AB%E8%BE%93%E5%85%A5%E6%B3%95%E4%B8%B4%E6%97%B6%E8%8B%B1%E6%96%87%E6%A8%A1%E5%BC%8F%E7%9A%84%E6%80%9D%E8%80%83%E3%80%81%E8%AE%BE%E8%AE%A1%E5%92%8C%E5%AE%9E%E7%8E%B0.md" class="post-edit-link" title="编辑" rel="noopener" target="_blank"><i class="fa fa-pen-nib"></i></a>
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2023-04-24 22:56:00 / 修改时间：15:01:19" itemprop="dateCreated datePublished" datetime="2023-04-24T22:56:00+00:00">2023-04-24</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/MacOS/" itemprop="url" rel="index"><span itemprop="name">MacOS</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/MacOS/%E4%B8%9A%E7%81%AB%E8%BE%93%E5%85%A5%E6%B3%95/" itemprop="url" rel="index"><span itemprop="name">业火输入法</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/MacOS/InputMethodKit/" itemprop="url" rel="index"><span itemprop="name">InputMethodKit</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>关于业火输入法临时英文模式的由来、思考、设计、开发和总结。</p>
+<span id="more"></span>
+
+<h2 id="临时半角符号"><a href="#临时半角符号" class="headerlink" title="临时半角符号"></a>临时半角符号</h2><p>我刚开始只是经常输错半角和全角符号，所以我刚开始的想法是需要一种能在中文输入模式下也能快速输入半角符号的方案。</p>
+<p>所以我的初始方案是在中文输入模式下，当输入分号时，并不直接输入全角的分号，而是进入拼词模式，唤出候选窗。然后在拼词模式下输入对应的符号，就自动把半角符号输入输入框中，并退出拼词模式。比如输入 “;, &#x3D; 半角,”、 “ ;.&#x3D;.”，如下图。那么如何输入全角的分号呢？我也考虑到了，在拼词模式下，再输入分号，就输出全角分号。其实写到这里，已经能感觉不太对了，主要是一致性的问题，分号+其它的符号输出半角符号，但是分号 + 分号竟然是全角符号，这里的两个输入逻辑是一致的，但是两种输出不一致。然而当时我并没有意识到这个问题，直到按我上面的思路去着手实现的时候才反应过来。</p>
+<p><img src="https://user-images.githubusercontent.com/16240729/234012766-ef2526e1-c1ef-4f5d-8150-9613545524fe.png" alt="临时半角符号"></p>
+<h3 id="为什么使用分号作为触发按键"><a href="#为什么使用分号作为触发按键" class="headerlink" title="为什么使用分号作为触发按键"></a>为什么使用分号作为触发按键</h3><p>解释一下为什么使用分号键来承载触发词。从萌芽这个想法开始，我的第一反应就是应该用分号键来承载，然后我意识到我实际上是受了清歌输入法的影响，因为用过，所以隐约记得清歌输入法是用分号键承载了什么能力，所以我才会有那样的第一反应。然后反应过来后再回看，发现这个分号按键真的很妙，因为和它对称的shift键大多数用来切换中英文，而分号键用来临时切回半角符号，有一种对称的美感。</p>
+<h2 id="临时英文模式"><a href="#临时英文模式" class="headerlink" title="临时英文模式"></a>临时英文模式</h2><p>然后再回到上面在着手实现时发现了不一致的问题，因为有珠玉在前，所以我转头去看了一下清歌输入法，清歌输入法是用分号键作为临时英文触发按键，按下分号键，再按下字母和符号键（一个或多个），再敲空格键，即可输出英文字母和半角符号。</p>
+<p>受到清歌输入法的启发，我开始思考我是否需要临时英文输入？考虑之下，我发现其实是有的，比如说“关于 IMKInputCotroller 的碎碎念”这句话，其中有中文有英文，经常会在输入英文时忘记当前是中文输入模式，或者输入完英文后忘记切换输入模式去输入中文。除了中英文的输入外，还有全角半角符号的转换也经常会输错。当这种事频繁发生并打断我的思路的时候，我意识到我确实需要临时英文来提高输入效率。</p>
+<p>业火的临时英文模式与清歌有所不同—中文输入模式下，按下分号键，进入临时英文模式，唤起候选框，半角分号作为第一个原码，之后按下多个英文字母或标点符号，把分号之后的所有的英文字母和标点符号按输入顺序作为第一个候选词，按空格，输出第一个候选词。具体的用流程图表示如下，基本上是把清歌的回车换成了空格:</p>
+<p><img src="https://user-images.githubusercontent.com/16240729/234012779-76017f2f-e1be-4705-9006-8c286763f07e.png" alt="业火输入法临时英文输入"></p>
+<p>可以看出，虽然仍然会有分号后＋其它符号或分号表现最终输出不一致的问题，但是除了这一点这外，还有一个空格确认的区别，所以最终反而不会有太多的不协调了。</p>
+<h2 id="具体实现"><a href="#具体实现" class="headerlink" title="具体实现"></a>具体实现</h2><p>关于具体的实现，只要理清了逻辑，其实没什么难点，只是有几个点需要注意一下。</p>
+<ol>
+<li>按下分号键时，要有临时英文的提示和一些操作提示</li>
+<li>当“五笔的四码唯一自动上屏”开启时，会和临时英文的唯一候选词冲突</li>
+</ol>
+<h3 id="处理提示的显示问题"><a href="#处理提示的显示问题" class="headerlink" title="处理提示的显示问题"></a>处理提示的显示问题</h3><p>最初候选词 <code>Candidate</code> 的结构为:</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">Candidate</span>: <span class="title class_">Hashable</span> &#123;</span><br><span class="line">    <span class="keyword">let</span> code: <span class="type">String</span></span><br><span class="line">    <span class="keyword">let</span> text: <span class="type">String</span></span><br><span class="line">    <span class="keyword">let</span> type: <span class="type">CandidateType</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>候选词的显示和候选词的实际内容是一致的，取的是 <code>text</code> 字段。如果这次也这样处理，那最终在英文输入时候选窗是类似这样的。</p>
+<p><img src="https://user-images.githubusercontent.com/16240729/234019008-fc192fc8-0796-43f3-bd02-5df146dd72f9.png" alt="候选窗样式"></p>
+<p>可以看到太多重复的内容了，一边是重复的内容，一边是要显示提示，最终的答案也就呼之欲出了——把候选词的显示和实际内容分开，最终调整 <code>Candidate</code> 的结构如下:</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">Candidate</span>: <span class="title class_">Hashable</span> &#123;</span><br><span class="line">    <span class="keyword">let</span> code: <span class="type">String</span></span><br><span class="line">    <span class="keyword">let</span> text: <span class="type">String</span></span><br><span class="line">    <span class="keyword">let</span> type: <span class="type">CandidateType</span></span><br><span class="line">    <span class="keyword">let</span> label: <span class="type">String</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">init</span>(<span class="params">code</span>: <span class="type">String</span>, <span class="params">text</span>: <span class="type">String</span>, <span class="params">type</span>: <span class="type">CandidateType</span>, <span class="params">label</span>: <span class="type">String</span>? <span class="operator">=</span> <span class="literal">nil</span>) &#123;</span><br><span class="line">        <span class="keyword">self</span>.code <span class="operator">=</span> code</span><br><span class="line">        <span class="keyword">self</span>.text <span class="operator">=</span> text</span><br><span class="line">        <span class="keyword">self</span>.type <span class="operator">=</span> type</span><br><span class="line">        <span class="keyword">self</span>.label <span class="operator">=</span> label <span class="operator">??</span> text</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>候选窗中实际显示 <code>label</code> 字段，输出时使用 <code>text</code> 字段，这样即可解决第一个问题。最终显示效果如下:</p>
+<p><img src="https://user-images.githubusercontent.com/16240729/234021526-cd7507dd-af67-4f26-b555-c8dbd2942b66.png" alt="临时英文的提示"></p>
+<h3 id="处理自动上屏和临时英文的冲突"><a href="#处理自动上屏和临时英文的冲突" class="headerlink" title="处理自动上屏和临时英文的冲突"></a>处理自动上屏和临时英文的冲突</h3><p>这里目前的实现是扩展了一个 <code>CandidateType</code> 的枚举，原来的 <code>Candidate</code> 的枚举定义如下: </p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">enum</span> <span class="title class_">CandidateType</span>: <span class="title class_">String</span> &#123;</span><br><span class="line">    <span class="keyword">case</span> wb <span class="comment">// 五笔</span></span><br><span class="line">    <span class="keyword">case</span> py <span class="comment">// 拼音</span></span><br><span class="line">    <span class="keyword">case</span> user <span class="comment">// 用户词库</span></span><br><span class="line">    <span class="keyword">case</span> tip <span class="comment">// 显示提示</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>然后在自动上屏的逻辑中判断过滤了一下这个 <code>CandidateType</code>。</p>
+<p>但是目前来看，感觉或许扩展一个 <code>Candidate</code> 结构字段 <code>canAutoCompose</code> 字段更合适一些。</p>
+<h2 id="关于临时英文的适用场景"><a href="#关于临时英文的适用场景" class="headerlink" title="关于临时英文的适用场景"></a>关于临时英文的适用场景</h2><p>这里主要解释一下，为什么拼音输入法没有临时英文模式。因为拼音输入法下，用户需要手动去选(输入1,2,3…或空格键)，才会把字或词输出出来，在这种情况下，如果不选词，直接按回车键，一般都是输出原码，也就是英文，所以拼音输入法用回车键就天生自带临时英文模式。</p>
+<p>同样的道理，如果五笔输入法，不开启四码唯一上屏选项，那就和拼音输入是一样的，也不需要临时英文模式，但是临时半角仍然是需要的。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          
+
+<div class="post-copyright">
+<ul>
+  <li class="post-copyright-author">
+      <strong>本文作者： </strong>虚幻
+  </li>
+  <li class="post-copyright-link">
+      <strong>本文链接：</strong>
+      <a href="https://qwertyyb.github.io/2023/04/24/%E5%85%B3%E4%BA%8E%E4%B8%9A%E7%81%AB%E8%BE%93%E5%85%A5%E6%B3%95%E4%B8%B4%E6%97%B6%E8%8B%B1%E6%96%87%E6%A8%A1%E5%BC%8F%E7%9A%84%E6%80%9D%E8%80%83%E3%80%81%E8%AE%BE%E8%AE%A1%E5%92%8C%E5%AE%9E%E7%8E%B0/" title="关于业火输入法临时英文模式的思考、设计和实现">https://qwertyyb.github.io/2023/04/24/关于业火输入法临时英文模式的思考、设计和实现/</a>
+  </li>
+  <li class="post-copyright-license">
+      <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/MacOS/" rel="tag"><i class="fa fa-tag"></i> MacOS</a>
+              <a href="/tags/%E4%B8%9A%E7%81%AB%E8%BE%93%E5%85%A5%E6%B3%95/" rel="tag"><i class="fa fa-tag"></i> 业火输入法</a>
+              <a href="/tags/InputMethodKit/" rel="tag"><i class="fa fa-tag"></i> InputMethodKit</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2023/04/23/%E5%85%B3%E4%BA%8E%20IMKInputController%20%E4%B8%80%E4%BA%9B%E9%9C%80%E8%A6%81%E5%85%B3%E6%B3%A8%E7%9A%84%E7%82%B9/" rel="prev" title="关于 `IMKInputController` 一些需要关注的点">
+                  <i class="fa fa-chevron-left"></i> 关于 `IMKInputController` 一些需要关注的点
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">豫ICP备18003010号-1 </a>
+  </div>
+
+<div class="copyright">
+  &copy; 2015 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">虚幻</span>
+</div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/pisces/" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"none","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js"></script>
+
+
+
+</body>
+</html>
