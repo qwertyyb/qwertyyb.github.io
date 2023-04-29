@@ -28,7 +28,7 @@
 <meta property="og:description" content="​	编码的相关知识还真是杂乱不堪，不少人对一些知识理解似乎也有些偏差，网上百度,google的内容，也有不少以讹传讹，根本就是错误的（例如说 unicode编码是两个字节），各种软件让你选择编码的时候，常常是很长的一个选单，让用户不知道该如何选。基于这样的问题，我就写下我的理解吧，一方面帮助一些需要帮助的人纠正认识，一方面作为自己以后备查的资料。">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2017-03-12T20:45:45.000Z">
-<meta property="article:modified_time" content="2023-04-29T07:32:14.107Z">
+<meta property="article:modified_time" content="2023-04-29T07:44:41.172Z">
 <meta property="article:author" content="虚幻">
 <meta property="article:tag" content="编码">
 <meta name="twitter:card" content="summary">
@@ -56,6 +56,8 @@
   <noscript>
     <link rel="stylesheet" href="/css/noscript.css">
   </noscript>
+
+<style>.github-emoji { position: relative; display: inline-block; width: 1.2em; min-height: 1.2em; overflow: hidden; vertical-align: top; color: transparent; }  .github-emoji > span { position: relative; z-index: 10; }  .github-emoji img, .github-emoji .fancybox { margin: 0 !important; padding: 0 !important; border: none !important; outline: none !important; text-decoration: none !important; user-select: none !important; cursor: auto !important; }  .github-emoji img { height: 1.2em !important; width: 1.2em !important; position: absolute !important; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) !important; user-select: none !important; cursor: auto !important; } .github-emoji-fallback { color: inherit; } .github-emoji-fallback img { opacity: 0 !important; }</style>
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
@@ -237,7 +239,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-04-29 07:32:14" itemprop="dateModified" datetime="2023-04-29T07:32:14+00:00">2023-04-29</time>
+      <time title="修改时间：2023-04-29 07:44:41" itemprop="dateModified" datetime="2023-04-29T07:44:41+00:00">2023-04-29</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -285,7 +287,7 @@
 <p>  CJK包含了中国，日本，韩国，越南，香港，也就是CJKVH。这个在UNICODE的Charset chart中可以明显看到。  unicode的相关标准可以从unicode.org上面获得，目前已经进行到了6.0版本。</p>
 <p>下面这段描述来自百度百科：</p>
 <blockquote>
-<p> Unicode字符集可以简写为UCS（Unicode Character Set）。早期的  unicodeUnicode标准有UCS-2、UCS-4的说法。UCS-2用两个字节编码，UCS-4用4个字节编码。UCS-4根据最高位为0的最高字节分成2^7&#x3D;128个group。每个group再根据次高字节分为256个平面（plane）。每个平面根据第3个字节分为256行 （row），每行有256个码位（cell）。group 0的平面0被称作BMP（Basic Multilingual Plane）。将UCS-4的BMP去掉前面的两个零字节就得到了UCS-2。每个平面有2^16&#x3D;65536个码位。Unicode计划使用了17个平面，一共有17<em>65536&#x3D;1114112个码位。在Unicode 5.0.0版本中，已定义的码位只有238605个，分布在平面0、平面1、平面2、平面14、平面15、平面16。其中平面15和平面16上只是定义了两个各占65534个码位的专用区（Private Use Area），分别是0xF0000-0xFFFFD和0x100000-0x10FFFD。所谓专用区，就是保留给大家放自定义字符的区域，可以简写为PUA。 　　平面0也有一个专用区：0xE000-0xF8FF，有6400个码位。平面0的0xD800-0xDFFF，共2048个码位，是一个被称作代理区Surrogate）的特殊区域。代理区的目的用两个UTF-16字符表示BMP以外的字符。在介绍UTF-16编码时会介绍。如前所述在Unicode 5.0.0版本中，238605-65534</em>2-6400-2408&#x3D;99089。余下的99089个已定义码位分布在平面0、平面1、平面2和平面14上，它们对应着Unicode目前定义的99089个字符，其中包括71226个汉字。平面0、平面1、平面2和平面14上分别定义了52080、3419、43253和337个字符。平面2的43253个字符都是汉字。平面0上定义了27973个汉字。</p>
+<p> Unicode字符集可以简写为UCS（Unicode Character Set）。早期的  unicodeUnicode标准有UCS-2、UCS-4的说法。UCS-2用两个字节编码，UCS-4用4个字节编码。UCS-4根据最高位为0的最高字节分成2^7=128个group。每个group再根据次高字节分为256个平面（plane）。每个平面根据第3个字节分为256行 （row），每行有256个码位（cell）。group 0的平面0被称作BMP（Basic Multilingual Plane）。将UCS-4的BMP去掉前面的两个零字节就得到了UCS-2。每个平面有2^16=65536个码位。Unicode计划使用了17个平面，一共有17<em>65536=1114112个码位。在Unicode 5.0.0版本中，已定义的码位只有238605个，分布在平面0、平面1、平面2、平面14、平面15、平面16。其中平面15和平面16上只是定义了两个各占65534个码位的专用区（Private Use Area），分别是0xF0000-0xFFFFD和0x100000-0x10FFFD。所谓专用区，就是保留给大家放自定义字符的区域，可以简写为PUA。 　　平面0也有一个专用区：0xE000-0xF8FF，有6400个码位。平面0的0xD800-0xDFFF，共2048个码位，是一个被称作代理区Surrogate）的特殊区域。代理区的目的用两个UTF-16字符表示BMP以外的字符。在介绍UTF-16编码时会介绍。如前所述在Unicode 5.0.0版本中，238605-65534</em>2-6400-2408=99089。余下的99089个已定义码位分布在平面0、平面1、平面2和平面14上，它们对应着Unicode目前定义的99089个字符，其中包括71226个汉字。平面0、平面1、平面2和平面14上分别定义了52080、3419、43253和337个字符。平面2的43253个字符都是汉字。平面0上定义了27973个汉字。</p>
 </blockquote>
 <h2 id="Unicode编码"><a href="#Unicode编码" class="headerlink" title="Unicode编码"></a>Unicode编码</h2><h4 id="1-Unicode的实现方案"><a href="#1-Unicode的实现方案" class="headerlink" title="1. Unicode的实现方案"></a>1. Unicode的实现方案</h4><p>Unicode其实只是一张巨大的编码表。要在计算机里面实现，也出现了几种不同的方案。也就是说如何表示unicode编码的问题，下面是几种常见的方案：</p>
 <h5 id="1-UTF-8（UCS-Transformation-Format-8bit"><a href="#1-UTF-8（UCS-Transformation-Format-8bit" class="headerlink" title="(1) UTF-8（UCS Transformation Format 8bit)"></a>(1) UTF-8（UCS Transformation Format 8bit)</h5><p>​    	这个方案的意思以8位为单位来标识文字，注意并不是说一个文字用8位标识。他其实是一种MBCS方案，可变字节的。到底需要几个字节表示一个符号，这个要根据这个符号的unicode编码来决定，最多4个字节。</p>
@@ -323,7 +325,7 @@
 <p>下面<a href="http://lib.csdn.net/base/datastructure">算法</a>解释来自百度百科。</p>
 <blockquote>
 <p>我们把Unicode  unicode编码记作U。编码规则如下： </p>
-<p>​	如果U&lt;0x10000，U的UTF-16编码就是U对应的16位无符号整数（为书写简便，下文将16位无符号整数记作WORD）。如果U≥0x10000，我们先计算U’&#x3D;U-0x10000，然后将U’写成二进制形式：yyyy yyyy yyxx xxxx xxxx，U的UTF-16编码（二进制）就是：110110yyyyyyyyyy 110111xxxxxxxxxx。为什么U’可以被写成20个二进制位？Unicode的最大码位是0x10ffff，减去0x10000后，U’的最大值是0xfffff，所以肯定可以用20个二进制位表示。</p>
+<p>​	如果U&lt;0x10000，U的UTF-16编码就是U对应的16位无符号整数（为书写简便，下文将16位无符号整数记作WORD）。如果U≥0x10000，我们先计算U’=U-0x10000，然后将U’写成二进制形式：yyyy yyyy yyxx xxxx xxxx，U的UTF-16编码（二进制）就是：110110yyyyyyyyyy 110111xxxxxxxxxx。为什么U’可以被写成20个二进制位？Unicode的最大码位是0x10ffff，减去0x10000后，U’的最大值是0xfffff，所以肯定可以用20个二进制位表示。</p>
 <p>​	例如：Unicode编码0x20C30，减去0x10000后，得到0x10C30，写成二进制是：0001 0000 1100 0011 0000。用前10位依次替代模板中的y，用后10位依次替代模板中的x，就得到：1101100001000011 1101110000110000，即0xD8430xDC30。 　　</p>
 </blockquote>
 <p>​    按照上述规则，Unicode编码0x10000-0x10FFFF的UTF-16编码有两个WORD，第一个WORD的高6位是110110，第二个WORD的高6位是110111。可见，第一个WORD的取值范围（二进制）是11011000 00000000到11011011 11111111，即0xD800-0xDBFF。第二个WORD的取值范围（二进制）是11011100 00000000到11011111 11111111，即0xDC00-0xDFFF。为了将一个WORD的UTF-16编码与两个WORD的UTF-16编码区分开来，Unicode编码的设计者将0xD800-0xDFFF保留下来，并称为代理区（Surrogate）： </p>
@@ -353,7 +355,7 @@
 <p>​        BOM的UTF-8编码为1110<em>1111</em> 10<em>111011</em>10*111111 *(<strong>EF BB BF</strong>)，所以一般EF BB BF被放在文本的开头，用来指示其编码为UTF-8。</p>
 <h4 id="3-Unicode编码实践"><a href="#3-Unicode编码实践" class="headerlink" title="3. Unicode编码实践"></a>3. Unicode编码实践</h4><p>​	在Windows的文本编辑工具记事本上，选择“另存为”的时候，用户可以选择不同的编码选项，对应编码选项有“ANSI”，“Unicode”，“Unicode big endian”，以及“UTF-8”。因为Windows的存储方式是Little-Endian，所以“Unicode”，“Unicode big endian”对应的分别是UTF-16LE和UTF-16BE。</p>
 <p>​        读者可以试着编写一串字符，然后分别用不同的编码保存，再用可以16进制编写的纯文本编辑工具（如，Ultra-edit）来检验一下具体的编码实现和存储顺序。下面是笔者将“田海立（U+7530, U+6D77, U+7ACB）”以不同编码方式保存，得到的结果：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">田海立_UTF-16BE.txt</span><br><span class="line"></span><br><span class="line">        FEFF75306D777ACB</span><br><span class="line"></span><br><span class="line">田海立_UTF-16LE.txt</span><br><span class="line"></span><br><span class="line">        FFFE3075776DCB7A</span><br><span class="line"></span><br><span class="line">田海立_UTF-8.txt</span><br><span class="line"></span><br><span class="line">        EFBBBFE794B0E6B5B7E7AB8B</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">田海立_UTF-16BE.txt</span><br><span class="line"></span><br><span class="line">        FEFF75306D777ACB</span><br><span class="line"></span><br><span class="line">田海立_UTF-16LE.txt</span><br><span class="line"></span><br><span class="line">        FFFE3075776DCB7A</span><br><span class="line"></span><br><span class="line">田海立_UTF-8.txt</span><br><span class="line"></span><br><span class="line">        EFBBBFE794B0E6B5B7E7AB8B</span><br></pre></td></tr></tbody></table></figure>
 
 <p>​        为了明确起见，<strong>BOM</strong>的编码用粗体标注；田的编码用红色标注；海的编码用绿色标注；立的编码用蓝色标注。可以看到，记事本（Notepad）存储的Unicode编码的文件的开头位置，用BOM的相应编码指示了编码格式。</p>
 
