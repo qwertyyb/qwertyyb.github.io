@@ -14,7 +14,7 @@ const getIssues = async (page = 1) => {
     owner: github.context.repo.owner,
     repo: github.context.repo.repo,
     labels: labels,
-    state: 'open',
+    state: 'all',
     creator: github.context.repo.owner,
     per_page: 100,
     page,

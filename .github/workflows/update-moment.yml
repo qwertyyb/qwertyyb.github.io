@@ -1,7 +1,7 @@
 name: Update Moment
 
 on:
-  issue:
+  issues:
 
 permissions:
   contents: write
@@ -12,7 +12,7 @@ jobs:
   moment:
     runs-on: ubuntu-latest
 
-    jobs:
+    steps:
       - uses: actions/checkout@v2
 
       - uses: ./packages/create-moment
@@ -22,6 +22,6 @@ jobs:
           git config user.name github-actions
           git config user.email github-actions@github.com
           git add source/moment/
-          git commit -m "update moment"
+          git commit -m "update moment close #${{ github.event.issue.number }}"
           git push
-        if: ${{ jobs.issueMoment.outputs.content != '' }}
+        if: ${{ steps.issueMoment.outputs.content != '' }}
