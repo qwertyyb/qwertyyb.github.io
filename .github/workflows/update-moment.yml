@@ -1,0 +1,27 @@
+name: Update Moment
+
+on:
+  issue:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  moment:
+    runs-on: ubuntu-latest
+
+    jobs:
+      - uses: actions/checkout@v2
+
+      - uses: ./packages/create-moment
+        id: issueMoment
+
+      - run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add source/moment/
+          git commit -m "update moment"
+          git push
+        if: ${{ jobs.issueMoment.outputs.content != '' }}

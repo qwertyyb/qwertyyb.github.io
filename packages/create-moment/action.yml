@@ -1,0 +1,19 @@
+name: 'update moment'
+description: '拉取issues生成moment markdown文件'
+inputs:
+  token:
+    description: 'github token'
+    default: ${{ github.token }}
+  labels:
+    description: 'issue labels'
+    default: 'moment'
+  momentPath:
+    description: 'moment markdown file path'
+    default: 'source/moment/index.md'
+outputs:
+  content:
+    description: 'issue moment content'
+
+runs:
+  using: 'node16'
+  main: 'dist/index.js'
