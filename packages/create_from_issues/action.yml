@@ -12,7 +12,7 @@ inputs:
     default: 'source/moment/index.md'
   postsLabels:
     description: 'posts labels'
-    default: 'moment'
+    default: 'posts'
   postsPath:
     description: 'posts markdown directory path'
     default: 'source/_posts'

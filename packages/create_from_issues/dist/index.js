@@ -14057,7 +14057,7 @@ const fs = __nccwpck_require__(7147)
 const path = __nccwpck_require__(1017)
 const fm = __nccwpck_require__(7646)
 
-const token = core.getInput('token') || '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'
+const token = core.getInput('token')
 const postsPath = core.getInput('postsPath') || '../../source/_posts'
 const postsLabels = core.getInput('postsLabels') || 'posts'
 
@@ -14100,6 +14100,8 @@ const createPosts = async () => {
   const issues = await getIssues(1, postsLabels)
 
   let posts = issues.map(issue => {
+    console.log(issue.body)
+    console.log(fm(issue.body))
     const title = fm(issue.body).attributes.title
     return {
       title,

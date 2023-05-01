@@ -48,6 +48,8 @@ const createPosts = async () => {
   const issues = await getIssues(1, postsLabels)
 
   let posts = issues.map(issue => {
+    console.log(issue.body)
+    console.log(fm(issue.body))
     const title = fm(issue.body).attributes.title
     return {
       title,
