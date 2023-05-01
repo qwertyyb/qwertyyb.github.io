@@ -2,24 +2,6 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
-    <loc>https://qwertyyb.github.io/2017/03/11/Simpler-Github-Pages-publishing/</loc>
-    
-    <lastmod>2023-05-01</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://qwertyyb.github.io/2015/10/21/demo/</loc>
-    
-    <lastmod>2023-05-01</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
     <loc>https://qwertyyb.github.io/2017/11/02/java%E7%89%88%E6%9C%AC%E6%9B%B4%E6%96%B0%E5%90%8E-eclipse%E6%89%93%E4%B8%8D%E5%BC%80/</loc>
     
     <lastmod>2023-05-01</lastmod>
@@ -30,15 +12,6 @@
   
   <url>
     <loc>https://qwertyyb.github.io/2017/05/28/shadowsocks%E6%9C%8D%E5%8A%A1%E7%AB%AF%E7%9A%84%E9%85%8D%E7%BD%AE/</loc>
-    
-    <lastmod>2023-05-01</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://qwertyyb.github.io/2023/05/01/%E4%B8%80%E4%B8%AA%E6%B5%8B%E8%AF%95%E5%86%85%E5%AE%B9%E6%A0%87%E9%A2%98/</loc>
     
     <lastmod>2023-05-01</lastmod>
     
@@ -208,6 +181,24 @@
     <priority>0.6</priority>
   </url>
   
+  <url>
+    <loc>https://qwertyyb.github.io/2017/03/11/Simpler-Github-Pages-publishing/</loc>
+    
+    <lastmod>2023-05-01</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://qwertyyb.github.io/2015/10/21/demo/</loc>
+    
+    <lastmod>2023-05-01</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
 
   <url>
     <loc>https://qwertyyb.github.io/</loc>
@@ -289,13 +280,6 @@
   
   <url>
     <loc>https://qwertyyb.github.io/tags/shadowsocks/</loc>
-    <lastmod>2023-05-01</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
-    <loc>https://qwertyyb.github.io/tags/test/</loc>
     <lastmod>2023-05-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
@@ -451,21 +435,7 @@
   </url>
   
   <url>
-    <loc>https://qwertyyb.github.io/categories/test/</loc>
-    <lastmod>2023-05-01</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
     <loc>https://qwertyyb.github.io/categories/MacOS/%E4%BA%94%E7%AC%94%E8%BE%93%E5%85%A5%E6%B3%95/</loc>
-    <lastmod>2023-05-01</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
-    <loc>https://qwertyyb.github.io/categories/MacOS/InputMethodKit/</loc>
     <lastmod>2023-05-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
@@ -479,7 +449,7 @@
   </url>
   
   <url>
-    <loc>https://qwertyyb.github.io/categories/%E9%9F%B3%E4%B9%90/%E6%A0%BC%E5%BC%8F/</loc>
+    <loc>https://qwertyyb.github.io/categories/MacOS/InputMethodKit/</loc>
     <lastmod>2023-05-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
@@ -487,6 +457,13 @@
   
   <url>
     <loc>https://qwertyyb.github.io/categories/%E5%B7%A5%E5%85%B7/</loc>
+    <lastmod>2023-05-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>https://qwertyyb.github.io/categories/%E9%9F%B3%E4%B9%90/%E6%A0%BC%E5%BC%8F/</loc>
     <lastmod>2023-05-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
@@ -528,14 +505,14 @@
   </url>
   
   <url>
-    <loc>https://qwertyyb.github.io/categories/%E9%A1%B9%E7%9B%AE%E7%AE%A1%E7%90%86/Github/Github-Pages/</loc>
+    <loc>https://qwertyyb.github.io/categories/%E5%89%8D%E7%AB%AF/%E5%BE%AE%E4%BF%A1/</loc>
     <lastmod>2023-05-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
-    <loc>https://qwertyyb.github.io/categories/%E5%89%8D%E7%AB%AF/%E5%BE%AE%E4%BF%A1/</loc>
+    <loc>https://qwertyyb.github.io/categories/%E9%A1%B9%E7%9B%AE%E7%AE%A1%E7%90%86/Github/Github-Pages/</loc>
     <lastmod>2023-05-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
