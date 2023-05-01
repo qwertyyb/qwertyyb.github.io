@@ -4547,6 +4547,20 @@ function removeHook(state, name, method) {
 
 /***/ }),
 
+/***/ 4761:
+/***/ (function(module) {
+
+!function(t,e){ true?module.exports=e():0}(this,(function(){"use strict";var t={year:0,month:1,day:2,hour:3,minute:4,second:5},e={};return function(n,i,o){var r,a=function(t,n,i){void 0===i&&(i={});var o=new Date(t),r=function(t,n){void 0===n&&(n={});var i=n.timeZoneName||"short",o=t+"|"+i,r=e[o];return r||(r=new Intl.DateTimeFormat("en-US",{hour12:!1,timeZone:t,year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit",second:"2-digit",timeZoneName:i}),e[o]=r),r}(n,i);return r.formatToParts(o)},u=function(e,n){for(var i=a(e,n),r=[],u=0;u<i.length;u+=1){var f=i[u],s=f.type,m=f.value,c=t[s];c>=0&&(r[c]=parseInt(m,10))}var d=r[3],l=24===d?0:d,v=r[0]+"-"+r[1]+"-"+r[2]+" "+l+":"+r[4]+":"+r[5]+":000",h=+e;return(o.utc(v).valueOf()-(h-=h%1e3))/6e4},f=i.prototype;f.tz=function(t,e){void 0===t&&(t=r);var n=this.utcOffset(),i=this.toDate(),a=i.toLocaleString("en-US",{timeZone:t}),u=Math.round((i-new Date(a))/1e3/60),f=o(a).$set("millisecond",this.$ms).utcOffset(15*-Math.round(i.getTimezoneOffset()/15)-u,!0);if(e){var s=f.utcOffset();f=f.add(n-s,"minute")}return f.$x.$timezone=t,f},f.offsetName=function(t){var e=this.$x.$timezone||o.tz.guess(),n=a(this.valueOf(),e,{timeZoneName:t}).find((function(t){return"timezonename"===t.type.toLowerCase()}));return n&&n.value};var s=f.startOf;f.startOf=function(t,e){if(!this.$x||!this.$x.$timezone)return s.call(this,t,e);var n=o(this.format("YYYY-MM-DD HH:mm:ss:SSS"));return s.call(n,t,e).tz(this.$x.$timezone,!0)},o.tz=function(t,e,n){var i=n&&e,a=n||e||r,f=u(+o(),a);if("string"!=typeof t)return o(t).tz(a);var s=function(t,e,n){var i=t-60*e*1e3,o=u(i,n);if(e===o)return[i,e];var r=u(i-=60*(o-e)*1e3,n);return o===r?[i,o]:[t-60*Math.min(o,r)*1e3,Math.max(o,r)]}(o.utc(t,i).valueOf(),f,a),m=s[0],c=s[1],d=o(m).utcOffset(c);return d.$x.$timezone=a,d},o.tz.guess=function(){return Intl.DateTimeFormat().resolvedOptions().timeZone},o.tz.setDefault=function(t){r=t}}}));
+
+/***/ }),
+
+/***/ 4359:
+/***/ (function(module) {
+
+!function(t,i){ true?module.exports=i():0}(this,(function(){"use strict";var t="minute",i=/[+-]\d\d(?::?\d\d)?/g,e=/([+-]|\d\d)/g;return function(s,f,n){var u=f.prototype;n.utc=function(t){var i={date:t,utc:!0,args:arguments};return new f(i)},u.utc=function(i){var e=n(this.toDate(),{locale:this.$L,utc:!0});return i?e.add(this.utcOffset(),t):e},u.local=function(){return n(this.toDate(),{locale:this.$L,utc:!1})};var o=u.parse;u.parse=function(t){t.utc&&(this.$u=!0),this.$utils().u(t.$offset)||(this.$offset=t.$offset),o.call(this,t)};var r=u.init;u.init=function(){if(this.$u){var t=this.$d;this.$y=t.getUTCFullYear(),this.$M=t.getUTCMonth(),this.$D=t.getUTCDate(),this.$W=t.getUTCDay(),this.$H=t.getUTCHours(),this.$m=t.getUTCMinutes(),this.$s=t.getUTCSeconds(),this.$ms=t.getUTCMilliseconds()}else r.call(this)};var a=u.utcOffset;u.utcOffset=function(s,f){var n=this.$utils().u;if(n(s))return this.$u?0:n(this.$offset)?a.call(this):this.$offset;if("string"==typeof s&&(s=function(t){void 0===t&&(t="");var s=t.match(i);if(!s)return null;var f=(""+s[0]).match(e)||["-",0,0],n=f[0],u=60*+f[1]+ +f[2];return 0===u?0:"+"===n?u:-u}(s),null===s))return this;var u=Math.abs(s)<=16?60*s:s,o=this;if(f)return o.$offset=u,o.$u=0===s,o;if(0!==s){var r=this.$u?this.toDate().getTimezoneOffset():-1*this.utcOffset();(o=this.local().add(u+r,t)).$offset=u,o.$x.$localOffset=r}else o=this.utc();return o};var h=u.format;u.format=function(t){var i=t||(this.$u?"YYYY-MM-DDTHH:mm:ss[Z]":"");return h.call(this,i)},u.valueOf=function(){var t=this.$utils().u(this.$offset)?0:this.$offset+(this.$x.$localOffset||this.$d.getTimezoneOffset());return this.$d.valueOf()-6e4*t},u.isUTC=function(){return!!this.$u},u.toISOString=function(){return this.toDate().toISOString()},u.toString=function(){return this.toDate().toUTCString()};var l=u.toDate;u.toDate=function(t){return"s"===t&&this.$offset?n(this.format("YYYY-MM-DD HH:mm:ss:SSS")).toDate():l.call(this)};var c=u.diff;u.diff=function(t,i,e){if(t&&this.$u===t.$u)return c.call(this,t,i,e);var s=this.local(),f=n(t).local();return c.call(s,f,i,e)}}}));
+
+/***/ }),
+
 /***/ 8932:
 /***/ ((__unused_webpack_module, exports) => {
 
@@ -13873,6 +13887,26 @@ function wrappy (fn, cb) {
 
 /***/ }),
 
+/***/ 1252:
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+const dayjs = __nccwpck_require__(7401)
+const utc = __nccwpck_require__(4359)
+const timezone = __nccwpck_require__(4761) 
+
+dayjs.extend(utc)
+dayjs.extend(timezone)
+
+const formatDate = (dateTime) => {
+  return dayjs(dateTime).tz('Asia/Shanghai').format('YYYY年MM月DD日 HH:mm')
+}
+
+module.exports = {
+  formatDate
+}
+
+/***/ }),
+
 /***/ 2877:
 /***/ ((module) => {
 
@@ -14052,17 +14086,17 @@ var __webpack_exports__ = {};
 (() => {
 const github = __nccwpck_require__(5438)
 const core = __nccwpck_require__(2186)
-const dayjs = __nccwpck_require__(7401)
 const fs = __nccwpck_require__(7147)
 const path = __nccwpck_require__(1017)
 const fm = __nccwpck_require__(7646)
+const { formatDate } = __nccwpck_require__(1252)
 
-const token = core.getInput('token')
-const postsPath = core.getInput('postsPath') || '../../source/_posts'
+const token = core.getInput('token') || process.env.GITHUB_TOKEN
+const postsPath = core.getInput('postsPath') || './source/_posts'
 const postsLabels = core.getInput('postsLabels') || 'posts'
 
 const momentLabels = core.getInput('momentLabels') || 'moment'
-const momentPath = core.getInput('momentPath') || '../../source/moment/index.md'
+const momentPath = core.getInput('momentPath') || './source/moment/index.md'
 
 const octokit = github.getOctokit(token)
 
@@ -14134,12 +14168,16 @@ const createMoment = async () => {
   const issues = await getIssues(1, momentLabels)
 
   let content = issues.map(issue => {
-    return [issue.body || issue.title, '', dayjs(issue.created_at).format('YYYY年MM月DD日 HH:mm')]
+    let lines = issue.body.split(/(\n|\r\n)/)
+      .filter(i => i.replace(/(\n|\r\n)/g, ''))
+    lines = lines.length <= 0 ? [issue.title] : lines
+
+    return [...lines, '', formatDate(issue.created_at)]
       .map(str => '> ' + str)
       .join('\n')
-  }).join('\n---\n')
+  }).join('\n\n---\n\n')
   if (content) {
-    content += '\n---\n'
+    content += '\n\n---\n\n'
   }
 
   const placeholderStart = '<!-- issueMomentContentStart -->'

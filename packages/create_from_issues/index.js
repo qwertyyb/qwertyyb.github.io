@@ -5,12 +5,12 @@ const path = require('path')
 const fm = require('front-matter')
 const { formatDate } = require('./utils')
 
-const token = core.getInput('token')
-const postsPath = core.getInput('postsPath') || '../../source/_posts'
+const token = core.getInput('token') || process.env.GITHUB_TOKEN
+const postsPath = core.getInput('postsPath') || './source/_posts'
 const postsLabels = core.getInput('postsLabels') || 'posts'
 
 const momentLabels = core.getInput('momentLabels') || 'moment'
-const momentPath = core.getInput('momentPath') || '../../source/moment/index.md'
+const momentPath = core.getInput('momentPath') || './source/moment/index.md'
 
 const octokit = github.getOctokit(token)
 

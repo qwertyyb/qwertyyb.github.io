@@ -6,8 +6,10 @@
     "version": "5.4.2"
   },
   "scripts": {
+    "fetch": "node packages/create_from_issues/dist/index.js",
     "build": "hexo generate",
     "deploy": "gh-pages -d public",
+    "preserver": "npm run fetch",
     "server": "hexo server",
     "new": "hexo new"
   },
