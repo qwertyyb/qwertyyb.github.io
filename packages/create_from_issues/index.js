@@ -3,7 +3,7 @@ const core = require('@actions/core')
 const dayjs = require('dayjs')
 const fs = require('fs')
 const path = require('path')
-const parserFrontMatter = require('parser-front-matter')
+const fm = require('front-matter')
 
 const token = core.getInput('token')
 const postsPath = core.getInput('postsPath') || '../../source/_posts'
@@ -48,7 +48,7 @@ const createPosts = async () => {
   const issues = await getIssues(1, postsLabels)
 
   let posts = issues.map(issue => {
-    const title = parserFrontMatter.parseSync(issue.body).data.title
+    const title = fm(issue.body).attributes.title
     return {
       title,
       body: issue.body
@@ -59,7 +59,7 @@ const createPosts = async () => {
   const fileList = fs.readdirSync(postsPath).map(fileName => path.join(postsPath, fileName))
 
   fileList.forEach(filePath => {
-    const data = parserFrontMatter.parseSync(fs.readFileSync(filePath, 'utf-8'))
+    const data = fm(fs.readFileSync(filePath, 'utf-8')).attributes
     if (data.created_from_issue) {
       console.log('remove', filePath)
       fs.rmSync(filePath)
