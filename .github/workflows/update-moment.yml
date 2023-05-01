@@ -1,7 +1,8 @@
-name: Update Moment
+name: Create From Issues
 
 on:
   issues:
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -15,7 +16,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - uses: ./packages/create-moment
+      - uses: ./packages/create_from_issues
         id: issueMoment
 
       - run: |
@@ -24,4 +25,4 @@ jobs:
           git add source/moment/
           git commit -m "update moment close #${{ github.event.issue.number }}"
           git push
-        if: ${{ steps.issueMoment.outputs.content != '' }}
+        if: ${{ github.event.issue.number }}

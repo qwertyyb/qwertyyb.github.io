@@ -4,12 +4,18 @@ inputs:
   token:
     description: 'github token'
     default: ${{ github.token }}
-  labels:
+  momentLabels:
     description: 'issue labels'
     default: 'moment'
   momentPath:
     description: 'moment markdown file path'
     default: 'source/moment/index.md'
+  postsLabels:
+    description: 'posts labels'
+    default: 'moment'
+  postsPath:
+    description: 'posts markdown directory path'
+    default: 'source/_posts'
 outputs:
   content:
     description: 'issue moment content'

@@ -1,0 +1,104 @@
+const github = require('@actions/github')
+const core = require('@actions/core')
+const dayjs = require('dayjs')
+const fs = require('fs')
+const path = require('path')
+const parserFrontMatter = require('parser-front-matter')
+
+const token = core.getInput('token')
+const postsPath = core.getInput('postsPath') || '../../source/_posts'
+const postsLabels = core.getInput('postsLabels') || 'posts'
+
+const momentLabels = core.getInput('momentLabels') || 'moment'
+const momentPath = core.getInput('momentPath') || '../../source/moment/index.md'
+
+const octokit = github.getOctokit(token)
+
+const getIssues = async (page = 1, labels = '') => {
+  const { data: issues } = await octokit.rest.issues.listForRepo({
+    owner: github.context.repo.owner,
+    repo: github.context.repo.repo,
+    labels: labels,
+    state: 'all',
+    creator: github.context.repo.owner,
+    per_page: 100,
+    page,
+  })
+  if (issues.length < 100) {
+    return issues
+  }
+  return [...issues, ...(await getIssues(page + 1))]
+}
+
+const getComments = async (page = 1) => {
+  const { data: comments } = await octokit.rest.issues.listComments({
+    owner: github.context.repo.owner,
+    repo: github.context.repo.repo,
+    issue_number: 1,
+    page,
+    per_page: 100
+  })
+  if (comments.length < 100) {
+    return comments
+  }
+  return [...comments, ...(await getComments(page + 1))]
+}
+
+const createPosts = async () => {
+  const issues = await getIssues(1, postsLabels)
+
+  let posts = issues.map(issue => {
+    const title = parserFrontMatter.parseSync(issue.body).data.title
+    return {
+      title,
+      body: issue.body
+    }
+  })
+
+  // 先移除之前的内容，再添加现在的内容
+  const fileList = fs.readdirSync(postsPath).map(fileName => path.join(postsPath, fileName))
+
+  fileList.forEach(filePath => {
+    const data = parserFrontMatter.parseSync(fs.readFileSync(filePath, 'utf-8'))
+    if (data.created_from_issue) {
+      console.log('remove', filePath)
+      fs.rmSync(filePath)
+    }
+  })
+
+  posts.forEach(post => {
+    const postPath = path.join(postsPath, post.title + '.md')
+    const arr = post.body.split('---')
+    arr[1] += '\ncreated_from_issue: true\n'
+    const content = arr.join('---')
+    console.log('create', postPath)
+    fs.writeFileSync(postPath, content, 'utf-8')
+  })
+}
+
+const createMoment = async () => {
+  const issues = await getIssues(1, momentLabels)
+
+  let content = issues.map(issue => {
+    return [issue.body || issue.title, '', dayjs(issue.created_at).format('YYYY年MM月DD日 HH:mm')]
+      .map(str => '> ' + str)
+      .join('\n')
+  }).join('\n---\n')
+  if (content) {
+    content += '\n---\n'
+  }
+
+  const placeholderStart = '<!-- issueMomentContentStart -->'
+  const placeholderEnd = '<!-- issueMomentContentEnd -->'
+  const placeholder = /<!-- issueMomentContentStart -->[\w\W]+<!-- issueMomentContentEnd -->/gi
+  const fileContent = fs.readFileSync(momentPath, 'utf-8')
+
+  const newContent = fileContent.replace(placeholder, [placeholderStart, content, placeholderEnd].join('\n\n'))
+
+  fs.writeFileSync(momentPath, newContent, 'utf-8')
+}
+
+
+createPosts()
+
+createMoment()

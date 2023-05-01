@@ -4575,6 +4575,34 @@ exports.Deprecation = Deprecation;
 
 /***/ }),
 
+/***/ 5625:
+/***/ ((module) => {
+
+/*!
+ * Determine if an object is a Buffer
+ *
+ * @author   Feross Aboukhadijeh <https://feross.org>
+ * @license  MIT
+ */
+
+// The _isBuffer check is for Safari 5-7 support, because it's missing
+// Object.prototype.constructor. Remove this eventually
+module.exports = function (obj) {
+  return obj != null && (isBuffer(obj) || isSlowBuffer(obj) || !!obj._isBuffer)
+}
+
+function isBuffer (obj) {
+  return !!obj.constructor && typeof obj.constructor.isBuffer === 'function' && obj.constructor.isBuffer(obj)
+}
+
+// For Node v0.10 support. Remove this eventually.
+function isSlowBuffer (obj) {
+  return typeof obj.readFloatLE === 'function' && typeof obj.slice === 'function' && isBuffer(obj.slice(0, 0))
+}
+
+
+/***/ }),
+
 /***/ 3287:
 /***/ ((__unused_webpack_module, exports) => {
 
@@ -4617,6 +4645,87 @@ function isPlainObject(o) {
 }
 
 exports.isPlainObject = isPlainObject;
+
+
+/***/ }),
+
+/***/ 4698:
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+"use strict";
+
+
+var set = __nccwpck_require__(6295);
+
+/**
+ * Cache results of the first function call to ensure only calling once.
+ *
+ * ```js
+ * var utils = require('lazy-cache')(require);
+ * // cache the call to `require('ansi-yellow')`
+ * utils('ansi-yellow', 'yellow');
+ * // use `ansi-yellow`
+ * console.log(utils.yellow('this is yellow'));
+ * ```
+ *
+ * @param  {Function} `fn` Function that will be called only once.
+ * @return {Function} Function that can be called to get the cached function
+ * @api public
+ */
+
+function lazyCache(requireFn) {
+  var cache = {};
+
+  return function proxy(name, alias) {
+    var key = alias;
+
+    // camel-case the module `name` if `alias` is not defined
+    if (typeof key !== 'string') {
+      key = camelcase(name);
+    }
+
+    // create a getter to lazily invoke the module the first time it's called
+    function getter() {
+      return cache[key] || (cache[key] = requireFn(name));
+    }
+
+    // trip the getter if `process.env.UNLAZY` is defined
+    if (unlazy(process.env)) {
+      getter();
+    }
+
+    set(proxy, key, getter);
+    return getter;
+  };
+}
+
+/**
+ * Return true if `process.env.LAZY` is true, or travis is running.
+ */
+
+function unlazy(env) {
+  return env.UNLAZY === 'true' || env.UNLAZY === true || env.TRAVIS;
+}
+
+/**
+ * Camelcase the the given module `name`.
+ */
+
+function camelcase(str) {
+  if (str.length === 1) {
+    return str.toLowerCase();
+  }
+  str = str.replace(/^[\W_]+|[\W_]+$/g, '').toLowerCase();
+  return str.replace(/[\W_]+(\w|$)/g, function(_, ch) {
+    return ch.toUpperCase();
+  });
+}
+
+/**
+ * Expose `lazyCache`
+ */
+
+module.exports = lazyCache;
 
 
 /***/ }),
@@ -6461,6 +6570,497 @@ function onceStrict (fn) {
   f.called = false
   return f
 }
+
+
+/***/ }),
+
+/***/ 6073:
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+"use strict";
+
+
+var utils = __nccwpck_require__(3037);
+
+/**
+ * Front matter parser
+ */
+
+var parser = module.exports;
+
+/**
+ * Parse front matter from the given string or the `contents` in the
+ * given `file` and callback `next(err, file)`.
+ *
+ * If an object is passed, either `file.contents` or `file.content`
+ * may be used (for gulp and assemble compatibility).
+ *
+ * ```js
+ * // pass a string
+ * parser.parse('---\ntitle: foo\n---\nbar', function (err, file) {
+ *   //=> {content: 'bar', data: {title: 'foo'}}
+ * });
+ *
+ * // or an object
+ * var file = {contents: new Buffer('---\ntitle: foo\nbar')};
+ * parser.parse(file, function(err, res) {
+ *   //=> {content: 'bar', data: {title: 'foo'}}
+ * });
+ * ```
+ * @param {String|Object} `file` The object or string to parse.
+ * @param {Object|Function} `options` or `next` callback function. Options are passed to [gray-matter][].
+ * @param {Function} `next` callback function.
+ * @api public
+ */
+
+parser.parse = function matterParse(file, options, next) {
+  if (typeof options === 'function') {
+    next = options;
+    options = {};
+  }
+
+  if (typeof next !== 'function') {
+    throw new TypeError('expected a callback function');
+  }
+
+  try {
+    next(null, parser.parseSync(file, options));
+  } catch (err) {
+    next(err);
+  }
+};
+
+/**
+ * Parse front matter from the given string or the `contents` in the
+ * given `file`. If an object is passed, either `file.contents` or
+ * `file.content` may be used (for gulp and assemble compatibility).
+ *
+ * ```js
+ * // pass a string
+ * var res = parser.parseSync('---\ntitle: foo\n---\nbar');
+ *
+ * // or an object
+ * var file = {contents: new Buffer('---\ntitle: foo\nbar')};
+ * var res = parser.parseSync(file);
+ * //=> {content: 'bar', data: {title: 'foo'}}
+ * ```
+ * @param {String|Object} `file` The object or string to parse.
+ * @param {Object} `options` passed to [gray-matter][].
+ * @api public
+ */
+
+parser.parseSync = function matterParseSync(file, options) {
+  if (typeof file === 'string') {
+    file = { contents: new Buffer(file) };
+
+  } else if (!utils.isObject(file)) {
+    throw new TypeError('expected file to be a string or object');
+  }
+
+  if (file.content && !file.contents) {
+    file.contents = new Buffer(file.content);
+  }
+
+  file.data = file.data || {};
+  if (!utils.isValidFile(file)) {
+    file.content = file.contents.toString();
+    file.orig = file.content;
+    return file;
+  }
+
+  try {
+    var opts = utils.extend({strict: true}, options, file.options);
+
+    // allow files to selectively disable parsing
+    if (opts.frontMatter === false) {
+      file.content = file.contents.toString();
+      file.orig = file.content;
+      return file;
+    }
+
+    var str = file.contents.toString();
+    var parsed = utils.matter(str, opts);
+    file.orig = parsed.orig;
+    file.data = utils.merge({}, file.data, parsed.data);
+    file.content = utils.trim(parsed.content);
+    file.contents = new Buffer(file.content);
+    return file;
+  } catch (err) {
+    throw err;
+  }
+};
+
+parser.stringify = function stringify(file, options, next) {
+  if (typeof options === 'function') {
+    next = options;
+    options = {};
+  }
+
+  if (typeof next !== 'function') {
+    throw new TypeError('expected a callback function');
+  }
+
+  if (!utils.isValidFile(file) || !utils.hasYFM(file)) {
+    next(null, file);
+    return;
+  }
+
+  try {
+    next(null, parser.stringifySync(file, options));
+  } catch (err) {
+    next(err);
+  }
+};
+
+parser.stringifySync = function stringifySync(file, options) {
+  if (typeof file === 'string') {
+    file = { contents: new Buffer(file) };
+
+  } else if (!utils.isObject(file)) {
+    throw new TypeError('expected file to be a string or object');
+  }
+
+  if (file.content && !file.contents) {
+    file.contents = new Buffer(file.content);
+  }
+
+  if (!utils.isValidFile(file) || !utils.hasYFM(file)) {
+    return file;
+  }
+
+  try {
+    file.content = utils.matter.stringify(file.content, file.data.yfm);
+    delete file.data.yfm;
+    return file;
+  } catch (err) {
+    throw err;
+  }
+};
+
+/**
+ * Decorate `.parseMatter` and `.stringifyMatter` functions onto the `file` object,
+ * so front-matter can be parsed on-demand.
+ */
+
+parser.file = function(file, options) {
+  file.parseMatter = function(opts) {
+    return parser.parseSync(this, utils.merge({}, options, opts));
+  };
+
+  file.stringifyMatter = function(opts) {
+    return parser.stringifySync(this, utils.merge({}, options, opts));
+  };
+};
+
+
+/***/ }),
+
+/***/ 3037:
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+"use strict";
+var require;var require;
+
+var utils = __nccwpck_require__(4698)(require);
+var fn = require;
+require = utils;
+
+/**
+ * Lazily required module dependencies
+ */
+
+__nccwpck_require__(8439)('extend-shallow', 'extend');
+__nccwpck_require__(8439)('file-is-binary', 'isBinary');
+__nccwpck_require__(8439)('gray-matter', 'matter');
+__nccwpck_require__(8439)('mixin-deep', 'merge');
+__nccwpck_require__(8439)('isobject', 'isObject');
+__nccwpck_require__(8439)('trim-leading-lines', 'trim');
+require = fn;
+
+utils.isValidFile = function(file) {
+  file = file || {};
+  return !utils.isNull(file) && !utils.isBinary(file);
+};
+
+utils.hasYFM = function(file) {
+  return file.data && file.data.hasOwnProperty('yfm');
+};
+
+utils.isNull = function isNull(file) {
+  if (file && typeof file.isNull !== 'function') {
+    file.isNull = function() {
+      return file.contents === null;
+    };
+  }
+  return file.isNull();
+};
+
+/**
+ * Expose `utils` modules
+ */
+
+module.exports = utils;
+
+
+/***/ }),
+
+/***/ 6295:
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+"use strict";
+/*!
+ * set-getter (https://github.com/doowb/set-getter)
+ *
+ * Copyright (c) 2016, Brian Woodward.
+ * Licensed under the MIT License.
+ */
+
+
+
+var toPath = __nccwpck_require__(8636);
+
+function isValidKey(key) {
+  return key !== '__proto__' && key !== 'constructor' && key !== 'prototype';
+}
+
+/**
+ * Defines a getter function on an object using property path notation.
+ *
+ * ```js
+ * var obj = {};
+ * getter(obj, 'foo', function() {
+ *   return 'bar';
+ * });
+ * ```
+ * @param {Object} `obj` Object to add property to.
+ * @param {String|Array} `prop` Property string or array to add.
+ * @param {Function} `getter` Getter function to add as a property.
+ * @api public
+ */
+
+function setGetter(obj, prop, getter) {
+  var key = toPath(arguments);
+  return define(obj, key, getter);
+}
+
+/**
+ * Define getter function on object or object hierarchy using dot notation.
+ *
+ * @param  {Object} `obj` Object to define getter property on.
+ * @param  {String} `prop` Property string to define.
+ * @param  {Function} `getter` Getter function to define.
+ * @return {Object} Returns original object.
+ */
+
+function define(obj, prop, getter) {
+  if (!~prop.indexOf('.')) {
+    if (isValidKey(prop)) {
+      defineProperty(obj, prop, getter);
+    }
+    return obj;
+  }
+
+  var keys = prop.split('.').filter(isValidKey);
+  var last = keys.pop();
+  var target = obj;
+  var key;
+
+  while ((key = keys.shift())) {
+    while (key.slice(-1) === '\\') {
+      key = key.slice(0, -1) + '.' + keys.shift();
+    }
+    target = target[key] || (target[key] = {});
+  }
+
+  defineProperty(target, last, getter);
+  return obj;
+}
+
+/**
+ * Define getter function on object as a configurable and enumerable property.
+ *
+ * @param  {Object} `obj` Object to define property on.
+ * @param  {String} `prop` Property to define.
+ * @param  {Function} `getter` Getter function to define.
+ */
+
+function defineProperty(obj, prop, getter) {
+  Object.defineProperty(obj, prop, {
+    configurable: true,
+    enumerable: true,
+    get: getter
+  });
+}
+
+/**
+ * Expose `setGetter`
+ */
+
+module.exports = setGetter;
+
+
+/***/ }),
+
+/***/ 8636:
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+"use strict";
+/*!
+ * to-object-path <https://github.com/jonschlinkert/to-object-path>
+ *
+ * Copyright (c) 2015, Jon Schlinkert.
+ * Licensed under the MIT License.
+ */
+
+
+
+var typeOf = __nccwpck_require__(463);
+
+module.exports = function toPath(args) {
+  if (typeOf(args) !== 'arguments') {
+    args = arguments;
+  }
+  return filter(args).join('.');
+};
+
+function filter(arr) {
+  var len = arr.length;
+  var idx = -1;
+  var res = [];
+
+  while (++idx < len) {
+    var ele = arr[idx];
+    if (typeOf(ele) === 'arguments' || Array.isArray(ele)) {
+      res.push.apply(res, filter(ele));
+    } else if (typeof ele === 'string') {
+      res.push(ele);
+    }
+  }
+  return res;
+}
+
+
+/***/ }),
+
+/***/ 463:
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+var isBuffer = __nccwpck_require__(5625);
+var toString = Object.prototype.toString;
+
+/**
+ * Get the native `typeof` a value.
+ *
+ * @param  {*} `val`
+ * @return {*} Native javascript type
+ */
+
+module.exports = function kindOf(val) {
+  // primitivies
+  if (typeof val === 'undefined') {
+    return 'undefined';
+  }
+  if (val === null) {
+    return 'null';
+  }
+  if (val === true || val === false || val instanceof Boolean) {
+    return 'boolean';
+  }
+  if (typeof val === 'string' || val instanceof String) {
+    return 'string';
+  }
+  if (typeof val === 'number' || val instanceof Number) {
+    return 'number';
+  }
+
+  // functions
+  if (typeof val === 'function' || val instanceof Function) {
+    return 'function';
+  }
+
+  // array
+  if (typeof Array.isArray !== 'undefined' && Array.isArray(val)) {
+    return 'array';
+  }
+
+  // check for instances of RegExp and Date before calling `toString`
+  if (val instanceof RegExp) {
+    return 'regexp';
+  }
+  if (val instanceof Date) {
+    return 'date';
+  }
+
+  // other objects
+  var type = toString.call(val);
+
+  if (type === '[object RegExp]') {
+    return 'regexp';
+  }
+  if (type === '[object Date]') {
+    return 'date';
+  }
+  if (type === '[object Arguments]') {
+    return 'arguments';
+  }
+  if (type === '[object Error]') {
+    return 'error';
+  }
+
+  // buffer
+  if (isBuffer(val)) {
+    return 'buffer';
+  }
+
+  // es6: Map, WeakMap, Set, WeakSet
+  if (type === '[object Set]') {
+    return 'set';
+  }
+  if (type === '[object WeakSet]') {
+    return 'weakset';
+  }
+  if (type === '[object Map]') {
+    return 'map';
+  }
+  if (type === '[object WeakMap]') {
+    return 'weakmap';
+  }
+  if (type === '[object Symbol]') {
+    return 'symbol';
+  }
+
+  // typed arrays
+  if (type === '[object Int8Array]') {
+    return 'int8array';
+  }
+  if (type === '[object Uint8Array]') {
+    return 'uint8array';
+  }
+  if (type === '[object Uint8ClampedArray]') {
+    return 'uint8clampedarray';
+  }
+  if (type === '[object Int16Array]') {
+    return 'int16array';
+  }
+  if (type === '[object Uint16Array]') {
+    return 'uint16array';
+  }
+  if (type === '[object Int32Array]') {
+    return 'int32array';
+  }
+  if (type === '[object Uint32Array]') {
+    return 'uint32array';
+  }
+  if (type === '[object Float32Array]') {
+    return 'float32array';
+  }
+  if (type === '[object Float64Array]') {
+    return 'float64array';
+  }
+
+  // must be a plain object
+  return 'object';
+};
 
 
 /***/ }),
@@ -9627,6 +10227,21 @@ module.exports = eval("require")("encoding");
 
 /***/ }),
 
+/***/ 8439:
+/***/ ((module) => {
+
+function webpackEmptyContext(req) {
+	var e = new Error("Cannot find module '" + req + "'");
+	e.code = 'MODULE_NOT_FOUND';
+	throw e;
+}
+webpackEmptyContext.keys = () => ([]);
+webpackEmptyContext.resolve = webpackEmptyContext;
+webpackEmptyContext.id = 8439;
+module.exports = webpackEmptyContext;
+
+/***/ }),
+
 /***/ 9491:
 /***/ ((module) => {
 
@@ -9788,6 +10403,11 @@ module.exports = JSON.parse('[[[0,44],"disallowed_STD3_valid"],[[45,46],"valid"]
 /******/ 	}
 /******/ 	
 /************************************************************************/
+/******/ 	/* webpack/runtime/hasOwnProperty shorthand */
+/******/ 	(() => {
+/******/ 		__nccwpck_require__.o = (obj, prop) => (Object.prototype.hasOwnProperty.call(obj, prop))
+/******/ 	})();
+/******/ 	
 /******/ 	/* webpack/runtime/compat */
 /******/ 	
 /******/ 	if (typeof __nccwpck_require__ !== 'undefined') __nccwpck_require__.ab = __dirname + "/";
@@ -9800,27 +10420,82 @@ const github = __nccwpck_require__(5438)
 const core = __nccwpck_require__(2186)
 const dayjs = __nccwpck_require__(7401)
 const fs = __nccwpck_require__(7147)
+const path = __nccwpck_require__(1017)
+const parserFrontMatter = __nccwpck_require__(6073)
 
-const octokit = github.getOctokit(core.getInput('token') || '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')
+const token = core.getInput('token')
+const postsPath = core.getInput('postsPath') || '../../source/_posts'
+const postsLabels = core.getInput('postsLabels') || 'posts'
 
-const getIssues = async (page = 1) => {
+const momentLabels = core.getInput('momentLabels') || 'moment'
+const momentPath = core.getInput('momentPath') || '../../source/moment/index.md'
+
+const octokit = github.getOctokit(token)
+
+const getIssues = async (page = 1, labels = '') => {
   const { data: issues } = await octokit.rest.issues.listForRepo({
-    owner: 'qwertyyb',
-    repo: 'qwertyyb.github.io',
-    labels: 'moment',
-    state: 'open',
-    creator: 'qwertyyb',
+    owner: github.context.repo.owner,
+    repo: github.context.repo.repo,
+    labels: labels,
+    state: 'all',
+    creator: github.context.repo.owner,
     per_page: 100,
     page,
   })
   if (issues.length < 100) {
-    return issues;
+    return issues
   }
   return [...issues, ...(await getIssues(page + 1))]
 }
 
-const run = async () => {
-  const issues = await getIssues()
+const getComments = async (page = 1) => {
+  const { data: comments } = await octokit.rest.issues.listComments({
+    owner: github.context.repo.owner,
+    repo: github.context.repo.repo,
+    issue_number: 1,
+    page,
+    per_page: 100
+  })
+  if (comments.length < 100) {
+    return comments
+  }
+  return [...comments, ...(await getComments(page + 1))]
+}
+
+const createPosts = async () => {
+  const issues = await getIssues(1, postsLabels)
+
+  let posts = issues.map(issue => {
+    const title = parserFrontMatter.parseSync(issue.body).data.title
+    return {
+      title,
+      body: issue.body
+    }
+  })
+
+  // 先移除之前的内容，再添加现在的内容
+  const fileList = fs.readdirSync(postsPath).map(fileName => path.join(postsPath, fileName))
+
+  fileList.forEach(filePath => {
+    const data = parserFrontMatter.parseSync(fs.readFileSync(filePath, 'utf-8'))
+    if (data.created_from_issue) {
+      console.log('remove', filePath)
+      fs.rmSync(filePath)
+    }
+  })
+
+  posts.forEach(post => {
+    const postPath = path.join(postsPath, post.title + '.md')
+    const arr = post.body.split('---')
+    arr[1] += '\ncreated_from_issue: true\n'
+    const content = arr.join('---')
+    console.log('create', postPath)
+    fs.writeFileSync(postPath, content, 'utf-8')
+  })
+}
+
+const createMoment = async () => {
+  const issues = await getIssues(1, momentLabels)
 
   let content = issues.map(issue => {
     return [issue.body || issue.title, '', dayjs(issue.created_at).format('YYYY年MM月DD日 HH:mm')]
@@ -9831,7 +10506,6 @@ const run = async () => {
     content += '\n---\n'
   }
 
-  const momentPath = core.getInput('momentPath') || '../../source/moment/index.md'
   const placeholderStart = '<!-- issueMomentContentStart -->'
   const placeholderEnd = '<!-- issueMomentContentEnd -->'
   const placeholder = /<!-- issueMomentContentStart -->[\w\W]+<!-- issueMomentContentEnd -->/gi
@@ -9840,11 +10514,12 @@ const run = async () => {
   const newContent = fileContent.replace(placeholder, [placeholderStart, content, placeholderEnd].join('\n\n'))
 
   fs.writeFileSync(momentPath, newContent, 'utf-8')
-
-  core.setOutput('content', content)
 }
 
-run()
+
+createPosts()
+
+createMoment()
 })();
 
 module.exports = __webpack_exports__;
