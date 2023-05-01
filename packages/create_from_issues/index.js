@@ -1,9 +1,9 @@
 const github = require('@actions/github')
 const core = require('@actions/core')
-const dayjs = require('dayjs')
 const fs = require('fs')
 const path = require('path')
 const fm = require('front-matter')
+const { formatDate } = require('./utils')
 
 const token = core.getInput('token')
 const postsPath = core.getInput('postsPath') || '../../source/_posts'
@@ -82,12 +82,16 @@ const createMoment = async () => {
   const issues = await getIssues(1, momentLabels)
 
   let content = issues.map(issue => {
-    return [issue.body || issue.title, '', dayjs(issue.created_at).format('YYYY年MM月DD日 HH:mm')]
+    let lines = issue.body.split(/(\n|\r\n)/)
+      .filter(i => i.replace(/(\n|\r\n)/g, ''))
+    lines = lines.length <= 0 ? [issue.title] : lines
+
+    return [...lines, '', formatDate(issue.created_at)]
       .map(str => '> ' + str)
       .join('\n')
-  }).join('\n---\n')
+  }).join('\n\n---\n\n')
   if (content) {
-    content += '\n---\n'
+    content += '\n\n---\n\n'
   }
 
   const placeholderStart = '<!-- issueMomentContentStart -->'
