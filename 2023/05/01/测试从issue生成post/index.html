@@ -20,28 +20,28 @@
 
 <script class="next-config" data-name="main" type="application/json">{"hostname":"qwertyyb.github.io","root":"/","images":"/images","scheme":"Pisces","darkmode":true,"version":"8.15.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":-1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
 
-    <meta name="description" content="在安装 jdk 的时候，安装成功后会默认询问是否安装 jre ，很多人是一路默认，稀里糊涂就安装上了。今天就遇到了这个问题，jre 环境更新后，eclipse 打不开了，报找不到 jre 的环境了，经过研究，打到了解决办法，这里记录一下。">
+    <meta name="description" content="文章简介">
 <meta property="og:type" content="article">
-<meta property="og:title" content="java版本更新后,eclipse打不开">
-<meta property="og:url" content="https://qwertyyb.github.io/2017/11/02/java%E7%89%88%E6%9C%AC%E6%9B%B4%E6%96%B0%E5%90%8E-eclipse%E6%89%93%E4%B8%8D%E5%BC%80/index.html">
+<meta property="og:title" content="测试从issue生成post">
+<meta property="og:url" content="https://qwertyyb.github.io/2023/05/01/%E6%B5%8B%E8%AF%95%E4%BB%8Eissue%E7%94%9F%E6%88%90post/index.html">
 <meta property="og:site_name" content="虚幻">
-<meta property="og:description" content="在安装 jdk 的时候，安装成功后会默认询问是否安装 jre ，很多人是一路默认，稀里糊涂就安装上了。今天就遇到了这个问题，jre 环境更新后，eclipse 打不开了，报找不到 jre 的环境了，经过研究，打到了解决办法，这里记录一下。">
+<meta property="og:description" content="文章简介">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2017-11-02T20:29:33.000Z">
+<meta property="article:published_time" content="2023-05-01T10:38:00.000Z">
 <meta property="article:modified_time" content="2023-05-01T05:22:18.777Z">
 <meta property="article:author" content="虚幻">
-<meta property="article:tag" content="java">
+<meta property="article:tag" content="test">
 <meta name="twitter:card" content="summary">
 
 
-<link rel="canonical" href="https://qwertyyb.github.io/2017/11/02/java%E7%89%88%E6%9C%AC%E6%9B%B4%E6%96%B0%E5%90%8E-eclipse%E6%89%93%E4%B8%8D%E5%BC%80/">
+<link rel="canonical" href="https://qwertyyb.github.io/2023/05/01/%E6%B5%8B%E8%AF%95%E4%BB%8Eissue%E7%94%9F%E6%88%90post/">
 
 
 
-<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://qwertyyb.github.io/2017/11/02/java%E7%89%88%E6%9C%AC%E6%9B%B4%E6%96%B0%E5%90%8E-eclipse%E6%89%93%E4%B8%8D%E5%BC%80/","path":"2017/11/02/java版本更新后-eclipse打不开/","title":"java版本更新后,eclipse打不开"}</script>
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://qwertyyb.github.io/2023/05/01/%E6%B5%8B%E8%AF%95%E4%BB%8Eissue%E7%94%9F%E6%88%90post/","path":"2023/05/01/测试从issue生成post/","title":"测试从issue生成post"}</script>
 
 <script class="next-config" data-name="calendar" type="application/json">""</script>
-<title>java版本更新后,eclipse打不开 | 虚幻</title>
+<title>测试从issue生成post | 虚幻</title>
   
 
   <script src="/js/third-party/analytics/baidu-analytics.js"></script>
@@ -132,7 +132,7 @@
   
   <aside class="sidebar">
 
-    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+    <div class="sidebar-inner sidebar-overview-active">
       <ul class="sidebar-nav">
         <li class="sidebar-nav-toc">
           文章目录
@@ -145,7 +145,6 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%A7%A3%E5%86%B3%E5%8A%9E%E6%B3%95"><span class="nav-number">1.</span> <span class="nav-text">解决办法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%87%BA%E9%94%99%E7%9A%84%E5%8E%9F%E5%9B%A0"><span class="nav-number">2.</span> <span class="nav-text">出错的原因</span></a></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -203,7 +202,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://qwertyyb.github.io/2017/11/02/java%E7%89%88%E6%9C%AC%E6%9B%B4%E6%96%B0%E5%90%8E-eclipse%E6%89%93%E4%B8%8D%E5%BC%80/">
+    <link itemprop="mainEntityOfPage" href="https://qwertyyb.github.io/2023/05/01/%E6%B5%8B%E8%AF%95%E4%BB%8Eissue%E7%94%9F%E6%88%90post/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="https://avatars.githubusercontent.com/u/16240729?v=4">
@@ -216,12 +215,12 @@
     </span>
 
     <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="java版本更新后,eclipse打不开 | 虚幻">
+      <meta itemprop="name" content="测试从issue生成post | 虚幻">
       <meta itemprop="description" content="">
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          java版本更新后,eclipse打不开<a href="https://github.com/qwertyyb/qwertyyb.github.io/tree/master/source/_posts/java%E7%89%88%E6%9C%AC%E6%9B%B4%E6%96%B0%E5%90%8E-eclipse%E6%89%93%E4%B8%8D%E5%BC%80.md" class="post-edit-link" title="编辑" rel="noopener" target="_blank"><i class="fa fa-pen-nib"></i></a>
+          测试从issue生成post<a href="https://github.com/qwertyyb/qwertyyb.github.io/tree/master/source/_posts/%E6%B5%8B%E8%AF%95%E4%BB%8Eissue%E7%94%9F%E6%88%90post.md" class="post-edit-link" title="编辑" rel="noopener" target="_blank"><i class="fa fa-pen-nib"></i></a>
         </h1>
 
         <div class="post-meta-container">
@@ -231,15 +230,9 @@
         <i class="far fa-calendar"></i>
       </span>
       <span class="post-meta-item-text">发表于</span>
+      
 
-      <time title="创建时间：2017-11-02 20:29:33" itemprop="dateCreated datePublished" datetime="2017-11-02T20:29:33+00:00">2017-11-02</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-05-01 05:22:18" itemprop="dateModified" datetime="2023-05-01T05:22:18+00:00">2023-05-01</time>
+      <time title="创建时间：2023-05-01 10:38:00 / 修改时间：05:22:18" itemprop="dateCreated datePublished" datetime="2023-05-01T10:38:00+00:00">2023-05-01</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -247,7 +240,7 @@
       </span>
       <span class="post-meta-item-text">分类于</span>
         <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/java/" itemprop="url" rel="index"><span itemprop="name">java</span></a>
+          <a href="/categories/test/" itemprop="url" rel="index"><span itemprop="name">test</span></a>
         </span>
     </span>
 
@@ -268,12 +261,10 @@
     
     
     <div class="post-body" itemprop="articleBody">
-        <p>在安装 <code>jdk</code> 的时候，安装成功后会默认询问是否安装 <code>jre</code> ，很多人是一路默认，稀里糊涂就安装上了。今天就遇到了这个问题，<code>jre</code> 环境更新后，<code>eclipse</code> 打不开了，报找不到 <code>jre</code> 的环境了，经过研究，打到了解决办法，这里记录一下。</p>
+        <p>文章简介</p>
 <span id="more"></span>
 
-<h2 id="解决办法"><a href="#解决办法" class="headerlink" title="解决办法"></a>解决办法</h2><p>在 <code>C:\Users\{你的用户名}\eclipse\java-oxygen\eclipse</code> 目录下，找到 <code>eclipse.ini</code> 文件，找到 <code>-vm</code> 行的下一行，把路径改为jdk下的 <code>jre/bin</code> 这样，以后 <code>jre</code> 再升级的时候也不会出错了</p>
-<h2 id="出错的原因"><a href="#出错的原因" class="headerlink" title="出错的原因"></a>出错的原因</h2><p>在安装jdk后，java目录会出现两个文件夹，jdk和jre, 具体的目录名字，还会包括版本号，当初始化eclipse的时候，会用jre的目录初始化，而当jre升级后，原来的版本更改，目录名也变了，自然就找不到原来的环境目录了</p>
-<p>参考连接：<br>更详细的原理请参考这里： <a href="http://www.cnblogs.com/PengLee/p/3970760.html">安装JDK的时候为什么会有两个jre文件</a></p>
+<p>文章内容</p>
 
     </div>
 
@@ -291,7 +282,7 @@
   </li>
   <li class="post-copyright-link">
       <strong>本文链接：</strong>
-      <a href="https://qwertyyb.github.io/2017/11/02/java%E7%89%88%E6%9C%AC%E6%9B%B4%E6%96%B0%E5%90%8E-eclipse%E6%89%93%E4%B8%8D%E5%BC%80/" title="java版本更新后,eclipse打不开">https://qwertyyb.github.io/2017/11/02/java版本更新后-eclipse打不开/</a>
+      <a href="https://qwertyyb.github.io/2023/05/01/%E6%B5%8B%E8%AF%95%E4%BB%8Eissue%E7%94%9F%E6%88%90post/" title="测试从issue生成post">https://qwertyyb.github.io/2023/05/01/测试从issue生成post/</a>
   </li>
   <li class="post-copyright-license">
       <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
@@ -300,21 +291,18 @@
 </div>
 
           <div class="post-tags">
-              <a href="/tags/java/" rel="tag"><i class="fa fa-tag"></i> java</a>
+              <a href="/tags/test/" rel="tag"><i class="fa fa-tag"></i> test</a>
           </div>
 
         
 
           <div class="post-nav">
             <div class="post-nav-item">
-                <a href="/2017/05/28/shadowsocks%E6%9C%8D%E5%8A%A1%E7%AB%AF%E7%9A%84%E9%85%8D%E7%BD%AE/" rel="prev" title="shadowsocks服务端的配置">
-                  <i class="fa fa-chevron-left"></i> shadowsocks服务端的配置
+                <a href="/2023/04/24/%E5%85%B3%E4%BA%8E%E4%B8%9A%E7%81%AB%E8%BE%93%E5%85%A5%E6%B3%95%E4%B8%B4%E6%97%B6%E8%8B%B1%E6%96%87%E6%A8%A1%E5%BC%8F%E7%9A%84%E6%80%9D%E8%80%83%E3%80%81%E8%AE%BE%E8%AE%A1%E5%92%8C%E5%AE%9E%E7%8E%B0/" rel="prev" title="关于业火输入法临时英文模式的思考、设计和实现">
+                  <i class="fa fa-chevron-left"></i> 关于业火输入法临时英文模式的思考、设计和实现
                 </a>
             </div>
             <div class="post-nav-item">
-                <a href="/2018/09/30/%E5%BE%AE%E4%BF%A1%E6%B5%8F%E8%A7%88%E5%99%A8%E8%A7%86%E9%A2%91%E6%92%AD%E6%94%BE%E5%99%A8%E5%BC%80%E5%8F%91%E5%AE%9E%E8%B7%B5/" rel="next" title="微信浏览器视频播放器开发实践">
-                  微信浏览器视频播放器开发实践 <i class="fa fa-chevron-right"></i>
-                </a>
             </div>
           </div>
     </footer>
