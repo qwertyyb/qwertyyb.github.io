@@ -2,8 +2,6 @@
 
 ## issue快捷操作
 
----
-
 - [全部](https://github.com/qwertyyb/qwertyyb.github.io/issues?q=is%3Aissue+label%3Aposts%2Cmoment)
 - [文章列表](https://github.com/qwertyyb/qwertyyb.github.io/issues?q=is%3Aissue+label%3Aposts)
 - [moment](https://github.com/qwertyyb/qwertyyb.github.io/issues?q=is%3Aissue+label%3Amoment)
