@@ -82,12 +82,9 @@ const createMoment = async () => {
   const issues = await getIssues(1, momentLabels)
 
   let content = issues.map(issue => {
-    let lines = issue.body.split(/(\n|\r\n)/)
-      .filter(i => i.replace(/(\n|\r\n)/g, ''))
-    lines = lines.length <= 0 ? [issue.title] : lines
+    let body = issue.body || issue.title
 
-    return [...lines, '', formatDate(issue.created_at)]
-      .map(str => '> ' + str)
+    return [body, '', formatDate(issue.created_at)]
       .join('\n')
   }).join('\n\n---\n\n')
   if (content) {
