@@ -737,6 +737,10 @@
 <p>而之所以在重启后客户端ID会变，是因为使用了公共的密钥校验，每次链接都会认为是一个新的客户端。</p>
 <p>所以 <code>openwrt</code> 不要使用 <code>vkey</code> 连接，最好是在 nps 的管理台中，新增客户端并指定密钥，然后 <code>openwrt</code> 使用特定的密钥连接。这样即使重启，客户端ID也不会发生变化了。</p>
 <h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>其实可能大多数人都不太需要把内网的服务直接暴露到外网，既不安全，也不方便，他们需要的可能更多是一种从外网访问内网的方式。目前来看，<code>nps</code> 是最好的方案，但是最好也部署一个 <code>ZeroTier</code> 作为 nps 不可用时的容灾方案。</p>
+<h2 id="参考链接"><a href="#参考链接" class="headerlink" title="参考链接"></a>参考链接</h2><ul>
+<li><a href="https://zhuanlan.zhihu.com/p/148825449">彻底搞懂SSH端口转发命令</a></li>
+<li><a href="https://wangdoc.com/ssh/port-forwarding">SSH 端口转发</a></li>
+</ul>
 ]]></content>
       <categories>
         <category>内网穿透</category>
