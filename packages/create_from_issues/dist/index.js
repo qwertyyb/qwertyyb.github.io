@@ -14170,8 +14170,7 @@ const createMoment = async () => {
   let content = issues.map(issue => {
     let body = issue.body || issue.title
 
-    return [body, '>', '> ' + formatDate(issue.created_at)]
-      .join('\n')
+    return body.replaceAll('[DATETIME]', formatDate(issue.created_at))
   }).join('\n\n---\n\n')
   if (content) {
     content += '\n\n---\n\n'
