@@ -14170,7 +14170,7 @@ const createMoment = async () => {
   let content = issues.map(issue => {
     let body = issue.body || issue.title
 
-    return [body, '>', formatDate(issue.created_at)]
+    return [body, '>', '> ' + formatDate(issue.created_at)]
       .join('\n')
   }).join('\n\n---\n\n')
   if (content) {
