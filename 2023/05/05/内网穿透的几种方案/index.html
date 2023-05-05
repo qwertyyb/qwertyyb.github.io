@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/avatar.jpg">
+  <link rel="mask-icon" href="/images/avatar.jpg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha256-HtsXJanqjKTc8vVQjO4YMhiqFoXkfBsjBWcX91T1jr8=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"qwertyyb.github.io","root":"/","images":"/images","scheme":"Pisces","darkmode":true,"version":"8.15.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":-1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="ssh 端口转发、zerotier、nps 内网穿透、frp 内网穿透这几种内网穿透技术的总结。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="内网穿透的几种方案">
+<meta property="og:url" content="https://qwertyyb.github.io/2023/05/05/%E5%86%85%E7%BD%91%E7%A9%BF%E9%80%8F%E7%9A%84%E5%87%A0%E7%A7%8D%E6%96%B9%E6%A1%88/index.html">
+<meta property="og:site_name" content="虚幻">
+<meta property="og:description" content="ssh 端口转发、zerotier、nps 内网穿透、frp 内网穿透这几种内网穿透技术的总结。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://user-images.githubusercontent.com/16240729/236389994-a499fffe-e01d-4678-959c-284019c3209a.png">
+<meta property="article:published_time" content="2023-05-05T12:40:00.000Z">
+<meta property="article:modified_time" content="2023-05-05T08:26:21.774Z">
+<meta property="article:author" content="虚幻">
+<meta property="article:tag" content="内网穿透">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://user-images.githubusercontent.com/16240729/236389994-a499fffe-e01d-4678-959c-284019c3209a.png">
+
+
+<link rel="canonical" href="https://qwertyyb.github.io/2023/05/05/%E5%86%85%E7%BD%91%E7%A9%BF%E9%80%8F%E7%9A%84%E5%87%A0%E7%A7%8D%E6%96%B9%E6%A1%88/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://qwertyyb.github.io/2023/05/05/%E5%86%85%E7%BD%91%E7%A9%BF%E9%80%8F%E7%9A%84%E5%87%A0%E7%A7%8D%E6%96%B9%E6%A1%88/","path":"2023/05/05/内网穿透的几种方案/","title":"内网穿透的几种方案"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>内网穿透的几种方案 | 虚幻</title>
+  
+
+  <script src="/js/third-party/analytics/baidu-analytics.js"></script>
+  <script async src="https://hm.baidu.com/hm.js?512529800174ec76de81bf92990fed78"></script>
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+
+<style>.github-emoji { position: relative; display: inline-block; width: 1.2em; min-height: 1.2em; overflow: hidden; vertical-align: top; color: transparent; }  .github-emoji > span { position: relative; z-index: 10; }  .github-emoji img, .github-emoji .fancybox { margin: 0 !important; padding: 0 !important; border: none !important; outline: none !important; text-decoration: none !important; user-select: none !important; cursor: auto !important; }  .github-emoji img { height: 1.2em !important; width: 1.2em !important; position: absolute !important; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) !important; user-select: none !important; cursor: auto !important; } .github-emoji-fallback { color: inherit; } .github-emoji-fallback img { opacity: 0 !important; }</style>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">虚幻</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">陪伴像幼蝉钻进土壤，无声却能生长</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-moment"><a href="/moment/" rel="section"><i class="fa fa-pencil fa-fw"></i>moment</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-业火输入法"><a href="/Fire/index.html" rel="section"><i class="fa fa-fire-flame-curved fa-fw"></i>业火输入法</a></li><li class="menu-item menu-item-ypaste"><a href="/YPaste/index.html" rel="section"><i class="fa fa-paste fa-fw"></i>YPaste</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%83%8C%E6%99%AF"><span class="nav-number">1.</span> <span class="nav-text">背景</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ssh%E7%AB%AF%E5%8F%A3%E8%BD%AC%E5%8F%91"><span class="nav-number">2.</span> <span class="nav-text">ssh端口转发</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E6%9C%AC%E5%9C%B0%E7%AB%AF%E5%8F%A3%E8%BD%AC%E5%8F%91"><span class="nav-number">2.1.</span> <span class="nav-text">1. 本地端口转发</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E8%BF%9C%E7%A8%8B%E7%AB%AF%E5%8F%A3%E8%BD%AC%E5%8F%91"><span class="nav-number">2.2.</span> <span class="nav-text">2. 远程端口转发</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E5%8A%A8%E6%80%81%E7%AB%AF%E5%8F%A3%E8%BD%AC%E5%8F%91"><span class="nav-number">2.3.</span> <span class="nav-text">3. 动态端口转发</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-%E6%80%BB%E7%BB%93"><span class="nav-number">2.4.</span> <span class="nav-text">4. 总结</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ZeroTier"><span class="nav-number">3.</span> <span class="nav-text">ZeroTier</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#frp%E5%86%85%E7%BD%91%E7%A9%BF%E9%80%8F"><span class="nav-number">4.</span> <span class="nav-text">frp内网穿透</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#nps%E5%86%85%E7%BD%91%E7%A9%BF%E9%80%8F"><span class="nav-number">5.</span> <span class="nav-text">nps内网穿透</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E6%8C%82%E4%B8%8A-SOCKS5-%E4%BB%A3%E7%90%86%E5%90%8E%EF%BC%8C%E6%97%A0%E6%B3%95%E8%AE%BF%E9%97%AE%E5%86%85%E7%BD%91%EF%BC%8C%E5%8D%B3%E4%BD%BF%E5%BC%80%E5%85%A8%E5%B1%80%E6%A8%A1%E5%BC%8F%E4%B9%9F%E4%B8%8D%E8%A1%8C%E3%80%82"><span class="nav-number">5.1.</span> <span class="nav-text">1. 挂上 SOCKS5 代理后，无法访问内网，即使开全局模式也不行。</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-openwrt-%E9%87%8D%E5%90%AF%E5%90%8E%EF%BC%8C%E6%97%A0%E6%B3%95%E8%BF%9E%E6%8E%A5%E5%86%85%E7%BD%91%E3%80%82"><span class="nav-number">5.2.</span> <span class="nav-text">2. openwrt 重启后，无法连接内网。</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">6.</span> <span class="nav-text">总结</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="虚幻"
+      src="https://avatars.githubusercontent.com/u/16240729?v=4">
+  <p class="site-author-name" itemprop="name">虚幻</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">20</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">24</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">26</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/qwertyyb" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;qwertyyb" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://qwertyyb.github.io/2023/05/05/%E5%86%85%E7%BD%91%E7%A9%BF%E9%80%8F%E7%9A%84%E5%87%A0%E7%A7%8D%E6%96%B9%E6%A1%88/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://avatars.githubusercontent.com/u/16240729?v=4">
+      <meta itemprop="name" content="虚幻">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="虚幻">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="内网穿透的几种方案 | 虚幻">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          内网穿透的几种方案<a href="https://github.com/qwertyyb/qwertyyb.github.io/tree/master/source/_posts/%E5%86%85%E7%BD%91%E7%A9%BF%E9%80%8F%E7%9A%84%E5%87%A0%E7%A7%8D%E6%96%B9%E6%A1%88.md" class="post-edit-link" title="编辑" rel="noopener" target="_blank"><i class="fa fa-pen-nib"></i></a>
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2023-05-05 12:40:00" itemprop="dateCreated datePublished" datetime="2023-05-05T12:40:00+00:00">2023-05-05</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E5%86%85%E7%BD%91%E7%A9%BF%E9%80%8F/" itemprop="url" rel="index"><span itemprop="name">内网穿透</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p><code>ssh</code> 端口转发、<code>zerotier</code>、<code>nps</code> 内网穿透、<code>frp</code> 内网穿透这几种内网穿透技术的总结。</p>
+<span id="more"></span>
+
+<p>先说最后结论，最终根据我的需求，我使用了 <code>zerotier</code> 和 <code>nps</code> 的方案来从外部访问内网环境。</p>
+<h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>需要一种方式，能够即使在外网也能像内网一样访问家里的服务，尤其是文件共享 <code>samba</code> 服务。</p>
+<p>内网和外网俱为一体: 最好能使用一个地址，比如都使用 <code>192.168.31.31</code>，而不是在家里时使用 <code>192.168.31.31</code> ，在外网时使用<code>xxx.xxx.xxx.xxx</code>。</p>
+<p>安全便捷: 在外网时，最好不要使用账号密码登录，也不要把服务完全暴露给外网，把家里的网络直接暴露给外网太危险了，外网有很多人在不断扫描尝试爆破服务。</p>
+<p>在内网有一台 <code>openwrt</code> 设备作为设备，在外网的腾讯去上有一台有公网IP的轻量云服务器。</p>
+<h2 id="ssh端口转发"><a href="#ssh端口转发" class="headerlink" title="ssh端口转发"></a>ssh端口转发</h2><p>ssh端口转发分为本地端口转发(-L)，远程端口转发(-R)和动态端口转发几种</p>
+<p>本地端口转发和远程端口转发都比较好理解，仅作下记录，给个命令，方便后面查询。</p>
+<h3 id="1-本地端口转发"><a href="#1-本地端口转发" class="headerlink" title="1. 本地端口转发"></a>1. 本地端口转发</h3><p>用来把远程的端口服务映射到本地localhost的端口服务。一般用于远程机器上有一个服务，但是有防火墙无法直接访问，通过ssh映射到本地越过防火墙进行访问。</p>
+<figure class="highlight bash"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ssh -L 主机A:端口X:主机C:端口Z username@hostname -N</span><br><span class="line"><span class="comment"># 简单理解为：将对A:X的访问转变成对C:Z的访问</span></span><br></pre></td></tr></tbody></table></figure>
+<p><code>-L</code> 表示本地端口转发。</p>
+<p>主机A即为本地机器，可忽略。</p>
+<p><strong>需要注意的是，主机C可以是任何能够被主机B识别到的设备(比如说主机C所在内网的其它设备)，也可以是主机B自身。</strong><br><strong><code>-N</code> 表示仅做端口映射，但并不登入主机C</strong></p>
+<h3 id="2-远程端口转发"><a href="#2-远程端口转发" class="headerlink" title="2. 远程端口转发"></a>2. 远程端口转发</h3><p>用来把远程主机的端口服务映射为本地服务。应用场景比如: 微信小程序服务端、webhook开发等。</p>
+<figure class="highlight bash"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ssh -R 主机B端口Y:主机C:主机C端口Z username@hostname</span><br><span class="line"><span class="comment"># 简单理解为：将对B:Y的访问转变成对C:Z的访问</span></span><br></pre></td></tr></tbody></table></figure>
+
+<p><code>-L</code> 表示远程端口转发</p>
+<p>主机B为远程主机</p>
+<p><strong>需要注意的是, 主机C可以是任何能够被主机A识别到的设备(比如说主机C所在内网的其它设备)，也可以是主机A自身。</strong></p>
+<h3 id="3-动态端口转发"><a href="#3-动态端口转发" class="headerlink" title="3. 动态端口转发"></a>3. 动态端口转发</h3><p>动态端口转发可以把本地主机A上运行的SSH客户端转变成一个SOCKS代理服务器；实际上它是一种特殊的本地端口转发，或者说叫它「动态本地端口转发」更科学。这个动态，就动在这种转发不规定目标地址（主机C）和目标端口（端口Z），而是去读取应用发起的请求，从请求中获取目标信息。</p>
+<figure class="highlight bash"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ssh -D 本地网卡地址:本地端口 username@hostname -N</span><br></pre></td></tr></tbody></table></figure>
+
+<ul>
+<li><code>-D</code>  表示动态转发</li>
+<li><code>本地网卡地址</code>  是本地主机，可忽略</li>
+<li><code>本地端口</code> 是 SOCKS5 代理端口</li>
+<li><code>-N</code> 表示这个 SSH 连接只进行端口转发，不登录远程 Shell，不能执行远程命令，只能充当隧道。</li>
+</ul>
+<p>举例来说，如果本地端口是2121，那么动态转发的命令就是下面这样。</p>
+<figure class="highlight bash"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ssh -D 2121 username@hostname -N</span><br></pre></td></tr></tbody></table></figure>
+
+<p>注意，这种转发采用了 SOCKS5 协议。访问外部网站时，需要把 HTTP 请求转成 SOCKS5 协议，才能把本地端口的请求转发出去。</p>
+<p>可以在系统或应用（浏览器等）中设置一个使用SOCKS5协议、服务器为localhost、端口为X的代理，利用代理使请求走端口X。</p>
+<p>下面是 SSH 隧道建立后的一个使用实例。</p>
+<figure class="highlight bash"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl -x socks5://localhost:2121 http://www.example.com</span><br></pre></td></tr></tbody></table></figure>
+
+<p>上面命令中，curl 的 <code>-x</code> 参数指定代理服务器，即通过 SOCKS5 协议的本地2121端口，访问 <code>http://www.example.com</code>。</p>
+<p>如果经常使用动态转发，可以将设置写入 SSH 客户端的用户个人配置文件（<code>~/.ssh/config</code>）。</p>
+<figure class="highlight bash"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">DynamicForward tunnel-host:local-port</span><br></pre></td></tr></tbody></table></figure>
+
+<h3 id="4-总结"><a href="#4-总结" class="headerlink" title="4. 总结"></a>4. 总结</h3><p>结合 ssh 的本地转发和远程转发，就可以成功在外网环境下，通过外网的中间服务器和内网的openwrt服务访问家里的所有内网服务。</p>
+<p>之所以没有使用这种方式是因为，这种端口映射的方案，最终访问的是本地的端口，并不能做到内外俱为一体的效果，而且在移动端设备上似乎也没有比较好的免费客户端来满足需求。</p>
+<h2 id="ZeroTier"><a href="#ZeroTier" class="headerlink" title="ZeroTier"></a>ZeroTier</h2><p><code>ZeroTier</code> 是一个非常完善的在线方案，不需要中间服务器。</p>
+<ol>
+<li><p>注册 <code>ZeroTier</code> 账号，添加一个 network， 选择一个子网段，不要和 <code>openwrt</code> 所在的内网网段一样，并记下 network id。</p>
+</li>
+<li><p><code>openwrt</code> 输入network并启动 <code>ZeroTier</code>。</p>
+</li>
+<li><p>打开 <code>zerotier</code> 后台，在对应的 <code>Members</code> 中勾选前面的对勾，批准 <code>openwrt</code> 加入网络。</p>
+</li>
+<li><p>在管理台添加 <code>openwrt</code> 所在内网网段的路由:  Advanced AddRoutes填写如下: </p>
+<p> <img src="https://user-images.githubusercontent.com/16240729/236389994-a499fffe-e01d-4678-959c-284019c3209a.png" alt="添加内网网段"></p>
+<p> 这一步主要是为了让其它加入此 network 的设备能够通过 <code>openwrt</code> 使用内网IP像在家里一样从外部访问</p>
+</li>
+<li><p>iPhone端下载 <code>ZeroTier One</code> APP，并加入此network(此APP国区 App Store 没有，需要去美区下载)，管理台批准此设备的加入</p>
+</li>
+<li><p>启动APP进入网络，此时会有VPN启动，这时就可以使用 <code>92.168.1.x</code> 的内网IP访问家里的服务了。</p>
+</li>
+</ol>
+<p>这样能完美契合我的需求，但美中不足的是，<code>ZeroTier</code> 的服务可能在国外，比较慢，使用起来体验并不好。虽然 <code>ZerotTier</code> 可以建立自定义 <code>Moon</code> 但需要中间服务器并且 <code>ZeroTier One </code> APP并不支持连接 Moon 服务，所以并没有什么好的解决方案。</p>
+<h2 id="frp内网穿透"><a href="#frp内网穿透" class="headerlink" title="frp内网穿透"></a>frp内网穿透</h2><p>frp主要就是用于把内网服务映射到公网上，针对外网访问提供了鉴权的能力。</p>
+<p>虽然也有 <a href="https://gofrp.org/docs/examples/stcp/">安全地暴露内网服务</a> 的方案，但是需要访问端安装客户端。而客户端目前也仅支持(MacOS、Linux和Windows)三端，不支持移动端，而我在外网的访问场景主要是在移动端。</p>
+<p>由于不符合需求和使用场景，所以只是看了一下文档，没有仔细研究。</p>
+<h2 id="nps内网穿透"><a href="#nps内网穿透" class="headerlink" title="nps内网穿透"></a>nps内网穿透</h2><p>相对于 <code>frp</code> 来说, <code>nps</code> 更符合我的使用场景，它支持通过 HTTP 和 SOCKS5 代理使用 内肉地址 来访问内网环境，使用步骤按官方文档一步一步来即可，需要中间服务器。但是在使用的过程踩了一些坑，标记一下。</p>
+<h3 id="1-挂上-SOCKS5-代理后，无法访问内网，即使开全局模式也不行。"><a href="#1-挂上-SOCKS5-代理后，无法访问内网，即使开全局模式也不行。" class="headerlink" title="1. 挂上 SOCKS5 代理后，无法访问内网，即使开全局模式也不行。"></a>1. 挂上 SOCKS5 代理后，无法访问内网，即使开全局模式也不行。</h3><p>使用 <code>shadowrocket</code> 应用连接 SOCKS5 代理后，无法访问内网，即使开了全局模式也无法访问内网。</p>
+<p>其实遇到这个问题心里有个大概猜测，因为是 192 开头的内网IP，一般的代理软件都会刻意忽略内网IP不走代理。</p>
+<p>那么这里需要修改默认配置，让192开头的内网IP也能走 SOCKS5 代理。</p>
+<p><code>shadowrocket</code> 的修改步骤如下</p>
+<ol>
+<li>首先先把默认配置复制一份出来，命名为回家</li>
+<li>修改回家的配置文件，通用 -&gt; 跳过代理， 移除 <code>192.168.0.0/16</code>，右上角对号保存</li>
+<li>使用回家的配置文件，再挂上 SOCKS5 代理，不管是使用配置文件还是代理就都可以正常内网了。</li>
+</ol>
+<p><strong>注意</strong><br>在 <code>shadowrocket</code> 中，即使全局路由是代理，配置文件的通用配置应该也会影响代理行为。所以在使用回家配置的情况下，全局路由为代理的情况下也是可以访问内网的，但是在默认配置的情况下，全局路由为代理的情况下，无法访问内网。</p>
+<h3 id="2-openwrt-重启后，无法连接内网。"><a href="#2-openwrt-重启后，无法连接内网。" class="headerlink" title="2. openwrt 重启后，无法连接内网。"></a>2. openwrt 重启后，无法连接内网。</h3><p>这里发现是因为 openwrt 重启后，客户端的 ID 变了，而原来的 SOCKS5 和 HTTP 代理绑定的还是原来的客户端 ID ，所以无法访问内网。</p>
+<p>而之所以在重启后客户端ID会变，是因为使用了公共的密钥校验，每次链接都会认为是一个新的客户端。</p>
+<p>所以 <code>openwrt</code> 不要使用 <code>vkey</code> 连接，最好是在 nps 的管理台中，新增客户端并指定密钥，然后 <code>openwrt</code> 使用特定的密钥连接。这样即使重启，客户端ID也不会发生变化了。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>其实可能大多数人都不太需要把内网的服务直接暴露到外网，既不安全，也不方便，他们需要的可能更多是一种从外网访问内网的方式。目前来看，<code>nps</code> 是最好的方案，但是最好也部署一个 <code>ZeroTier</code> 作为 nps 不可用时的容灾方案。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          
+
+<div class="post-copyright">
+<ul>
+  <li class="post-copyright-author">
+      <strong>本文作者： </strong>虚幻
+  </li>
+  <li class="post-copyright-link">
+      <strong>本文链接：</strong>
+      <a href="https://qwertyyb.github.io/2023/05/05/%E5%86%85%E7%BD%91%E7%A9%BF%E9%80%8F%E7%9A%84%E5%87%A0%E7%A7%8D%E6%96%B9%E6%A1%88/" title="内网穿透的几种方案">https://qwertyyb.github.io/2023/05/05/内网穿透的几种方案/</a>
+  </li>
+  <li class="post-copyright-license">
+      <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/%E5%86%85%E7%BD%91%E7%A9%BF%E9%80%8F/" rel="tag"><i class="fa fa-tag"></i> 内网穿透</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2023/05/01/%E6%B5%8B%E8%AF%95%E4%BB%8Eissue%E7%94%9F%E6%88%90post/" rel="prev" title="测试从issue生成post">
+                  <i class="fa fa-chevron-left"></i> 测试从issue生成post
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">豫ICP备18003010号-1 </a>
+  </div>
+
+<div class="copyright">
+  &copy; 2015 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">虚幻</span>
+</div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/pisces/" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"none","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js"></script>
+
+
+
+</body>
+</html>

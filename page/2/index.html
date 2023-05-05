@@ -154,18 +154,18 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">19</span>
+          <span class="site-state-item-count">20</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
           <a href="/categories/">
-        <span class="site-state-item-count">23</span>
+        <span class="site-state-item-count">24</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
           <a href="/tags/">
-        <span class="site-state-item-count">25</span>
+        <span class="site-state-item-count">26</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -187,6 +187,107 @@
     </div>
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://qwertyyb.github.io/2019/04/06/%E5%9F%BA%E4%BA%8EwebRTC%E7%9A%84%E7%BD%91%E7%BB%9C%E7%9B%B4%E6%92%AD%E4%B8%8E%E7%82%B9%E6%92%AD%E7%B3%BB%E7%BB%9F-3/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://avatars.githubusercontent.com/u/16240729?v=4">
+      <meta itemprop="name" content="虚幻">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="虚幻">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | 虚幻">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2019/04/06/%E5%9F%BA%E4%BA%8EwebRTC%E7%9A%84%E7%BD%91%E7%BB%9C%E7%9B%B4%E6%92%AD%E4%B8%8E%E7%82%B9%E6%92%AD%E7%B3%BB%E7%BB%9F-3/" class="post-title-link" itemprop="url">基于webRTC的网络直播与点播系统-3（业务功能实现)</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2019-04-06 09:32:52" itemprop="dateCreated datePublished" datetime="2019-04-06T09:32:52+00:00">2019-04-06</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E5%89%8D%E7%AB%AF/" itemprop="url" rel="index"><span itemprop="name">前端</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E5%89%8D%E7%AB%AF/WebRTC/" itemprop="url" rel="index"><span itemprop="name">WebRTC</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>首先，明确两个概念，直播者(<code>presentor</code>)和观众(<code>viewer</code>)</p>
+<ol>
+<li><p>在第一步中，会建立一个基本的直播端页面，这个页面中包含一个视频元素，直播者可以观察到摄像头的录制画面。</p>
+<p><strong>需要注意的是这里并不会直接显示摄像头获取到的本地画面，而是通过一个回环的方式，显示通过网络获取到的画画，这样直播者可以通过观察画面质量知道网络状况，做出调整和优化。所以实际上，直播者(presentor)也是一个观众(viewer)，观看自己的画画</strong></p>
+</li>
+<li><p>在第二步中，会建立一个基本的观众端页面，<br>这个页面和直播端页面类似，唯一的不同是，这个视频源是来自直播者的摄像头而不是来自当前的设备。</p>
+</li>
+<li><p>第三步，完成这一部分的后端逻辑</p>
+</li>
+<li><p>扩展直播和点播的逻辑，完成通话功能</p>
+</li>
+</ol>
+<p>demo地址: <a href="https://webrtc.qwertyyb.cn/front/">https://webrtc.qwertyyb.cn/front/</a></p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2019/04/06/%E5%9F%BA%E4%BA%8EwebRTC%E7%9A%84%E7%BD%91%E7%BB%9C%E7%9B%B4%E6%92%AD%E4%B8%8E%E7%82%B9%E6%92%AD%E7%B3%BB%E7%BB%9F-3/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
