@@ -606,6 +606,65 @@
       </tags>
   </entry>
   <entry>
+    <title>从ES正则匹配索引(RegExp Match Indices)提案重新认识Javascript正则表达式</title>
+    <url>/2023/05/06/%E4%BB%8EES%E6%AD%A3%E5%88%99%E5%8C%B9%E9%85%8D%E7%B4%A2%E5%BC%95(RegExp%20Match%20Indices)%E6%8F%90%E6%A1%88%E9%87%8D%E6%96%B0%E8%AE%A4%E8%AF%86Javascript%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F/</url>
+    <content><![CDATA[<p>今天在整理最近两年(2022-2023)新完成ES提案(stage 4)的时候，从RegExp Match Indices提案发现了一些之前没有注意到的正则表达式的用法，记录一下。</p>
+<span id="more"></span>
+
+<h2 id="修饰符并不是只有-g-和-i"><a href="#修饰符并不是只有-g-和-i" class="headerlink" title="修饰符并不是只有 g 和 i"></a>修饰符并不是只有 <code>g</code> 和 <code>i</code></h2><p>修饰符除了 <code>g</code> 全局匹配和 <code>i</code> 忽略大小写外，还有 <code>m</code>、<code>u</code>、<code>y</code>、<code>s</code>、<code>d</code> 这五种不常用的。它们的作用分别是:</p>
+<h3 id="1-i-ignore-case-忽略大小写"><a href="#1-i-ignore-case-忽略大小写" class="headerlink" title="1. i (ignore case) 忽略大小写"></a>1. <code>i</code> (ignore case) 忽略大小写</h3><p>没啥可说的</p>
+<h3 id="2-g-global-全局匹配"><a href="#2-g-global-全局匹配" class="headerlink" title="2. g (global) 全局匹配"></a>2. <code>g</code> (global) 全局匹配</h3><p>找到所有的匹配，示例如下:</p>
+<figure class="highlight javascript"><table><tbody><tr><td class="code"><pre><span class="line">reg = <span class="regexp">/abc/</span></span><br><span class="line"></span><br><span class="line">reg.<span class="title function_">exec</span>(<span class="string">'abcdabcdabcd'</span>) <span class="comment">// ['abc', index: 0, input: 'abcdabcdabcd', groups: undefined]</span></span><br><span class="line">reg.<span class="title function_">exec</span>(<span class="string">'abcdabcdabcd'</span>) <span class="comment">// ['abc', index: 0, input: 'abcdabcdabcd', groups: undefined]</span></span><br><span class="line">reg.<span class="title function_">exec</span>(<span class="string">'abcdabcdabcd'</span>) <span class="comment">// ['abc', index: 0, input: 'abcdabcdabcd', groups: undefined]</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// g exec执行时带状态，连续匹配</span></span><br><span class="line">reg = <span class="regexp">/abc/g</span></span><br><span class="line"></span><br><span class="line">reg.<span class="title function_">exec</span>(<span class="string">'abcdabcdabcd'</span>) <span class="comment">// ['abc', index: 0, input: 'abcdabcdabcd', groups: undefined]</span></span><br><span class="line">reg.<span class="title function_">exec</span>(<span class="string">'abcdabcdabcd'</span>) <span class="comment">// ['abc', index: 4, input: 'abcdabcdabcd', groups: undefined]</span></span><br><span class="line">reg.<span class="title function_">exec</span>(<span class="string">'abcdabcdabcd'</span>) <span class="comment">// ['abc', index: 8, input: 'abcdabcdabcd', groups: undefined]</span></span><br><span class="line">reg.<span class="title function_">exec</span>(<span class="string">'abcdabcdabcd'</span>) <span class="comment">// null</span></span><br><span class="line"><span class="comment">// match 匹配出全部的字符串</span></span><br><span class="line"><span class="string">'abcdabcdabcd'</span>.<span class="title function_">match</span>(reg) <span class="comment">// ['abc', 'abc', 'abc'] </span></span><br></pre></td></tr></tbody></table></figure>
+
+<h3 id="3-m-multiline-多行匹配"><a href="#3-m-multiline-多行匹配" class="headerlink" title="3. m (multiline) 多行匹配"></a>3. <code>m</code> (multiline) 多行匹配</h3><p>当使用开始(<code>^</code>)或结束匹配(<code>$</code>)时，如果不加 <code>m</code>，那会把原始字符串整个拿来进行匹配，加上 <code>m</code> 修饰符后，会把原始输入按行来进行匹配。示例如下:</p>
+<figure class="highlight javascript"><table><tbody><tr><td class="code"><pre><span class="line">/^abc$/.<span class="title function_">exec</span>(<span class="string">'abc\nabc'</span>)</span><br><span class="line"><span class="comment">// -&gt; null</span></span><br><span class="line"></span><br><span class="line">/^abc$/m.<span class="title function_">exec</span>(<span class="string">'abc\nabc'</span>)</span><br><span class="line"><span class="comment">// -&gt; ['abc', index: 0, input: 'abc\nabc', groups: undefined]</span></span><br></pre></td></tr></tbody></table></figure>
+
+<h3 id="4-s-dotAll-点号匹配所有字符"><a href="#4-s-dotAll-点号匹配所有字符" class="headerlink" title="4. s (dotAll) 点号匹配所有字符"></a>4. <code>s</code> (dotAll) 点号匹配所有字符</h3><p>默认情况下，<code>.</code> 匹配除了换行之外的任意字符，使用 <code>s</code> 修饰符可以匹配所有字符，包括换行符。示例如下:</p>
+<figure class="highlight javascript"><table><tbody><tr><td class="code"><pre><span class="line">/^a.<span class="property">c$</span>/.<span class="title function_">exec</span>(<span class="string">'a\nc'</span>)</span><br><span class="line"><span class="comment">// null</span></span><br><span class="line"></span><br><span class="line">/^a.<span class="property">c$</span>/s.<span class="title function_">exec</span>(<span class="string">'a\nc'</span>)</span><br><span class="line"><span class="comment">// ['a\nc', index: 0, input: 'a\nc', groups: undefined]</span></span><br></pre></td></tr></tbody></table></figure>
+
+<h3 id="5-y-sticky-粘性匹配"><a href="#5-y-sticky-粘性匹配" class="headerlink" title="5. y (sticky) 粘性匹配"></a>5. <code>y</code> (sticky) 粘性匹配</h3><p><code>y</code> 修饰符和 <code>g</code> 都是有状态的连续匹配，但是 <code>y</code> 与 <code>g</code> 不同的点在于，<code>y</code> 的连续匹配是</p>
+<blockquote>
+<p>仅从正则表达式的 <a href="https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/RegExp/lastIndex">lastIndex</a> 属性表示的索引处为目标字符串匹配（并且不会尝试从后续索引匹配）。</p>
+</blockquote>
+<p>示例如下:</p>
+<figure class="highlight javascript"><table><tbody><tr><td class="code"><pre><span class="line"><span class="keyword">const</span> reg = <span class="regexp">/abc/y</span></span><br><span class="line"></span><br><span class="line">reg.<span class="title function_">exec</span>(<span class="string">'abcdabcdabcd'</span>)</span><br><span class="line"><span class="comment">// ['abc', index: 0, input: 'abcdabcdabcd', groups: undefined]</span></span><br><span class="line">reg.<span class="property">lastIndex</span></span><br><span class="line"><span class="comment">// 3</span></span><br><span class="line"><span class="comment">// 下一次匹配将从输入字符串的第3个索引开始匹配</span></span><br><span class="line"></span><br><span class="line">reg.<span class="title function_">exec</span>(<span class="string">'abcdabcdabcd'</span>)</span><br><span class="line"><span class="comment">// null</span></span><br><span class="line">reg.<span class="property">lastIndex</span></span><br><span class="line"><span class="comment">// 0</span></span><br><span class="line"><span class="comment">// 这里是 y 和 g 不一致的地方</span></span><br><span class="line"><span class="comment">// 第二次匹配时 y 修饰符等价于 /^abc/.test('dabcdabcd'), 要求开头匹配</span></span><br><span class="line"><span class="comment">// g 修饰符等价于 /abc/.test('dabcdabcd')，后续匹配即可</span></span><br></pre></td></tr></tbody></table></figure>
+
+<h3 id="6-u-unicode-unicode模式"><a href="#6-u-unicode-unicode模式" class="headerlink" title="6. u (unicode) unicode模式"></a>6. <code>u</code> (unicode) unicode模式</h3><p>这个就涉及到编码了，先看下例子，CSDN上有一篇文章说得比较明白[^1]，此处引用一下</p>
+<blockquote>
+<p>前两天室友正在看 js 关于正则表达式的博客，发现 js 正则表达式中有个 u，可以用于开启 unicode 模式，并且被博客举的两个例子搞懵了，例子如下：</p>
+<figure class="highlight javascript"><table><tbody><tr><td class="code"><pre><span class="line">/^\uD83D/.<span class="title function_">test</span>(<span class="string">'\uD83D\uDC2A'</span>) <span class="comment">// true</span></span><br><span class="line">/^\uD83D/u.<span class="title function_">test</span>(<span class="string">'\uD83D\uDC2A'</span>) <span class="comment">// false</span></span><br></pre></td></tr></tbody></table></figure>
+<p>为什么会这样？我们看见这个例子的时候也是这样想的。其实 js 有个大前提，JavaScript 内部，字符以 UTF-16 的格式储存，每个字符固定为 2 个字节。对于那些需要 4 个字节储存的字符（Unicode 码点大于0xFFFF 的字符），JavaScript 会认为它们是两个字符。</p>
+<p>例子中的第一个就能够解释，用 \uD83D 匹配两个字符，其中包含 \uD83D，匹配当然成功，但为什么开启 unicode 模式之后就匹配失败？因为在 UTF-16 中还有自己的规则，UTF-16 会用两个字节表示基础字符，面对扩展字符使用四个字节表示，也就是说有些情况下四个字节的 UTF-16 才能表示一个字符，很不幸，上面的例子就是这个情况。因为在 UTF-16 中 0xd800 - 0xdbff 表示高位代理，0xdc00 - 0xdfff 表示低位代理，其实两个代理就是在告诉计算机，它们属于扩展字符，需要使用四个字节表示一个字符。</p>
+<p>于是，例子中的第二条在开启 Unicode 模式之后，\uD83D\uDC2A 被识别为一个字符，\uD83D 作为一个字符中的一部分匹配整个字符肯定是以失败告终，如果对 Js 的这个神奇现象想进行更加深入的了解，可以阅读 Unicode-aware regular expressions in ES2015 一文。<br>————————————————<br>版权声明：本文为CSDN博主「CloneableX」的原创文章，遵循CC 4.0 BY-SA版权协议，转载请附上原文出处链接及本声明。<br>原文链接：<a href="https://blog.csdn.net/u011476390/article/details/101596962">https://blog.csdn.net/u011476390/article/details/101596962</a></p>
+</blockquote>
+<p>启用unicode模式之后，除了 <code>\u{...}</code>进行精确匹配外，还可以<a href="https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Regular_expressions/Unicode_character_class_escape">使用 <code>\p{...}</code> 按分类进行匹配</a>。</p>
+<h3 id="7-d-indices-匹配索引"><a href="#7-d-indices-匹配索引" class="headerlink" title="7. d indices 匹配索引"></a>7. <code>d</code> indices 匹配索引</h3><p>新提案，2022年进入stage 4，chrome已支持，在执行 <code>RegExp.prototype.exec</code> 和 <code>String.prototype.match</code> 时，返回匹配字符串的开始和结束索引，示例如下</p>
+<figure class="highlight javascript"><table><tbody><tr><td class="code"><pre><span class="line"><span class="keyword">const</span> re1 = <span class="regexp">/a+(?&lt;Z&gt;z)?/</span>d;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> s1 = <span class="string">"xaaaz"</span>;</span><br><span class="line">re1.<span class="title function_">exec</span>(s1)</span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">输出: </span></span><br><span class="line"><span class="comment">[</span></span><br><span class="line"><span class="comment">    0: "aaaz", // 第一个匹配的子字符串</span></span><br><span class="line"><span class="comment">    1: "z", // 第二个匹配的子字符串</span></span><br><span class="line"><span class="comment">    groups: { Z: 'z' }, // 命名捕获组对象，捕获组名字为key, 对应的匹配字符串为value</span></span><br><span class="line"><span class="comment">    index: 1, // 配置字符串的开始位置</span></span><br><span class="line"><span class="comment">    indices: Array(2) // 加了 d 修饰符后，会返回此数组字段</span></span><br><span class="line"><span class="comment">      - 0: (2)[1, 5] // 第一个配置的子字符串的开始和结束位置</span></span><br><span class="line"><span class="comment">      - 1: (2)[4, 5] // 第二个配置的子字符串的开始和结束位置</span></span><br><span class="line"><span class="comment">      - groups: // 命名捕获组的开始和结束位置，捕获组名字为key, 对应的开始和结束位置为value</span></span><br><span class="line"><span class="comment">        - Z: (2)[4, 5] // 命名为Z的捕获组对应的子字符串的开始和结束位置</span></span><br><span class="line"><span class="comment">    input: 'xaaaz' // 输入的原始字符</span></span><br><span class="line"><span class="comment">]</span></span><br><span class="line"><span class="comment">*/</span></span><br></pre></td></tr></tbody></table></figure>
+
+<h3 id="8-不同修饰符下-RegExp-prototype-exec-和-String-prototype-match-的区别"><a href="#8-不同修饰符下-RegExp-prototype-exec-和-String-prototype-match-的区别" class="headerlink" title="8. 不同修饰符下 RegExp.prototype.exec 和 String.prototype.match 的区别"></a>8. 不同修饰符下 <code>RegExp.prototype.exec</code> 和 <code>String.prototype.match</code> 的区别</h3><ul>
+<li>这两个方法在某些修饰符下是返回的结果是一致的，但是某些情况下又是不一致的，而且修饰符不同的组合也会有不同的效果。</li>
+<li>总体来说 <code>RegExp.prototype.exec</code> 方法只返回一个匹配结果，而 <code>RegExp.prototype.match</code> 方法倾向于返回所有的匹配结果。</li>
+<li>所以最好是在使用前实际运行验证一番。</li>
+</ul>
+<h2 id="一些注意点"><a href="#一些注意点" class="headerlink" title="一些注意点"></a>一些注意点</h2><ol>
+<li>使用 <code>new RegExp</code> 实例化正则表达式时，元字符需要转义</li>
+</ol>
+<p>比如说应该是 <code>new RegExp("\\w") 而不是 </code>new RegExp(“\w”)`</p>
+<p>正则表达式的 <code>source</code> 属性和 <code>new RegExp</code> 的第一个参数一致，该属性只读</p>
+<figure class="highlight javascript"><table><tbody><tr><td class="code"><pre><span class="line">/abc/gi.<span class="property">source</span> === <span class="string">'abc'</span> <span class="comment">// true</span></span><br></pre></td></tr></tbody></table></figure>
+
+]]></content>
+      <categories>
+        <category>前端</category>
+        <category>正则表达式</category>
+      </categories>
+      <tags>
+        <tag>前端</tag>
+        <tag>正则表达式</tag>
+        <tag>Javascript</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>关于业火输入法临时英文模式的思考、设计和实现</title>
     <url>/2023/04/24/%E5%85%B3%E4%BA%8E%E4%B8%9A%E7%81%AB%E8%BE%93%E5%85%A5%E6%B3%95%E4%B8%B4%E6%97%B6%E8%8B%B1%E6%96%87%E6%A8%A1%E5%BC%8F%E7%9A%84%E6%80%9D%E8%80%83%E3%80%81%E8%AE%BE%E8%AE%A1%E5%92%8C%E5%AE%9E%E7%8E%B0/</url>
     <content><![CDATA[<p>关于业火输入法临时英文模式的由来、思考、设计、开发和总结。</p>
