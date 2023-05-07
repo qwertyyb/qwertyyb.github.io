@@ -1,0 +1,20 @@
+{
+  "name": "backup_images",
+  "version": "1.0.0",
+  "private": true,
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "fs-extra": "^11.1.1",
+    "gh-md-urls": "^1.1.1",
+    "glob": "^10.2.2",
+    "undici": "^5.22.0"
+  }
+}
