@@ -239,6 +239,66 @@
       </tags>
   </entry>
   <entry>
+    <title>Hexo + Github Pages + Github Actions + Github Issues 工作流</title>
+    <url>/2023/05/07/Hexo%20+%20Github%20Pages%20+%20Github%20Actions%20+%20Github%20Issues%20%E5%B7%A5%E4%BD%9C%E6%B5%81/</url>
+    <content><![CDATA[<p>使用 <code>Github Issue</code> 写文章，同步到 <code>Hexo</code> 静态站点，利用 <code>Github Actions</code> 构建 <code>Hexo</code> 静态站点并发布到 <code>Github Pages</code> ，构建易用的工作流。</p>
+<span id="more"></span>
+
+<h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>目标当然是为了能够方便快捷地写作，同时低成本，最好是能白嫖。</p>
+<p>先看看起始的写作流程是什么</p>
+<ol>
+<li>把项目 Clone 到本地</li>
+<li><code>npm install</code> 安装依赖</li>
+<li>执行 <code>hexo new xxx</code> 在 <code>source/_posts/</code> 目录创建一个 Markdown 文件</li>
+<li>使用 Markdown 编辑器打开新创建的文件进行写作</li>
+<li>执行 <code>hexo build &amp;&amp; hexo deploy</code> 发布到 <code>gh-pages</code> 上</li>
+</ol>
+<p>遇到的问题:<br>如果在一个新的设备上，当开始写作时，要做很多前置工作才能准备好环境，很多时候，当everything is ready，已经没有写作的兴致了。</p>
+<h2 id="Github-Actions-自动构建"><a href="#Github-Actions-自动构建" class="headerlink" title="Github Actions 自动构建"></a><code>Github Actions</code> 自动构建</h2><p>自从 <code>Github</code> 被微软收购后，开始财大气粗地推出了很多需要烧钱的功能，<a href="https://github.com/features/actions"><code>Github Actions</code></a> 就是一项强大的功能，可以用 <code>Github Actions</code> 来做CI/CD 自动化流程。借助 <code>Github Actions</code> 和 <code>Github</code> 在线编辑 Markdown 的功能可以不用把项目 Clone 下来了。</p>
+<p>我可以在 <code>Github</code> 在线仓库中，在对应的 <code>source/_posts/</code> 目录直接 <code>Create New File</code>, 新增一个 Markdown 文件，然后直接在线编辑即可，编辑完直接在线 <code>commit</code> 到仓库中。</p>
+<p><code>Github Actions</code> 在检测到 <code>master</code> 分支上有新的 <code>commit</code> —— 即 <code>push</code> 事件，自动执行拉 <code>master</code> 分支，安装依赖，执行构建，发布到 <code>gh-pages</code> 分支这一系列操作。</p>
+<p>遇到的问题:</p>
+<ol>
+<li>在线创建的 Markdown 文件是空的，需要我手动填充 Front Matter 内容和格式，一是容易遗漏，二也容易出错。</li>
+<li>Github 仓库的在线 Markdown 编辑器不能支持图片的上传，导致每次写作时，需要引用图片的时候，我还需要想办法把图片上传到图床获得图片地址才行，太不优雅了。</li>
+</ol>
+<h2 id="图片放在哪里"><a href="#图片放在哪里" class="headerlink" title="图片放在哪里?"></a>图片放在哪里?</h2><p>关于图片放在哪里的问题，首先我不喜欢把图片放在仓库中，虽然不会丢失，但是会导致仓库变大，不太好看。而所有的国内的所谓图床，大企业的如微信、微博都有防盗链，无法使用在我的个人站点，而小企业的图床都是朝不保夕，说不定哪天就没了，很不稳定。所以可供选择的图床仅有国外的类似 <code>imgur</code> 等相对而言还比较可靠。</p>
+<p>我发现在 Github 的 issue 中上传的图片可在无鉴权的情况下访问，也没有限制第三方网站的直接引用，所以相对于 <code>imgur</code> ，我更倾向于把图片上传到 Github 中，毕竟我的整个站点都是放在 Github 仓库中，那我希望我的图片也能放在 Github 上。</p>
+<h2 id="用-Github-Issues-写作"><a href="#用-Github-Issues-写作" class="headerlink" title="用 Github Issues 写作"></a>用 <code>Github Issues</code> 写作</h2><p>自从发现在 Github Issues 中可以上传图片后，我就发现 Github Issues 的编辑器很好用，支持 Markdown 还能直接拖拽上传图片。除此之外，还有模板的能力，可以在模板中写入 Front Matter，能完美解决上面遇到的两个问题。那么如果我用 <code>Github Issues</code> 写作，然后使用 <code>Github Actions</code> 把 issues 中的文章同步到仓库，就能发布到个人站点了。</p>
+<p>为此，写了一个 <code>nodejs</code> 脚本，去读取仓库下的 <code>issues</code> 内容同步到 <code>sources/_posts/</code> 文件夹，可<a href="https://github.com/qwertyyb/qwertyyb.github.io/tree/master/packages/create_from_issues">在这里找到具体实现</a>。</p>
+<p>具体步骤如下: </p>
+<ol>
+<li><p>在项目仓库中创建一个 Issue Label 命名为 <code>posts</code>，脚本将拉取包含此 label 的 issues 并生成 Markdown 文件。在生成 Markdown 文件时，在 Front Matter 中插入一个特殊的字段 <code>create_from_issue: true</code> 以标记是的 issue 自动生成的。</p>
+</li>
+<li><p>创建一个 Issue 模板(Issue Template), 命名为 posts，labels 选中 posts label, 然后填充 posts 的模板内容填充。<strong>这里需要注意的是 posts 使用 Front Matter 来定义创建时间、标题、分类、标签等元数据，但是 issue template 也使用 Front Matter 来定义模块的标题、描述、内容等数据，所以如果在模块的默认内容中也使用 Front Matter来填充，会冲突，所以内容区域的Front Matter不要写全，可以只写上面部分或下面部分</strong>。如下图:</p>
+<p> 2.a. 使用 Front Matter 作为模板内容填充，从模块创建时，内容是空的。</p>
+<p> <img src="https://user-images.githubusercontent.com/16240729/236664337-4b8115ae-43d0-47ef-a594-79b9e7559db2.png" alt="使用 Front Matter 作为模板内容填充"><br>  <img src="https://user-images.githubusercontent.com/16240729/236664364-6d4d3487-d12a-4bc9-88f3-ce900624cbb3.png" alt="从模板创建时，内容是空的"></p>
+<p> 2.b. 不用完整的 Front Matter 填充，仅填写上面的分隔符，从模板创建时内容正常。</p>
+<p>   <img src="https://user-images.githubusercontent.com/16240729/236664422-25c1279b-319f-41cf-b21a-8ed9415af00f.png" alt="不用完整的 Front Matter 填充，仅填写上面的分隔符"><br><img src="https://user-images.githubusercontent.com/16240729/236664452-7c0018ed-886e-4627-aade-6d290b265b3e.png" alt="从模板创建时内容正常"></p>
+</li>
+</ol>
+<p>经过上面一番操作，终于可以愉快的写作了，不再需要clone项目等前置操作，流程完全自动化了，不再有任何的技术门槛了。</p>
+<p><img src="https://user-images.githubusercontent.com/16240729/236663063-cb90e3a1-e109-42cd-b6cb-6c63f0e84af7.png" alt="工作流程"></p>
+<h2 id="国内访问"><a href="#国内访问" class="headerlink" title="国内访问"></a>国内访问</h2><p>GIthub Pages 在国内的访问一直都很不流畅，处于半墙不墙的状态，如果有条件的话当然是可以在 <code>Gitee</code> 码云部署一个 <code>Gitee Pages</code> 作为镜像站点，但是码云从2022年起，所有的代码都会被人工审核，<code>Gitee Pages</code> 更是要求实名认证 ＋ 手举身份证的照片，如果不介意，Gitee Pages应该是最好的方案。如果介意，可以使用 <code>GitLab Pages</code> 或 <code>netlify.app</code> 这两个虽然在国内没有服务器，但是目前还没有被墙，也可以作为替代方案。</p>
+<p><img src="https://user-images.githubusercontent.com/16240729/236665323-ca1c79b1-49e1-48d7-a91c-3a3c6d4bfd14.png" alt="github pages在国内的测速情况"></p>
+<p><img src="https://user-images.githubusercontent.com/16240729/236665335-01f38978-6780-4aab-900d-8b8afacdef1a.png" alt="gitlab pages在国内的测速情况"></p>
+<p><img src="https://user-images.githubusercontent.com/16240729/236665376-a1f34ce2-26fc-4e1c-9890-1bb6e77e48d8.png" alt="netlify app在国内的测速情况"></p>
+]]></content>
+      <categories>
+        <category>前端</category>
+        <category>项目管理</category>
+        <category>Hexo</category>
+        <category>Github</category>
+        <category>Github Pages</category>
+        <category>Github Actions</category>
+      </categories>
+      <tags>
+        <tag>Hexo</tag>
+        <tag>Github Pages</tag>
+        <tag>Github Actions</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>IMKInputController 的碎碎念</title>
     <url>/2023/04/23/IMKInputController%20%E7%9A%84%E7%A2%8E%E7%A2%8E%E5%BF%B5/</url>
     <content><![CDATA[<p>在开发业火输入法的过程中，发现 <code>IMKInputController</code> 有一些文档没提到，又容易搞错的点，记录一下</p>
@@ -404,8 +464,8 @@
         <category>Github Pages</category>
       </categories>
       <tags>
-        <tag>github</tag>
         <tag>Github Pages</tag>
+        <tag>github</tag>
       </tags>
   </entry>
   <entry>
