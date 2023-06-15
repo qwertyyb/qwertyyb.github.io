@@ -240,7 +240,7 @@
   </entry>
   <entry>
     <title>Hexo + Github Pages + Github Actions + Github Issues 工作流</title>
-    <url>/2023/06/05/Hexo%20+%20Github%20Pages%20+%20Github%20Actions%20+%20Github%20Issues%20%E5%B7%A5%E4%BD%9C%E6%B5%81/</url>
+    <url>/2023/06/15/Hexo%20+%20Github%20Pages%20+%20Github%20Actions%20+%20Github%20Issues%20%E5%B7%A5%E4%BD%9C%E6%B5%81/</url>
     <content><![CDATA[<p>使用 <code>Github Issue</code> 写文章，同步到 <code>Hexo</code> 静态站点，利用 <code>Github Actions</code> 构建 <code>Hexo</code> 静态站点并发布到 <code>Github Pages</code> ，构建易用的工作流。</p>
 <span id="more"></span>
 
@@ -436,6 +436,69 @@
       </categories>
       <tags>
         <tag>音乐</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Safari PWA应用覆盖状态栏实践</title>
+    <url>/2023/06/15/Safari%20PWA%E5%BA%94%E7%94%A8%E8%A6%86%E7%9B%96%E7%8A%B6%E6%80%81%E6%A0%8F%E5%AE%9E%E8%B7%B5/</url>
+    <content><![CDATA[<p>PWA应用在IOS Safari上默认无法覆盖到状态栏，此文章给出解决方案</p>
+<span id="more"></span>
+
+<h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>PWA 应用规范中的 <code>manifest.json</code> 规范有一个字段 <code>display</code> 可以控制显示方式，有以下几个值 <code>fullscreen</code>、<code>standalone</code>、<code>minimal-ui</code>、<code>browser</code>，然而 safari 不支持 <code>fullscreen</code> 和 <code>minimal-ui</code>，所以我即使用 <code>fullscreen</code> 也会在 IOS 上被降级为 <code>standalone</code>。</p>
+<p>但是 <code>standalone</code> 并不能覆盖到状态栏，所以在IOS上会显示一个黑底白字的状态栏，如下图所示，此文教你如何把页面覆盖到状态栏。</p>
+<p><img src="https://github.com/qwertyyb/qwertyyb.github.io/assets/16240729/ee398701-2966-4530-a6ef-4ae0aecffb70" alt="standalone"></p>
+<p>我使用的IOS系统版本为 16.5。</p>
+<h2 id="解决方案"><a href="#解决方案" class="headerlink" title="解决方案"></a>解决方案</h2><p>safari 提供了 meta 标签的方式可以把 PWA 应用覆盖到状态栏，官方的具体文档如下: <a href="https://developer.apple.com/library/archive/documentation/AppleApplications/Reference/SafariHTMLRef/Articles/MetaTags.html">Safari Meta Tags</a></p>
+<p>文档中需要关注两个 meta 标签。</p>
+<ol>
+<li>apple-mobile-web-app-capable</li>
+</ol>
+<figure class="highlight plaintext"><table><tbody><tr><td class="code"><pre><span class="line">&lt;meta name="apple-mobile-web-app-capable" content="yes"&gt;</span><br></pre></td></tr></tbody></table></figure>
+
+<p>这个感觉和 <code>manifest.json</code> 中的 <code>display: standalone</code> 的表现是一致的，两个选择一个就好，推荐使用 <code>manifest.json</code>，毕竟是 PWA 规范而不是 safari 的私有特性</p>
+<ol start="2">
+<li>apple-mobile-web-app-status-bar-style</li>
+</ol>
+<figure class="highlight plaintext"><table><tbody><tr><td class="code"><pre><span class="line">&lt;meta name="apple-mobile-web-app-status-bar-style" content="black"&gt;</span><br></pre></td></tr></tbody></table></figure>
+
+<p>设置状态栏样式，有三个值<br>default: 白底黑字，页面无法覆盖到状态栏</p>
+<p><img src="https://github.com/qwertyyb/qwertyyb.github.io/assets/16240729/3531bc73-2378-43b1-a388-b6b518c3adca" alt="default"></p>
+<p>black: 黑底白字，页面无法覆盖到状态栏</p>
+<p><img src="https://github.com/qwertyyb/qwertyyb.github.io/assets/16240729/26397fd8-dc69-47d4-9f98-4b0c31b8010b" alt="black"></p>
+<p>black-translucent: 透明底，白色字体，页面覆盖到状态栏</p>
+<p><img src="https://github.com/qwertyyb/qwertyyb.github.io/assets/16240729/6267f3d6-903b-4bca-b0fa-a0474a124e19" alt="black-translucent"></p>
+<p>所以如果只是简单自定义一下状态栏黑白色，可以通过设置此 meta 为 default 或 black即可。那如果要设置颜色为黑色或白色之外的颜色就没有办法了吗？当然不是。</p>
+<ol start="3">
+<li>theme color</li>
+</ol>
+<p>theme color 可以使用Meta 标签 theme-color，也可以作为 <code>manifest.json</code> 中 theme_color 的字段。作为 manifest.json 的规范，兼容度比较高，所以无论是从规范上还是从兼容性上来说，manifest.theme_color都是比较推荐的方案。</p>
+<figure class="highlight plaintext"><table><tbody><tr><td class="code"><pre><span class="line">&lt;meta name="theme-color" content="#f00"&gt;</span><br></pre></td></tr></tbody></table></figure>
+
+<figure class="highlight plaintext"><table><tbody><tr><td class="code"><pre><span class="line">// manifest.json</span><br><span class="line">...</span><br><span class="line">   "theme_color": "#f00"</span><br><span class="line">...</span><br></pre></td></tr></tbody></table></figure>
+
+<p>需要注意的是 theme-color 在safari上不仅仅在PWA应用下生效，在浏览器中也会生效，状态栏文字颜色会自动根据背景颜色自动调整为黑色或白色。</p>
+<p><img src="https://github.com/qwertyyb/qwertyyb.github.io/assets/16240729/2d9132a4-433d-4f96-84b7-651cbfa1b966" alt="theme color"></p>
+<h2 id="black-translucent的坑"><a href="#black-translucent的坑" class="headerlink" title="black-translucent的坑"></a>black-translucent的坑</h2><ol>
+<li>状态栏文字颜色固定为白色。</li>
+</ol>
+<p>如果不甘于只是简单的自定义状态栏的背景颜色，那就需要使用 <code>black-translucent</code> 让页面覆盖到状态栏，然后在页面中自定义状态栏的背景，唯一遗憾的是，状态栏的文字颜色是写死的白色，所以为了让状态栏上的文字能比较清晰的显示，背景需要为深色。</p>
+<ol start="2">
+<li>100%高度占不全</li>
+</ol>
+<p>这个坑就有些离谱了，在html定义高度为 100% 时，预期是页面能占满手机屏幕，然而并不是，下面还有一部分没有覆盖到，如下图所示。</p>
+<p><img src="https://github.com/qwertyyb/qwertyyb.github.io/assets/16240729/dee154fd-adc5-43ce-a9d5-9643d1be2a8a" alt="html height 100%"></p>
+<p><img src="https://github.com/qwertyyb/qwertyyb.github.io/assets/16240729/376a6cda-12dc-419b-8b93-d806f3eae4a3" alt="未全覆盖"></p>
+<p>实在是非常离谱，经过几番测试，发现了最终的解决方案在 html 上应用样式 height: 100vh 就可以了</p>
+]]></content>
+      <categories>
+        <category>前端</category>
+        <category>Safari</category>
+        <category>PWA</category>
+      </categories>
+      <tags>
+        <tag>前端</tag>
+        <tag>Safari</tag>
+        <tag>PWA</tag>
       </tags>
   </entry>
   <entry>
