@@ -1,14 +1,14 @@
 ---
 name: posts
 about: 添加新的文章
-title: ''
+title: ""
 labels: posts
-assignees: ''
+assignees: ""
 body:
 - type: markdown
   attributes:
     value: |
-      ---
+      "---
       title: 文章标题
       date: [DATETIME]
       tags:
@@ -21,7 +21,7 @@ body:
   
       <!-- more -->
 
-      文章内容
+      文章内容"
 ---
 
 
