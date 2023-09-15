@@ -240,7 +240,7 @@
   </entry>
   <entry>
     <title>Hexo + Github Pages + Github Actions + Github Issues 工作流</title>
-    <url>/2023/09/13/Hexo%20+%20Github%20Pages%20+%20Github%20Actions%20+%20Github%20Issues%20%E5%B7%A5%E4%BD%9C%E6%B5%81/</url>
+    <url>/2023/09/15/Hexo%20+%20Github%20Pages%20+%20Github%20Actions%20+%20Github%20Issues%20%E5%B7%A5%E4%BD%9C%E6%B5%81/</url>
     <content><![CDATA[<p>使用 <code>Github Issue</code> 写文章，同步到 <code>Hexo</code> 静态站点，利用 <code>Github Actions</code> 构建 <code>Hexo</code> 静态站点并发布到 <code>Github Pages</code> ，构建易用的工作流。</p>
 <span id="more"></span>
 
@@ -529,6 +529,38 @@
       <tags>
         <tag>Github Pages</tag>
         <tag>github</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>cocoapods项目迁移至swift package manager</title>
+    <url>/2023/09/15/cocoapods%E9%A1%B9%E7%9B%AE%E8%BF%81%E7%A7%BB%E8%87%B3swift%20package%20manager/</url>
+    <content><![CDATA[<p>把 业火输入法 的项目依赖从 cocoapods 迁移至 swift package manager 记录</p>
+<span id="more"></span>
+
+<h3 id="1-cocoapods移除"><a href="#1-cocoapods移除" class="headerlink" title="1. cocoapods移除"></a>1. cocoapods移除</h3><ul>
+<li>首先执行命令 <code>pod deintegrate</code>，会自动移除 Pods 目录</li>
+<li>然后删除 Podfile 和 Podfile.lock 文件</li>
+<li>最后用 Xcode 打开 *.xcodeproj 文件，后续就不使用 *.xcodeworkspace 文件了</li>
+</ul>
+<h3 id="2-通过SPM安装原来cocoapods的依赖"><a href="#2-通过SPM安装原来cocoapods的依赖" class="headerlink" title="2. 通过SPM安装原来cocoapods的依赖"></a>2. 通过SPM安装原来cocoapods的依赖</h3><p>切到项目配置 Package Dependencies TAB 下，点击添加图标，右上角输入依赖地址，会自动加载依赖，此处需要注意版本匹配，安装的版本最好和原来cocoapods的依赖版本一致，防止库依赖升级后无法使用。</p>
+<img width="500" alt="Snipaste_2023-09-15_18-22-10" src="https://github.com/qwertyyb/qwertyyb.github.io/assets/16240729/1a880a85-a7a7-48a4-94d1-32b92e966b2b">
+
+<p>另外需要注意的是，如果 SPM 依赖在墙外，最好是有梯子。</p>
+<h4 id="2-1-卡-Preparing-to-validate…-的解决方案"><a href="#2-1-卡-Preparing-to-validate…-的解决方案" class="headerlink" title="2.1 卡 Preparing to validate… 的解决方案"></a>2.1 卡 Preparing to validate… 的解决方案</h4><p>问题:  添加 SPM 依赖时，界面一直卡在 Preparing to validate…，如下:</p>
+<img width="400" alt="preparing to validate..." src="https://github.com/qwertyyb/qwertyyb.github.io/assets/16240729/077a4980-0ce9-435a-b3bf-58bd1cea3f3e">
+
+<p>解决方案: 把 Build Location 从 Legacy 调整为 Xcode Default。调整方式: 菜单File –&gt; Project Settings –&gt; Advanced… –&gt; 选中Xcode Default，然后重启 Xcode，再添加 SPM 依赖就可以成功了。</p>
+<h3 id="3-SQLCipher的迁移"><a href="#3-SQLCipher的迁移" class="headerlink" title="3. SQLCipher的迁移"></a>3. SQLCipher的迁移</h3><p>项目中使用了 SQLCipher 来存储敏感数据，但是 SQLCipher 只有 cocoapods 依赖，没有 SPM 包（<a href="https://github.com/sqlcipher/sqlcipher/issues/371">相关issue</a>），需要自行构建处理(待补充)</p>
+<h3 id="4-总结"><a href="#4-总结" class="headerlink" title="4. 总结"></a>4. 总结</h3><p>迁移总体而言还算比较简单，但是 SPM 这种方式的缺点也是有的，比如说如果依赖的包后续删库跑路了，那在新设备上依赖应该就会无法安装了，所以要慎重引入依赖并做好容灾管理。</p>
+]]></content>
+      <categories>
+        <category>MacOS开发</category>
+      </categories>
+      <tags>
+        <tag>业火输入法</tag>
+        <tag>Fire</tag>
+        <tag>Swift</tag>
+        <tag>MacOS开发</tag>
       </tags>
   </entry>
   <entry>
