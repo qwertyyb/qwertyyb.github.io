@@ -52,7 +52,11 @@ created_from_issue: true
 
 <img width="588" alt="图片" src="https://github.com/qwertyyb/qwertyyb.github.io/assets/16240729/bdfc309c-7169-4c04-89bb-6ee5f22c476d">
 
-再重新运行项目，通过在终端运行 `ps -ef | grep Fire.app` 发现运行目录已经变成了在 `/Library/Input Methods` 目录下，符合预期，这里需要注意的是最终部署app的目录是 Installation Build Products Location + Installation Directory，最终解决了 `No Such Module` 的问题。
+再重新运行项目，通过在终端运行 `ps -ef | grep Fire.app` 发现运行目录已经变成了在 `/Library/Input Methods` 目录下，符合预期，这里需要注意两个问题:
+
+1. 最终部署app的目录是 Installation Build Products Location + Installation Directory。
+2. 另外就是可能会发现修改了这里的配置后，通过 `Archive` 构建出来的归档的 `Type` 为 `generic Xcode archive` ，同时 Validate Content 的按钮是置灰的，所以这里的配置最好 `Debug` 和 `Release` 分开来会比较好，可以参考 Apple 的[官方文档](https://developer.apple.com/documentation/technotes/tn3110-resolving-generic-xcode-archive-issue)
+
 
 ### 3. SQLCipher的迁移
 
