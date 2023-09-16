@@ -557,7 +557,11 @@
 <p>所以需要寻找更完美的方案来解决，我遍历了 Fire Target 下的 所有 <code>Build Setting</code> 配置，发现里面有一个 Deployment 的配置，这里面的 <code>Deployment Location</code> 、 <code>Installation Build Products Location</code>、<code>Installation Directory</code> 感觉似乎可以解决这里的问题。于是简单调整了一下这里的配置，如下: </p>
 <img width="588" alt="图片" src="https://github.com/qwertyyb/qwertyyb.github.io/assets/16240729/bdfc309c-7169-4c04-89bb-6ee5f22c476d">
 
-<p>再重新运行项目，通过在终端运行 <code>ps -ef | grep Fire.app</code> 发现运行目录已经变成了在 <code>/Library/Input Methods</code> 目录下，符合预期，这里需要注意的是最终部署app的目录是 Installation Build Products Location + Installation Directory，最终解决了 <code>No Such Module</code> 的问题。</p>
+<p>再重新运行项目，通过在终端运行 <code>ps -ef | grep Fire.app</code> 发现运行目录已经变成了在 <code>/Library/Input Methods</code> 目录下，符合预期，这里需要注意两个问题:</p>
+<ol>
+<li>最终部署app的目录是 Installation Build Products Location + Installation Directory。</li>
+<li>另外就是可能会发现修改了这里的配置后，通过 <code>Archive</code> 构建出来的归档的 <code>Type</code> 为 <code>generic Xcode archive</code> ，同时 Validate Content 的按钮是置灰的，所以这里的配置最好 <code>Debug</code> 和 <code>Release</code> 分开来会比较好，可以参考 Apple 的<a href="https://developer.apple.com/documentation/technotes/tn3110-resolving-generic-xcode-archive-issue">官方文档</a></li>
+</ol>
 <h3 id="3-SQLCipher的迁移"><a href="#3-SQLCipher的迁移" class="headerlink" title="3. SQLCipher的迁移"></a>3. SQLCipher的迁移</h3><p>项目中使用了 <code>SQLCipher</code> 来存储敏感数据，但是 <code>SQLCipher</code> 只有 <code>cocoapods</code> 依赖，没有 <code>SPM</code> 包（<a href="https://github.com/sqlcipher/sqlcipher/issues/371">相关issue</a>），需要自行构建处理。</p>
 <p>SQLCipher的构建步骤比较简单，<a href="https://www.zetetic.net/sqlcipher/ios-tutorial/">参考官方文档</a>即可，简而言之，就是首先 clone SQLCipher 项目，构建出 sqlite3.c 和 sqlite3.h，然后把这两个文件拷贝到项目目录下，再在Xcode中添加这两个文件，接着修改 <code>Build Settings</code> 中的 <code>other c flags</code> 中就可以。</p>
 <p>不过我在这个迁移过程中也不太顺利，遇到了一些问题。我是把 <code>sqlite3.c</code> 和 <code>sqlite3.h</code> 放在了 <code>SQLCipher</code> 目录下，然后把这个目录放在了 Target 对应的目录下，在Xcode导入的过程中，我勾选的是 <code>Create folder references</code>, 就出现了编译过程中报<code>Undefined Symbol: _sqlite3_open</code> 的问题，而之所以出现这个问题是因为没有编译 <code>sqlite3.c</code> 文件，所以找不到相关函数的定义。而解决方案呢，就是在导入的时候，选择 <code>Create groups</code>，就会自动编译 <code>sqlite3.c</code> 文件了。</p>
