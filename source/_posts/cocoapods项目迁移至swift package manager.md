@@ -60,7 +60,7 @@ created_from_issue: true
 
 ### 3. SQLCipher的迁移
 
-项目中使用了 `SQLCipher` 来存储敏感数据，但是 `SQLCipher` 只有 `cocoapods` 依赖，没有 `SPM` 包（[相关issue](https://github.com/sqlcipher/sqlcipher/issues/371)），需要自行构建处理。
+项目中使用了 `SQLCipher` 来存储敏感数据，但是 `SQLCipher` 只有 `cocoapods` 依赖，目前还没有 `SPM` 包，需要自行构建处理。
 
 SQLCipher的构建步骤比较简单，[参考官方文档](https://www.zetetic.net/sqlcipher/ios-tutorial/)即可，简而言之，就是首先 clone SQLCipher 项目，构建出 sqlite3.c 和 sqlite3.h，然后把这两个文件拷贝到项目目录下，再在Xcode中添加这两个文件，接着修改 `Build Settings` 中的 `other c flags` 中就可以。
 
