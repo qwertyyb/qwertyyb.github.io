@@ -240,7 +240,7 @@
   </entry>
   <entry>
     <title>Hexo + Github Pages + Github Actions + Github Issues 工作流</title>
-    <url>/2023/10/10/Hexo%20+%20Github%20Pages%20+%20Github%20Actions%20+%20Github%20Issues%20%E5%B7%A5%E4%BD%9C%E6%B5%81/</url>
+    <url>/2023/10/11/Hexo%20+%20Github%20Pages%20+%20Github%20Actions%20+%20Github%20Issues%20%E5%B7%A5%E4%BD%9C%E6%B5%81/</url>
     <content><![CDATA[<p>使用 <code>Github Issue</code> 写文章，同步到 <code>Hexo</code> 静态站点，利用 <code>Github Actions</code> 构建 <code>Hexo</code> 静态站点并发布到 <code>Github Pages</code> ，构建易用的工作流。</p>
 <span id="more"></span>
 
@@ -1191,6 +1191,31 @@
       <tags>
         <tag>前端</tag>
         <tag>WebRTC</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>实现HazeOver的窗口高亮效果</title>
+    <url>/2023/10/11/%E5%AE%9E%E7%8E%B0HazeOver%E7%9A%84%E7%AA%97%E5%8F%A3%E9%AB%98%E4%BA%AE%E6%95%88%E6%9E%9C/</url>
+    <content><![CDATA[<p>如何自己实现一个HazeOver，实现前置窗口的高亮效果。</p>
+<span id="more"></span>
+
+<h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><img width="400" alt="HazeOver" src="https://github.com/qwertyyb/qwertyyb.github.io/assets/16240729/fa37171c-3b39-478f-ade5-56799a9a475d">
+
+
+<p><a href="https://hazeover.com/">HazeOver</a> 是一款可以高亮当前最前方窗口的 MacOS 应用，遗憾的是它不免费，官网售价高达54元。我当真是不能理解为什么一个这么简单的东西竟然能要价这么高，所以我打算自已写一个类似的应用来满足我的需求。</p>
+<h2 id="基本思路"><a href="#基本思路" class="headerlink" title="基本思路"></a>基本思路</h2><h3 id="1-窗口高亮"><a href="#1-窗口高亮" class="headerlink" title="1. 窗口高亮"></a>1. 窗口高亮</h3><p>首先需要了解的是，不是最前面的窗口变亮了，而是后面的窗口被遮罩挡住了变黑了，就像下面图示这样。</p>
+<p>所以要做的就是搞一个遮罩也就是半透明的窗口，让这个窗口始终处于最前面窗口的后面。半透明的窗口很好实现，不是问题，问题在于，如何让这个窗口处于最前面窗口的后面。</p>
+<h3 id="2-监听最前方窗口变化"><a href="#2-监听最前方窗口变化" class="headerlink" title="2. 监听最前方窗口变化"></a>2. 监听最前方窗口变化</h3><p>另一个问题在于最前方的窗口是会变更的，当最前方的窗口变更的时候，应用程序如何及时收到通知，把遮罩移动到新的最前方窗口下面。</p>
+<h2 id="调研技术方案"><a href="#调研技术方案" class="headerlink" title="调研技术方案"></a>调研技术方案</h2><h3 id="1-让遮罩窗口位于最前方窗口后面"><a href="#1-让遮罩窗口位于最前方窗口后面" class="headerlink" title="1. 让遮罩窗口位于最前方窗口后面"></a>1. 让遮罩窗口位于最前方窗口后面</h3><p>一番搜索查找，在 NSWindow 的官方文档上找到了答案，NSWindow 实例上有一个 <a href="https://developer.apple.com/documentation/appkit/nswindow/1419672-order"><code>order(_:relativeTo:)</code> 的方法</a>，可以指定这个窗口实例放在某个弹窗的上面或下面。</p>
+<p>但是这个方法也不太好调用，需要传入对应窗口的 number 字段，而对应的窗口一般是其他应用程序的窗口，所以如何获取到最前面应用的最前面窗口的 number 字段，感觉很是一个比较棘手的问题，官方文档也印证了这个想法，官方提供了 NSWindowList 来获取，但是这个方法早就被取消不可用了。</p>
+<p>没办法，经过一番网络搜刮，找到了一个可用的方法 <a href="https://developer.apple.com/documentation/coregraphics/1455137-cgwindowlistcopywindowinfo">CGWindowListCopyWindowInfo</a>，这个方法返回一个有序的窗口数组，顺序就是从屏幕最前面到最后面，数组中的元素为 Dict，可以通过 kCGWindowNumber 字段获取到窗口的 number 字段。</p>
+<p>如此终于就能调用 <code>NSWindow.order(:relativeTo:)</code> 的方法了，如此，第一个问题也就有了技术方案。</p>
+<h3 id="2-监听最前方窗口的变化"><a href="#2-监听最前方窗口的变化" class="headerlink" title="2. 监听最前方窗口的变化"></a>2. 监听最前方窗口的变化</h3><h2 id="丐版实现"><a href="#丐版实现" class="headerlink" title="丐版实现"></a>丐版实现</h2><h2 id="如何实现平滑的过渡"><a href="#如何实现平滑的过渡" class="headerlink" title="如何实现平滑的过渡"></a>如何实现平滑的过渡</h2>]]></content>
+      <categories>
+        <category>Macos</category>
+      </categories>
+      <tags>
+        <tag>Macos</tag>
       </tags>
   </entry>
   <entry>

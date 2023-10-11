@@ -20,36 +20,30 @@
 
 <script class="next-config" data-name="main" type="application/json">{"hostname":"qwertyyb.github.io","root":"/","images":"/images","scheme":"Pisces","darkmode":true,"version":"8.15.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":-1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
 
-    <meta name="description" content="把 业火输入法 的项目依赖从 cocoapods 迁移至 swift package manager 记录">
+    <meta name="description" content="如何自己实现一个HazeOver，实现前置窗口的高亮效果。">
 <meta property="og:type" content="article">
-<meta property="og:title" content="cocoapods项目迁移至swift package manager">
-<meta property="og:url" content="https://qwertyyb.github.io/2023/09/15/cocoapods%E9%A1%B9%E7%9B%AE%E8%BF%81%E7%A7%BB%E8%87%B3swift%20package%20manager/index.html">
+<meta property="og:title" content="实现HazeOver的窗口高亮效果">
+<meta property="og:url" content="https://qwertyyb.github.io/2023/10/11/%E5%AE%9E%E7%8E%B0HazeOver%E7%9A%84%E7%AA%97%E5%8F%A3%E9%AB%98%E4%BA%AE%E6%95%88%E6%9E%9C/index.html">
 <meta property="og:site_name" content="虚幻">
-<meta property="og:description" content="把 业火输入法 的项目依赖从 cocoapods 迁移至 swift package manager 记录">
+<meta property="og:description" content="如何自己实现一个HazeOver，实现前置窗口的高亮效果。">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://github.com/qwertyyb/qwertyyb.github.io/assets/16240729/1a880a85-a7a7-48a4-94d1-32b92e966b2b">
-<meta property="og:image" content="https://github.com/qwertyyb/qwertyyb.github.io/assets/16240729/077a4980-0ce9-435a-b3bf-58bd1cea3f3e">
-<meta property="og:image" content="https://github.com/qwertyyb/qwertyyb.github.io/assets/16240729/bdfc309c-7169-4c04-89bb-6ee5f22c476d">
-<meta property="og:image" content="https://github.com/qwertyyb/qwertyyb.github.io/assets/16240729/90387f35-b584-4e6a-b5c4-c250d92abbbc">
-<meta property="article:published_time" content="2023-09-15T16:00:00.000Z">
+<meta property="og:image" content="https://github.com/qwertyyb/qwertyyb.github.io/assets/16240729/fa37171c-3b39-478f-ade5-56799a9a475d">
+<meta property="article:published_time" content="2023-10-11T10:10:12.031Z">
 <meta property="article:modified_time" content="2023-10-11T10:10:12.035Z">
 <meta property="article:author" content="虚幻">
-<meta property="article:tag" content="业火输入法">
-<meta property="article:tag" content="Fire">
-<meta property="article:tag" content="Swift">
-<meta property="article:tag" content="MacOS开发">
+<meta property="article:tag" content="Macos">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://github.com/qwertyyb/qwertyyb.github.io/assets/16240729/1a880a85-a7a7-48a4-94d1-32b92e966b2b">
+<meta name="twitter:image" content="https://github.com/qwertyyb/qwertyyb.github.io/assets/16240729/fa37171c-3b39-478f-ade5-56799a9a475d">
 
 
-<link rel="canonical" href="https://qwertyyb.github.io/2023/09/15/cocoapods%E9%A1%B9%E7%9B%AE%E8%BF%81%E7%A7%BB%E8%87%B3swift%20package%20manager/">
+<link rel="canonical" href="https://qwertyyb.github.io/2023/10/11/%E5%AE%9E%E7%8E%B0HazeOver%E7%9A%84%E7%AA%97%E5%8F%A3%E9%AB%98%E4%BA%AE%E6%95%88%E6%9E%9C/">
 
 
 
-<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://qwertyyb.github.io/2023/09/15/cocoapods%E9%A1%B9%E7%9B%AE%E8%BF%81%E7%A7%BB%E8%87%B3swift%20package%20manager/","path":"2023/09/15/cocoapods项目迁移至swift package manager/","title":"cocoapods项目迁移至swift package manager"}</script>
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://qwertyyb.github.io/2023/10/11/%E5%AE%9E%E7%8E%B0HazeOver%E7%9A%84%E7%AA%97%E5%8F%A3%E9%AB%98%E4%BA%AE%E6%95%88%E6%9E%9C/","path":"2023/10/11/实现HazeOver的窗口高亮效果/","title":"实现HazeOver的窗口高亮效果"}</script>
 
 <script class="next-config" data-name="calendar" type="application/json">""</script>
-<title>cocoapods项目迁移至swift package manager | 虚幻</title>
+<title>实现HazeOver的窗口高亮效果 | 虚幻</title>
   
 
   <script src="/js/third-party/analytics/baidu-analytics.js"></script>
@@ -153,7 +147,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-cocoapods-%E7%A7%BB%E9%99%A4"><span class="nav-number">1.</span> <span class="nav-text">1. cocoapods 移除</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E9%80%9A%E8%BF%87-SPM-%E5%AE%89%E8%A3%85%E5%8E%9F%E6%9D%A5-cocoapods-%E7%9A%84%E4%BE%9D%E8%B5%96"><span class="nav-number">2.</span> <span class="nav-text">2. 通过 SPM 安装原来 cocoapods 的依赖</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#2-1-%E5%8D%A1-Preparing-to-validate%E2%80%A6-%E7%9A%84%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88"><span class="nav-number">2.1.</span> <span class="nav-text">2.1 卡 Preparing to validate… 的解决方案</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-2-No-Such-Module-%E2%80%9Cxxx%E2%80%9D-%E7%9A%84%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88"><span class="nav-number">2.2.</span> <span class="nav-text">2.2 No Such Module “xxx” 的解决方案</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-SQLCipher%E7%9A%84%E8%BF%81%E7%A7%BB"><span class="nav-number">3.</span> <span class="nav-text">3. SQLCipher的迁移</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-%E6%80%BB%E7%BB%93"><span class="nav-number">4.</span> <span class="nav-text">4. 总结</span></a></li></ol></div>
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%83%8C%E6%99%AF"><span class="nav-number">1.</span> <span class="nav-text">背景</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9F%BA%E6%9C%AC%E6%80%9D%E8%B7%AF"><span class="nav-number">2.</span> <span class="nav-text">基本思路</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E7%AA%97%E5%8F%A3%E9%AB%98%E4%BA%AE"><span class="nav-number">2.1.</span> <span class="nav-text">1. 窗口高亮</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E7%9B%91%E5%90%AC%E6%9C%80%E5%89%8D%E6%96%B9%E7%AA%97%E5%8F%A3%E5%8F%98%E5%8C%96"><span class="nav-number">2.2.</span> <span class="nav-text">2. 监听最前方窗口变化</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%B0%83%E7%A0%94%E6%8A%80%E6%9C%AF%E6%96%B9%E6%A1%88"><span class="nav-number">3.</span> <span class="nav-text">调研技术方案</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E8%AE%A9%E9%81%AE%E7%BD%A9%E7%AA%97%E5%8F%A3%E4%BD%8D%E4%BA%8E%E6%9C%80%E5%89%8D%E6%96%B9%E7%AA%97%E5%8F%A3%E5%90%8E%E9%9D%A2"><span class="nav-number">3.1.</span> <span class="nav-text">1. 让遮罩窗口位于最前方窗口后面</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E7%9B%91%E5%90%AC%E6%9C%80%E5%89%8D%E6%96%B9%E7%AA%97%E5%8F%A3%E7%9A%84%E5%8F%98%E5%8C%96"><span class="nav-number">3.2.</span> <span class="nav-text">2. 监听最前方窗口的变化</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%90%E7%89%88%E5%AE%9E%E7%8E%B0"><span class="nav-number">4.</span> <span class="nav-text">丐版实现</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0%E5%B9%B3%E6%BB%91%E7%9A%84%E8%BF%87%E6%B8%A1"><span class="nav-number">5.</span> <span class="nav-text">如何实现平滑的过渡</span></a></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -211,7 +205,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://qwertyyb.github.io/2023/09/15/cocoapods%E9%A1%B9%E7%9B%AE%E8%BF%81%E7%A7%BB%E8%87%B3swift%20package%20manager/">
+    <link itemprop="mainEntityOfPage" href="https://qwertyyb.github.io/2023/10/11/%E5%AE%9E%E7%8E%B0HazeOver%E7%9A%84%E7%AA%97%E5%8F%A3%E9%AB%98%E4%BA%AE%E6%95%88%E6%9E%9C/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="https://avatars.githubusercontent.com/u/16240729?v=4">
@@ -224,12 +218,12 @@
     </span>
 
     <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="cocoapods项目迁移至swift package manager | 虚幻">
+      <meta itemprop="name" content="实现HazeOver的窗口高亮效果 | 虚幻">
       <meta itemprop="description" content="">
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          cocoapods项目迁移至swift package manager<a href="https://github.com/qwertyyb/qwertyyb.github.io/tree/master/source/_posts/cocoapods%E9%A1%B9%E7%9B%AE%E8%BF%81%E7%A7%BB%E8%87%B3swift%20package%20manager.md" class="post-edit-link" title="编辑" rel="noopener" target="_blank"><i class="fa fa-pen-nib"></i></a>
+          实现HazeOver的窗口高亮效果<a href="https://github.com/qwertyyb/qwertyyb.github.io/tree/master/source/_posts/%E5%AE%9E%E7%8E%B0HazeOver%E7%9A%84%E7%AA%97%E5%8F%A3%E9%AB%98%E4%BA%AE%E6%95%88%E6%9E%9C.md" class="post-edit-link" title="编辑" rel="noopener" target="_blank"><i class="fa fa-pen-nib"></i></a>
         </h1>
 
         <div class="post-meta-container">
@@ -240,7 +234,7 @@
       </span>
       <span class="post-meta-item-text">发表于</span>
 
-      <time title="创建时间：2023-09-15 16:00:00" itemprop="dateCreated datePublished" datetime="2023-09-15T16:00:00+00:00">2023-09-15</time>
+      <time title="创建时间：2023-10-11 10:10:12" itemprop="dateCreated datePublished" datetime="2023-10-11T10:10:12+00:00">2023-10-11</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -248,7 +242,7 @@
       </span>
       <span class="post-meta-item-text">分类于</span>
         <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/MacOS%E5%BC%80%E5%8F%91/" itemprop="url" rel="index"><span itemprop="name">MacOS开发</span></a>
+          <a href="/categories/Macos/" itemprop="url" rel="index"><span itemprop="name">Macos</span></a>
         </span>
     </span>
 
@@ -269,41 +263,21 @@
     
     
     <div class="post-body" itemprop="articleBody">
-        <p>把 <a href="https://github.com/qwertyyb/Fire">业火输入法</a> 的项目依赖从 <code>cocoapods</code> 迁移至 <code>swift package manager</code> 记录</p>
+        <p>如何自己实现一个HazeOver，实现前置窗口的高亮效果。</p>
 <span id="more"></span>
 
-<h3 id="1-cocoapods-移除"><a href="#1-cocoapods-移除" class="headerlink" title="1. cocoapods 移除"></a>1. <code>cocoapods</code> 移除</h3><ul>
-<li>首先执行命令 <code>pod deintegrate</code>，会自动移除 <code>Pods</code> 目录</li>
-<li>然后删除 <code>Podfile</code> 和 <code>Podfile.lock</code> 文件</li>
-<li>最后用 Xcode 打开 <code>*.xcodeproj 文件</code> ，后续就不使用 <code>*.xcodeworkspace</code> 文件了</li>
-</ul>
-<h3 id="2-通过-SPM-安装原来-cocoapods-的依赖"><a href="#2-通过-SPM-安装原来-cocoapods-的依赖" class="headerlink" title="2. 通过 SPM 安装原来 cocoapods 的依赖"></a>2. 通过 <code>SPM</code> 安装原来 <code>cocoapods</code> 的依赖</h3><p>切到项目配置 <code>Package Dependencies</code> TAB 下，点击添加图标，右上角输入依赖地址，会自动加载依赖，此处需要注意版本匹配，安装的版本最好和原来 <code>cocoapods</code> 的依赖版本一致，防止库依赖升级后无法使用。</p>
-<img width="500" alt="Snipaste_2023-09-15_18-22-10" src="https://github.com/qwertyyb/qwertyyb.github.io/assets/16240729/1a880a85-a7a7-48a4-94d1-32b92e966b2b">
+<h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><img width="400" alt="HazeOver" src="https://github.com/qwertyyb/qwertyyb.github.io/assets/16240729/fa37171c-3b39-478f-ade5-56799a9a475d">
 
-<p>另外需要注意的是，如果 <code>SPM</code> 依赖在墙外，最好是有梯子。</p>
-<h4 id="2-1-卡-Preparing-to-validate…-的解决方案"><a href="#2-1-卡-Preparing-to-validate…-的解决方案" class="headerlink" title="2.1 卡 Preparing to validate… 的解决方案"></a>2.1 卡 Preparing to validate… 的解决方案</h4><p>问题:  添加 SPM 依赖时，界面一直卡在 Preparing to validate…，如下:</p>
-<img width="600" alt="preparing to validate..." src="https://github.com/qwertyyb/qwertyyb.github.io/assets/16240729/077a4980-0ce9-435a-b3bf-58bd1cea3f3e">
 
-<p>解决方案: 把 <code>Build Location 从 Legacy</code> 调整为 <code>Xcode Default</code>。调整方式: 菜单File –&gt; Project Settings –&gt; Advanced… –&gt; 选中Xcode Default，然后重启 Xcode，再添加 <code>SPM</code> 依赖就可以成功了。</p>
-<h4 id="2-2-No-Such-Module-“xxx”-的解决方案"><a href="#2-2-No-Such-Module-“xxx”-的解决方案" class="headerlink" title="2.2 No Such Module “xxx” 的解决方案"></a>2.2 No Such Module “xxx” 的解决方案</h4><p>安装了对应依赖的 <code>SPM</code> 版本后，理论上，应该能够成功执行构建了，网络上的迁移文章也都是如此顺利，没有多余的其他步骤了。但是在 业火输入法 的迁移中，却出现了意外的错误 <code>No Such Module "xxx"</code> ，我几乎搜刮了网络上所有关于此错误的案例，但是都不适用于我的场景，真是让人十分头大。</p>
-<p>万般无奈之下，我只能重新创建了一个同名的项目，然后把旧项目的 <code>Fire.xcodeprj</code> 用新项目的 <code>Fire.xcodeprj</code> 文件替换掉，因为新创建的项目使用 <code>SPM</code> 依赖是完全没有问题的。需要注意的是替换之后，要把原项目的所有文件都重新导入到项目中，一直最后一步之前，我所有的迁移都是能正常成功构建和运行的。</p>
-<p>在完全迁移的最后一步，终于再次出现了意外的情况，而我也终于定位到了之前出现 <code>No Such Module</code> 的原因。由于我迁移的项目是输入法，所以为了能够在开发时进行调试，不同于一般的应用，直接运行就能Debug，我需要把构建的项目放在 <code>/Library InputMethods</code> 目录下，为此我在 <code>Build Settings</code> 中使用了 <code>CONFIGURATION_BUILD_DIR</code> 来改变构建目录。然后我就发现项目构建失败了，出现了和上面 <code>No Such Module "xxx"</code> 的同样错误，由此我也就最终找到了上面出现的报错的原因。</p>
-<p>猜测之所以报错是因为，SPM 的依赖还在原来的构建目录下，在新的构建目录下，没有 SPM 的依赖，所以出现了上面的问题，之所以有此猜测，是因为网上有些解决方案是通过把原来构建目录下的 SPM 包挪到新构建的目录下修复的，可以参考这个文档: <a href="https://stackoverflow.com/questions/57165778/getting-no-such-module-error-when-importing-a-swift-package-manager-dependency%E3%80%82%E7%84%B6%E8%80%8C%E8%BF%99%E4%B8%AA%E6%96%87%E6%A1%A3%E9%87%8C%E9%9D%A2%E7%9A%84">https://stackoverflow.com/questions/57165778/getting-no-such-module-error-when-importing-a-swift-package-manager-dependency。然而这个文档里面的</a> <code>fix SPM</code> 脚本能运行的前提是，需要先 <code>build Release</code>才行。</p>
-<p>所以需要寻找更完美的方案来解决，我遍历了 Fire Target 下的 所有 <code>Build Setting</code> 配置，发现里面有一个 Deployment 的配置，这里面的 <code>Deployment Location</code> 、 <code>Installation Build Products Location</code>、<code>Installation Directory</code> 感觉似乎可以解决这里的问题。于是简单调整了一下这里的配置，如下: </p>
-<img width="588" alt="图片" src="https://github.com/qwertyyb/qwertyyb.github.io/assets/16240729/bdfc309c-7169-4c04-89bb-6ee5f22c476d">
-
-<p>再重新运行项目，通过在终端运行 <code>ps -ef | grep Fire.app</code> 发现运行目录已经变成了在 <code>/Library/Input Methods</code> 目录下，符合预期，这里需要注意两个问题:</p>
-<ol>
-<li>最终部署app的目录是 Installation Build Products Location + Installation Directory。</li>
-<li>另外就是可能会发现修改了这里的配置后，通过 <code>Archive</code> 构建出来的归档的 <code>Type</code> 为 <code>generic Xcode archive</code> ，同时 Validate Content 的按钮是置灰的，所以这里的配置最好 <code>Debug</code> 和 <code>Release</code> 分开来会比较好，可以参考 Apple 的<a href="https://developer.apple.com/documentation/technotes/tn3110-resolving-generic-xcode-archive-issue">官方文档</a></li>
-</ol>
-<h3 id="3-SQLCipher的迁移"><a href="#3-SQLCipher的迁移" class="headerlink" title="3. SQLCipher的迁移"></a>3. SQLCipher的迁移</h3><p>项目中使用了 <code>SQLCipher</code> 来存储敏感数据，但是 <code>SQLCipher</code> 只有 <code>cocoapods</code> 依赖，目前还没有 <code>SPM</code> 包，需要自行构建处理。</p>
-<p>SQLCipher的构建步骤比较简单，<a href="https://www.zetetic.net/sqlcipher/ios-tutorial/">参考官方文档</a>即可，简而言之，就是首先 clone SQLCipher 项目，构建出 sqlite3.c 和 sqlite3.h，然后把这两个文件拷贝到项目目录下，再在Xcode中添加这两个文件，接着修改 <code>Build Settings</code> 中的 <code>other c flags</code> 中就可以。</p>
-<p>不过我在这个迁移过程中也不太顺利，遇到了一些问题。我是把 <code>sqlite3.c</code> 和 <code>sqlite3.h</code> 放在了 <code>SQLCipher</code> 目录下，然后把这个目录放在了 Target 对应的目录下，在Xcode导入的过程中，我勾选的是 <code>Create folder references</code>, 就出现了编译过程中报<code>Undefined Symbol: _sqlite3_open</code> 的问题，而之所以出现这个问题是因为没有编译 <code>sqlite3.c</code> 文件，所以找不到相关函数的定义。而解决方案呢，就是在导入的时候，选择 <code>Create groups</code>，就会自动编译 <code>sqlite3.c</code> 文件了。</p>
-<img width="876" alt="图片" src="https://github.com/qwertyyb/qwertyyb.github.io/assets/16240729/90387f35-b584-4e6a-b5c4-c250d92abbbc">
-
-<h3 id="4-总结"><a href="#4-总结" class="headerlink" title="4. 总结"></a>4. 总结</h3><p>迁移总体而言还算比较简单，但是 <code>SPM</code> 这种方式的缺点也是有的，比如说如果依赖的包后续删库跑路了，那在新设备上依赖应该就会无法安装了，所以要慎重引入依赖并做好容灾管理。</p>
-
+<p><a href="https://hazeover.com/">HazeOver</a> 是一款可以高亮当前最前方窗口的 MacOS 应用，遗憾的是它不免费，官网售价高达54元。我当真是不能理解为什么一个这么简单的东西竟然能要价这么高，所以我打算自已写一个类似的应用来满足我的需求。</p>
+<h2 id="基本思路"><a href="#基本思路" class="headerlink" title="基本思路"></a>基本思路</h2><h3 id="1-窗口高亮"><a href="#1-窗口高亮" class="headerlink" title="1. 窗口高亮"></a>1. 窗口高亮</h3><p>首先需要了解的是，不是最前面的窗口变亮了，而是后面的窗口被遮罩挡住了变黑了，就像下面图示这样。</p>
+<p>所以要做的就是搞一个遮罩也就是半透明的窗口，让这个窗口始终处于最前面窗口的后面。半透明的窗口很好实现，不是问题，问题在于，如何让这个窗口处于最前面窗口的后面。</p>
+<h3 id="2-监听最前方窗口变化"><a href="#2-监听最前方窗口变化" class="headerlink" title="2. 监听最前方窗口变化"></a>2. 监听最前方窗口变化</h3><p>另一个问题在于最前方的窗口是会变更的，当最前方的窗口变更的时候，应用程序如何及时收到通知，把遮罩移动到新的最前方窗口下面。</p>
+<h2 id="调研技术方案"><a href="#调研技术方案" class="headerlink" title="调研技术方案"></a>调研技术方案</h2><h3 id="1-让遮罩窗口位于最前方窗口后面"><a href="#1-让遮罩窗口位于最前方窗口后面" class="headerlink" title="1. 让遮罩窗口位于最前方窗口后面"></a>1. 让遮罩窗口位于最前方窗口后面</h3><p>一番搜索查找，在 NSWindow 的官方文档上找到了答案，NSWindow 实例上有一个 <a href="https://developer.apple.com/documentation/appkit/nswindow/1419672-order"><code>order(_:relativeTo:)</code> 的方法</a>，可以指定这个窗口实例放在某个弹窗的上面或下面。</p>
+<p>但是这个方法也不太好调用，需要传入对应窗口的 number 字段，而对应的窗口一般是其他应用程序的窗口，所以如何获取到最前面应用的最前面窗口的 number 字段，感觉很是一个比较棘手的问题，官方文档也印证了这个想法，官方提供了 NSWindowList 来获取，但是这个方法早就被取消不可用了。</p>
+<p>没办法，经过一番网络搜刮，找到了一个可用的方法 <a href="https://developer.apple.com/documentation/coregraphics/1455137-cgwindowlistcopywindowinfo">CGWindowListCopyWindowInfo</a>，这个方法返回一个有序的窗口数组，顺序就是从屏幕最前面到最后面，数组中的元素为 Dict，可以通过 kCGWindowNumber 字段获取到窗口的 number 字段。</p>
+<p>如此终于就能调用 <code>NSWindow.order(:relativeTo:)</code> 的方法了，如此，第一个问题也就有了技术方案。</p>
+<h3 id="2-监听最前方窗口的变化"><a href="#2-监听最前方窗口的变化" class="headerlink" title="2. 监听最前方窗口的变化"></a>2. 监听最前方窗口的变化</h3><h2 id="丐版实现"><a href="#丐版实现" class="headerlink" title="丐版实现"></a>丐版实现</h2><h2 id="如何实现平滑的过渡"><a href="#如何实现平滑的过渡" class="headerlink" title="如何实现平滑的过渡"></a>如何实现平滑的过渡</h2>
     </div>
 
     
@@ -320,7 +294,7 @@
   </li>
   <li class="post-copyright-link">
       <strong>本文链接：</strong>
-      <a href="https://qwertyyb.github.io/2023/09/15/cocoapods%E9%A1%B9%E7%9B%AE%E8%BF%81%E7%A7%BB%E8%87%B3swift%20package%20manager/" title="cocoapods项目迁移至swift package manager">https://qwertyyb.github.io/2023/09/15/cocoapods项目迁移至swift package manager/</a>
+      <a href="https://qwertyyb.github.io/2023/10/11/%E5%AE%9E%E7%8E%B0HazeOver%E7%9A%84%E7%AA%97%E5%8F%A3%E9%AB%98%E4%BA%AE%E6%95%88%E6%9E%9C/" title="实现HazeOver的窗口高亮效果">https://qwertyyb.github.io/2023/10/11/实现HazeOver的窗口高亮效果/</a>
   </li>
   <li class="post-copyright-license">
       <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
@@ -329,23 +303,20 @@
 </div>
 
           <div class="post-tags">
-              <a href="/tags/%E4%B8%9A%E7%81%AB%E8%BE%93%E5%85%A5%E6%B3%95/" rel="tag"><i class="fa fa-tag"></i> 业火输入法</a>
-              <a href="/tags/Fire/" rel="tag"><i class="fa fa-tag"></i> Fire</a>
-              <a href="/tags/Swift/" rel="tag"><i class="fa fa-tag"></i> Swift</a>
-              <a href="/tags/MacOS%E5%BC%80%E5%8F%91/" rel="tag"><i class="fa fa-tag"></i> MacOS开发</a>
+              <a href="/tags/Macos/" rel="tag"><i class="fa fa-tag"></i> Macos</a>
           </div>
 
         
 
           <div class="post-nav">
             <div class="post-nav-item">
-                <a href="/2023/06/16/%E5%89%8D%E7%AB%AF%E8%8E%B7%E5%8F%96%E4%B8%8B%E8%BD%BD%E8%BF%9B%E5%BA%A6%E2%80%94%E2%80%94%E4%BB%8E%E5%85%A5%E9%97%A8%E5%88%B0%E6%94%BE%E5%BC%83/" rel="prev" title="前端获取下载进度——从入门到放弃">
-                  <i class="fa fa-chevron-left"></i> 前端获取下载进度——从入门到放弃
+                <a href="/2023/09/15/cocoapods%E9%A1%B9%E7%9B%AE%E8%BF%81%E7%A7%BB%E8%87%B3swift%20package%20manager/" rel="prev" title="cocoapods项目迁移至swift package manager">
+                  <i class="fa fa-chevron-left"></i> cocoapods项目迁移至swift package manager
                 </a>
             </div>
             <div class="post-nav-item">
-                <a href="/2023/10/11/%E5%AE%9E%E7%8E%B0HazeOver%E7%9A%84%E7%AA%97%E5%8F%A3%E9%AB%98%E4%BA%AE%E6%95%88%E6%9E%9C/" rel="next" title="实现HazeOver的窗口高亮效果">
-                  实现HazeOver的窗口高亮效果 <i class="fa fa-chevron-right"></i>
+                <a href="/2023/10/11/Hexo%20+%20Github%20Pages%20+%20Github%20Actions%20+%20Github%20Issues%20%E5%B7%A5%E4%BD%9C%E6%B5%81/" rel="next" title="Hexo + Github Pages + Github Actions + Github Issues 工作流">
+                  Hexo + Github Pages + Github Actions + Github Issues 工作流 <i class="fa fa-chevron-right"></i>
                 </a>
             </div>
           </div>
