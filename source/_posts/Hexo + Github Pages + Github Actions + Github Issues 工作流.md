@@ -1,6 +1,6 @@
 ---
 title: Hexo + Github Pages + Github Actions + Github Issues 工作流
-date: 时间
+date: 2023-05-07
 tags:
   - Hexo
   - Github Pages
