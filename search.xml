@@ -240,7 +240,7 @@
   </entry>
   <entry>
     <title>Hexo + Github Pages + Github Actions + Github Issues 工作流</title>
-    <url>/2023/10/11/Hexo%20+%20Github%20Pages%20+%20Github%20Actions%20+%20Github%20Issues%20%E5%B7%A5%E4%BD%9C%E6%B5%81/</url>
+    <url>/2023/05/07/Hexo%20+%20Github%20Pages%20+%20Github%20Actions%20+%20Github%20Issues%20%E5%B7%A5%E4%BD%9C%E6%B5%81/</url>
     <content><![CDATA[<p>使用 <code>Github Issue</code> 写文章，同步到 <code>Hexo</code> 静态站点，利用 <code>Github Actions</code> 构建 <code>Hexo</code> 静态站点并发布到 <code>Github Pages</code> ，构建易用的工作流。</p>
 <span id="more"></span>
 
@@ -1195,7 +1195,7 @@
   </entry>
   <entry>
     <title>实现HazeOver的窗口高亮效果</title>
-    <url>/2023/10/11/%E5%AE%9E%E7%8E%B0HazeOver%E7%9A%84%E7%AA%97%E5%8F%A3%E9%AB%98%E4%BA%AE%E6%95%88%E6%9E%9C/</url>
+    <url>/2023/10/12/%E5%AE%9E%E7%8E%B0HazeOver%E7%9A%84%E7%AA%97%E5%8F%A3%E9%AB%98%E4%BA%AE%E6%95%88%E6%9E%9C/</url>
     <content><![CDATA[<p>如何自己实现一个HazeOver，实现前置窗口的高亮效果。</p>
 <span id="more"></span>
 
