@@ -26,6 +26,9 @@ created_from_issue: true
 
 首先需要了解的是，不是最前面的窗口变亮了，而是后面的窗口被遮罩挡住了变黑了，就像下面图示这样。
 
+<img width="464" alt="Snipaste_2023-10-18_12-52-37" src="https://github.com/qwertyyb/qwertyyb.github.io/assets/16240729/3edd2be7-d0c8-4f08-8ef9-71966bf3c2d1">
+
+
 所以要做的就是搞一个遮罩也就是半透明的窗口，让这个窗口始终处于最前面窗口的后面。半透明的窗口很好实现，不是问题，问题在于，如何让这个窗口处于最前面窗口的后面。
 
 ### 2. 监听最前方窗口变化
@@ -59,6 +62,9 @@ created_from_issue: true
 所以核心问题变成了，过渡的时候如何只过渡旧的窗口区域过渡，而保持屏幕的其他区域亮度不变？
 
 经过思考，想到了一种方案，使用两个 MaskWindow 来交替执行淡入淡出效果，示意图如下:
+
+
+<img width="795" alt="Snipaste_2023-10-18_13-02-42" src="https://github.com/qwertyyb/qwertyyb.github.io/assets/16240729/47572d72-54a6-4b0d-86b3-e7e6ea5360ce">
 
 
 MaskWindow1 淡出，透明度从半透明变为全透明，MaskWindow2 淡入，透明度从全透明变为半透明，两个 MaskWindow 同时开始过渡，均为线性过渡，这样就能保证在过渡过程中除了旧的窗口之外的其他区域，两个 MaskWindow 叠加后的效果是一致的。然后当新的最前方窗口变化时，就把 MaskWindow2 淡出，MaskWindow1 淡入。就像上面这样，两个 MaskWindow 轮流执行淡入淡出，最终达到期望的效果。
