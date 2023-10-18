@@ -745,6 +745,78 @@
       </tags>
   </entry>
   <entry>
+    <title>不同大小的文字底部对齐，应该使用baseline而不是flex-end</title>
+    <url>/2023/10/18/%E4%B8%8D%E5%90%8C%E5%A4%A7%E5%B0%8F%E7%9A%84%E6%96%87%E5%AD%97%E5%BA%95%E9%83%A8%E5%AF%B9%E9%BD%90%EF%BC%8C%E5%BA%94%E8%AF%A5%E4%BD%BF%E7%94%A8baseline%E8%80%8C%E4%B8%8D%E6%98%AFflex-end/</url>
+    <content><![CDATA[<p>flex容器下，不同大小的文字底部对齐，为什么应该使用 baseline 而不是 flex-end?</p>
+<span id="more"></span>
+
+<h2 id="背景－从一个兼容性Bug说起"><a href="#背景－从一个兼容性Bug说起" class="headerlink" title="背景－从一个兼容性Bug说起"></a>背景－从一个兼容性Bug说起</h2><p>看一下最简单的例子:</p>
+<figure class="highlight html"><table><tbody><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">"container"</span> <span class="attr">style</span>=<span class="string">"display: flex;align-items: flex-end"</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">"big-text"</span> <span class="attr">style</span>=<span class="string">"font-size: 26px"</span>&gt;</span>大字体<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">"small-text"</span> <span class="attr">style</span>=<span class="string">"font-size: 14px"</span>&gt;</span>小字体<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br></pre></td></tr></tbody></table></figure>
+<p>运行的效果如下:</p>
+<img width="132" alt="图片" src="https://github.com/qwertyyb/qwertyyb.github.io/assets/16240729/8e0e1fc8-e4af-49e5-9afa-8c2ddca5d068">
+
+<p>可以看到两个字体所在矩形虽然对齐了，但是两个文字的底部并没有对齐。<br>分析原因发现，是因为文字周围有一圈空白的边距，这个边距在字体大小不同的情况下是不一致的，所以矩形区域虽然对齐了，但是文字底部没有对齐。而这个边距其实和 <code>line-height</code> 有关，所以首先来看看如何从 <code>line-height</code> 的角度出发解决问题。</p>
+<h2 id="从-line-height-的角度解决"><a href="#从-line-height-的角度解决" class="headerlink" title="从 line-height 的角度解决"></a>从 <code>line-height</code> 的角度解决</h2><h3 id="为什么你不应该使用-line-height-1"><a href="#为什么你不应该使用-line-height-1" class="headerlink" title="为什么你不应该使用 line-height: 1"></a>为什么你不应该使用 <code>line-height: 1</code></h3><p>首先想到的就是把文字周围的边距给彻底去掉，也即设置 <code>line-height: 1</code>，那么为什么说不应该使用这种方式呢？有以下几个原因: </p>
+<ol>
+<li>在 <code>line-height: 1</code> 的情况下，文字如果长度不定，出现了换行，就会出现两行文字紧贴在一起的情况，如下。因为 <code>line-height</code> 被用来去掉边距了，所以无法再调整换行后文字的行距了。</li>
+</ol>
+<img width="136" alt="图片" src="https://github.com/qwertyyb/qwertyyb.github.io/assets/16240729/adbaba47-e897-439f-b5c2-271a88194cec">
+
+<ol start="2">
+<li><code>line-height: 1</code> 和 <code>overflow: hidden</code> 会出现字体上下部分被剪切的问题，如下。这里有点反直觉，<code>line-height: 1</code> 直觉上应该和字体的高度是一致的，但是在实际运行过程中发现，并不是这样的，主要和设备的字体有关，这里后面再详细探讨具体原因。</li>
+</ol>
+<img width="152" alt="图片" src="https://github.com/qwertyyb/qwertyyb.github.io/assets/16240729/226dd6ce-4de2-4f6c-953c-ce13c3b59e97">
+
+
+<h3 id="使用-line-height-的正确方法"><a href="#使用-line-height-的正确方法" class="headerlink" title="使用 line-height 的正确方法"></a>使用 <code>line-height</code> 的正确方法</h3><p>在完全去掉周围边距这种方法不可用的情况下，只能通过把不同字体大小的透明边距宽度设置为一致就可以了。基本原理是 矩形区域高度 = (line-height) ≈ (fontSize + 透明边距)。</p>
+<p>修改代码如下: </p>
+<figure class="highlight html"><table><tbody><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">"container"</span> <span class="attr">style</span>=<span class="string">"display: flex;align-items: flex-end"</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">"big-text"</span> <span class="attr">style</span>=<span class="string">"font-size: 26px;font-size: 30px"</span>&gt;</span>大字体<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">"small-text"</span> <span class="attr">style</span>=<span class="string">"font-size: 14px;font-size: 18px"</span>&gt;</span>小字体<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br></pre></td></tr></tbody></table></figure>
+
+<p>运行效果如下:</p>
+<img width="230" alt="图片" src="https://github.com/qwertyyb/qwertyyb.github.io/assets/16240729/724d58b4-ce2a-4fba-85ed-dcf286eb7bc4">
+
+<p>这样就把透明边距都控制为2px，让文字近似做到了底部对齐的效果。</p>
+<h2 id="终极解决方案－align-items-baseline"><a href="#终极解决方案－align-items-baseline" class="headerlink" title="终极解决方案－align-items: baseline"></a>终极解决方案－align-items: baseline</h2><p>可能更多人使用的是 align-items 的 <code>flex-start</code>、<code>center</code>、<code>flex-end</code> 这几个特性，很少使用 <code>baseline</code>、<code>first baseline</code>、<code>last baseline</code>，但是在文字对齐上，后面的这三个特性更有用。</p>
+<p>经过实测，<code>align-items: baseline</code> 可以完美的做到文字的底部对齐，修改代码:</p>
+<figure class="highlight html"><table><tbody><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">"container"</span> <span class="attr">style</span>=<span class="string">"display: flex;align-items: baseline"</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">"big-text"</span> <span class="attr">style</span>=<span class="string">"font-size: 26px"</span>&gt;</span>大字体<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">"small-text"</span> <span class="attr">style</span>=<span class="string">"font-size: 14px;"</span>&gt;</span>小字体<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br></pre></td></tr></tbody></table></figure>
+
+<p>运行效果:</p>
+<img width="147" alt="图片" src="https://github.com/qwertyyb/qwertyyb.github.io/assets/16240729/cf51803a-5b36-4816-86b3-024f50af20ac">
+
+
+
+<p>个人理解，前面比较经常用的一些属性值主要是用于盒子的对齐，而 <code>baseline</code> 相关的三个属性值，是让盒子内文字的 <code>baseline</code> 对齐。而 <code>first baseline</code> 和 <code>last baseline</code> 应该是在多行文本情况下有多个 <code>baseline</code> 的情况时，要对齐第一个 <code>baseline</code> 还是最后一个 <code>baseline</code>，实测如下:</p>
+<ol>
+<li>first baseline</li>
+</ol>
+<img width="221" alt="align-items: first baseline " src="https://github.com/qwertyyb/qwertyyb.github.io/assets/16240729/a57e902a-8571-47b6-a0a5-4ad20adfc02d">
+
+<ol start="2">
+<li>last baseline</li>
+</ol>
+<img width="230" alt="align-items: last baseline" src="https://github.com/qwertyyb/qwertyyb.github.io/assets/16240729/baa371d3-c7fc-4581-a406-becdcb057ffa">
+
+
+
+
+
+
+
+
+
+
+]]></content>
+      <categories>
+        <category>前端</category>
+        <category>css</category>
+      </categories>
+      <tags>
+        <tag>css</tag>
+        <tag>fontSize</tag>
+        <tag>文字底部对齐</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>为什么要使用业火输入法</title>
     <url>/2023/04/13/%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A6%81%E4%BD%BF%E7%94%A8%E4%B8%9A%E7%81%AB%E8%BE%93%E5%85%A5%E6%B3%95/</url>
     <content><![CDATA[<p>如果您是Mac用户，并且经常需要使用中文输入，那么一款优秀的输入法将会是您工作生活中的必备工具。而如果您喜欢使用五笔输入法，那么我非常推荐您尝试一下 <a href="/Fire/index.html">业火输入法</a>。</p>
@@ -1195,7 +1267,7 @@
   </entry>
   <entry>
     <title>实现HazeOver的窗口高亮效果</title>
-    <url>/2023/10/18/%E5%AE%9E%E7%8E%B0HazeOver%E7%9A%84%E7%AA%97%E5%8F%A3%E9%AB%98%E4%BA%AE%E6%95%88%E6%9E%9C/</url>
+    <url>/2023/10/17/%E5%AE%9E%E7%8E%B0HazeOver%E7%9A%84%E7%AA%97%E5%8F%A3%E9%AB%98%E4%BA%AE%E6%95%88%E6%9E%9C/</url>
     <content><![CDATA[<p>如何自己实现一个HazeOver，实现前置窗口的高亮效果。</p>
 <span id="more"></span>
 
