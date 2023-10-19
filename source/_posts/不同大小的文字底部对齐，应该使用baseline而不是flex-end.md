@@ -66,6 +66,8 @@ flex容器下，不同大小的文字底部对齐，为什么应该使用 baseli
 
 这样就把透明边距都控制为2px，让文字近似做到了底部对齐的效果。
 
+关于 `line-height` 、`font-size` 和 矩形大小的更具体内容可以参考这篇掘金文章，非常清楚: https://juejin.cn/post/6971673576017494053 
+
 ## 终极解决方案－align-items: baseline
 
 可能更多人使用的是 align-items 的 `flex-start`、`center`、`flex-end` 这几个特性，很少使用 `baseline`、`first baseline`、`last baseline`，但是在文字对齐上，后面的这三个特性更有用。
