@@ -20,38 +20,33 @@
 
 <script class="next-config" data-name="main" type="application/json">{"hostname":"qwertyyb.github.io","root":"/","images":"/images","scheme":"Pisces","darkmode":true,"version":"8.15.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":-1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
 
-    <meta name="description" content="PWA应用在IOS Safari上默认无法覆盖到状态栏，此文章给出解决方案">
+    <meta name="description" content="业火输入法在全角符号的模式下，转换全角引号（包括‘、’、“、”、『、「、」、』）一直都有问题，比如说没有办法输入右引号等，这篇文章介绍一下业火输入法如何处理这些个问题。">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Safari PWA应用覆盖状态栏实践">
-<meta property="og:url" content="https://qwertyyb.github.io/2023/06/15/Safari%20PWA%E5%BA%94%E7%94%A8%E8%A6%86%E7%9B%96%E7%8A%B6%E6%80%81%E6%A0%8F%E5%AE%9E%E8%B7%B5/index.html">
+<meta property="og:title" content="业火输入法全角单双引号的实现">
+<meta property="og:url" content="https://qwertyyb.github.io/2023/10/27/%E4%B8%9A%E7%81%AB%E8%BE%93%E5%85%A5%E6%B3%95%E5%85%A8%E8%A7%92%E5%8D%95%E5%8F%8C%E5%BC%95%E5%8F%B7%E7%9A%84%E5%AE%9E%E7%8E%B0/index.html">
 <meta property="og:site_name" content="虚幻">
-<meta property="og:description" content="PWA应用在IOS Safari上默认无法覆盖到状态栏，此文章给出解决方案">
+<meta property="og:description" content="业火输入法在全角符号的模式下，转换全角引号（包括‘、’、“、”、『、「、」、』）一直都有问题，比如说没有办法输入右引号等，这篇文章介绍一下业火输入法如何处理这些个问题。">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://github.com/qwertyyb/qwertyyb.github.io/assets/16240729/ee398701-2966-4530-a6ef-4ae0aecffb70">
-<meta property="og:image" content="https://github.com/qwertyyb/qwertyyb.github.io/assets/16240729/3531bc73-2378-43b1-a388-b6b518c3adca">
-<meta property="og:image" content="https://github.com/qwertyyb/qwertyyb.github.io/assets/16240729/26397fd8-dc69-47d4-9f98-4b0c31b8010b">
-<meta property="og:image" content="https://github.com/qwertyyb/qwertyyb.github.io/assets/16240729/6267f3d6-903b-4bca-b0fa-a0474a124e19">
-<meta property="og:image" content="https://github.com/qwertyyb/qwertyyb.github.io/assets/16240729/2d9132a4-433d-4f96-84b7-651cbfa1b966">
-<meta property="og:image" content="https://github.com/qwertyyb/qwertyyb.github.io/assets/16240729/dee154fd-adc5-43ce-a9d5-9643d1be2a8a">
-<meta property="og:image" content="https://github.com/qwertyyb/qwertyyb.github.io/assets/16240729/376a6cda-12dc-419b-8b93-d806f3eae4a3">
-<meta property="article:published_time" content="2023-06-15T12:30:00.000Z">
+<meta property="og:image" content="https://github.com/qwertyyb/qwertyyb.github.io/assets/16240729/b101ee43-10c8-4c38-8834-af7f8f28497c">
+<meta property="og:image" content="https://github.com/qwertyyb/qwertyyb.github.io/assets/16240729/9f54861d-8aab-4fe4-8d24-e56466be2bf7">
+<meta property="article:published_time" content="2023-10-27T07:02:24.659Z">
 <meta property="article:modified_time" content="2023-10-27T07:02:24.659Z">
 <meta property="article:author" content="虚幻">
-<meta property="article:tag" content="前端">
-<meta property="article:tag" content="Safari">
-<meta property="article:tag" content="PWA">
+<meta property="article:tag" content="MacOS">
+<meta property="article:tag" content="InputMethodKit">
+<meta property="article:tag" content="业火输入法">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://github.com/qwertyyb/qwertyyb.github.io/assets/16240729/ee398701-2966-4530-a6ef-4ae0aecffb70">
+<meta name="twitter:image" content="https://github.com/qwertyyb/qwertyyb.github.io/assets/16240729/b101ee43-10c8-4c38-8834-af7f8f28497c">
 
 
-<link rel="canonical" href="https://qwertyyb.github.io/2023/06/15/Safari%20PWA%E5%BA%94%E7%94%A8%E8%A6%86%E7%9B%96%E7%8A%B6%E6%80%81%E6%A0%8F%E5%AE%9E%E8%B7%B5/">
+<link rel="canonical" href="https://qwertyyb.github.io/2023/10/27/%E4%B8%9A%E7%81%AB%E8%BE%93%E5%85%A5%E6%B3%95%E5%85%A8%E8%A7%92%E5%8D%95%E5%8F%8C%E5%BC%95%E5%8F%B7%E7%9A%84%E5%AE%9E%E7%8E%B0/">
 
 
 
-<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://qwertyyb.github.io/2023/06/15/Safari%20PWA%E5%BA%94%E7%94%A8%E8%A6%86%E7%9B%96%E7%8A%B6%E6%80%81%E6%A0%8F%E5%AE%9E%E8%B7%B5/","path":"2023/06/15/Safari PWA应用覆盖状态栏实践/","title":"Safari PWA应用覆盖状态栏实践"}</script>
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://qwertyyb.github.io/2023/10/27/%E4%B8%9A%E7%81%AB%E8%BE%93%E5%85%A5%E6%B3%95%E5%85%A8%E8%A7%92%E5%8D%95%E5%8F%8C%E5%BC%95%E5%8F%B7%E7%9A%84%E5%AE%9E%E7%8E%B0/","path":"2023/10/27/业火输入法全角单双引号的实现/","title":"业火输入法全角单双引号的实现"}</script>
 
 <script class="next-config" data-name="calendar" type="application/json">""</script>
-<title>Safari PWA应用覆盖状态栏实践 | 虚幻</title>
+<title>业火输入法全角单双引号的实现 | 虚幻</title>
   
 
   <script src="/js/third-party/analytics/baidu-analytics.js"></script>
@@ -155,7 +150,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%83%8C%E6%99%AF"><span class="nav-number">1.</span> <span class="nav-text">背景</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88"><span class="nav-number">2.</span> <span class="nav-text">解决方案</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#black-translucent%E7%9A%84%E5%9D%91"><span class="nav-number">3.</span> <span class="nav-text">black-translucent的坑</span></a></li></ol></div>
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%83%8C%E6%99%AF"><span class="nav-number">1.</span> <span class="nav-text">背景</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%B3%BB%E7%BB%9F%E8%BE%93%E5%85%A5%E6%B3%95%E5%92%8C%E6%90%9C%E7%8B%97%E8%BE%93%E5%85%A5%E6%B3%95%E7%9A%84%E5%AE%9E%E7%8E%B0"><span class="nav-number">2.</span> <span class="nav-text">系统输入法和搜狗输入法的实现</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%9D%E8%80%83"><span class="nav-number">3.</span> <span class="nav-text">思考</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8A%80%E6%9C%AF%E5%AE%9E%E7%8E%B0"><span class="nav-number">4.</span> <span class="nav-text">技术实现</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">5.</span> <span class="nav-text">总结</span></a></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -213,7 +208,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://qwertyyb.github.io/2023/06/15/Safari%20PWA%E5%BA%94%E7%94%A8%E8%A6%86%E7%9B%96%E7%8A%B6%E6%80%81%E6%A0%8F%E5%AE%9E%E8%B7%B5/">
+    <link itemprop="mainEntityOfPage" href="https://qwertyyb.github.io/2023/10/27/%E4%B8%9A%E7%81%AB%E8%BE%93%E5%85%A5%E6%B3%95%E5%85%A8%E8%A7%92%E5%8D%95%E5%8F%8C%E5%BC%95%E5%8F%B7%E7%9A%84%E5%AE%9E%E7%8E%B0/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="https://avatars.githubusercontent.com/u/16240729?v=4">
@@ -226,12 +221,12 @@
     </span>
 
     <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="Safari PWA应用覆盖状态栏实践 | 虚幻">
+      <meta itemprop="name" content="业火输入法全角单双引号的实现 | 虚幻">
       <meta itemprop="description" content="">
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          Safari PWA应用覆盖状态栏实践<a href="https://github.com/qwertyyb/qwertyyb.github.io/tree/master/source/_posts/Safari%20PWA%E5%BA%94%E7%94%A8%E8%A6%86%E7%9B%96%E7%8A%B6%E6%80%81%E6%A0%8F%E5%AE%9E%E8%B7%B5.md" class="post-edit-link" title="编辑" rel="noopener" target="_blank"><i class="fa fa-pen-nib"></i></a>
+          业火输入法全角单双引号的实现<a href="https://github.com/qwertyyb/qwertyyb.github.io/tree/master/source/_posts/%E4%B8%9A%E7%81%AB%E8%BE%93%E5%85%A5%E6%B3%95%E5%85%A8%E8%A7%92%E5%8D%95%E5%8F%8C%E5%BC%95%E5%8F%B7%E7%9A%84%E5%AE%9E%E7%8E%B0.md" class="post-edit-link" title="编辑" rel="noopener" target="_blank"><i class="fa fa-pen-nib"></i></a>
         </h1>
 
         <div class="post-meta-container">
@@ -242,7 +237,7 @@
       </span>
       <span class="post-meta-item-text">发表于</span>
 
-      <time title="创建时间：2023-06-15 12:30:00" itemprop="dateCreated datePublished" datetime="2023-06-15T12:30:00+00:00">2023-06-15</time>
+      <time title="创建时间：2023-10-27 07:02:24" itemprop="dateCreated datePublished" datetime="2023-10-27T07:02:24+00:00">2023-10-27</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -250,15 +245,15 @@
       </span>
       <span class="post-meta-item-text">分类于</span>
         <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E5%89%8D%E7%AB%AF/" itemprop="url" rel="index"><span itemprop="name">前端</span></a>
+          <a href="/categories/MacOS/" itemprop="url" rel="index"><span itemprop="name">MacOS</span></a>
         </span>
           ，
         <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E5%89%8D%E7%AB%AF/Safari/" itemprop="url" rel="index"><span itemprop="name">Safari</span></a>
+          <a href="/categories/MacOS/%E4%B8%9A%E7%81%AB%E8%BE%93%E5%85%A5%E6%B3%95/" itemprop="url" rel="index"><span itemprop="name">业火输入法</span></a>
         </span>
           ，
         <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E5%89%8D%E7%AB%AF/Safari/PWA/" itemprop="url" rel="index"><span itemprop="name">PWA</span></a>
+          <a href="/categories/MacOS/InputMethodKit/" itemprop="url" rel="index"><span itemprop="name">InputMethodKit</span></a>
         </span>
     </span>
 
@@ -279,54 +274,36 @@
     
     
     <div class="post-body" itemprop="articleBody">
-        <p>PWA应用在IOS Safari上默认无法覆盖到状态栏，此文章给出解决方案</p>
+        <p>业火输入法在全角符号的模式下，转换全角引号（包括‘、’、“、”、『、「、」、』）一直都有问题，比如说没有办法输入右引号等，这篇文章介绍一下业火输入法如何处理这些个问题。</p>
 <span id="more"></span>
 
-<h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>PWA 应用规范中的 <code>manifest.json</code> 规范有一个字段 <code>display</code> 可以控制显示方式，有以下几个值 <code>fullscreen</code>、<code>standalone</code>、<code>minimal-ui</code>、<code>browser</code>，然而 safari 不支持 <code>fullscreen</code> 和 <code>minimal-ui</code>，所以我即使用 <code>fullscreen</code> 也会在 IOS 上被降级为 <code>standalone</code>。</p>
-<p>但是 <code>standalone</code> 并不能覆盖到状态栏，所以在IOS上会显示一个黑底白字的状态栏，如下图所示，此文教你如何把页面覆盖到状态栏。</p>
-<p><img src="https://github.com/qwertyyb/qwertyyb.github.io/assets/16240729/ee398701-2966-4530-a6ef-4ae0aecffb70" alt="standalone"></p>
-<p>我使用的IOS系统版本为 16.5。</p>
-<h2 id="解决方案"><a href="#解决方案" class="headerlink" title="解决方案"></a>解决方案</h2><p>safari 提供了 meta 标签的方式可以把 PWA 应用覆盖到状态栏，官方的具体文档如下: <a href="https://developer.apple.com/library/archive/documentation/AppleApplications/Reference/SafariHTMLRef/Articles/MetaTags.html">Safari Meta Tags</a></p>
-<p>文档中需要关注两个 meta 标签。</p>
+<h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>业火输入法全角引号符号的有两个问题:</p>
 <ol>
-<li>apple-mobile-web-app-capable</li>
+<li>单引号（’‘）和双引号（”“）没有办法输入右引号。</li>
+<li>没有办法输入单直角引号（「」）和双直角引号（『』）</li>
 </ol>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;meta name="apple-mobile-web-app-capable" content="yes"&gt;</span><br></pre></td></tr></tbody></table></figure>
+<p>这两个问题有不同的原因，首先，之所以没有办法输入右引号是因为单双引号在键盘上分别只有一个键位对应，在半角模式下，左右引号是一模一样的，所以在半角输入一个键位对应左右引号是没有问题的，但是全角符号不同，全角的单双引号，左右引号是不同的，这样，在一个键位严格对应一个符号的情况下，自然就没有办法输入右引号了，这一转换映射关系可参考<a href="https://github.com/qwertyyb/Fire/blob/257c4da97c98de9c7f90a94336f0103df0b4e095/Fire/types.swift#L186">业火输入法的实现</a>。其次，之所以没有办法输入单双直角引号是因为业火输入法没有对应的半角符号转换为单双直角引号，此处也可查看上面映射关系的具体实现。</p>
+<h2 id="系统输入法和搜狗输入法的实现"><a href="#系统输入法和搜狗输入法的实现" class="headerlink" title="系统输入法和搜狗输入法的实现"></a>系统输入法和搜狗输入法的实现</h2><p>可以站在巨人的肩膀上来看看系统输入法和搜狗输入法是如何解决这两个问题的，实际验证过程中，发现两个输入法的解决这两个问题的方法是一致的。</p>
+<ol>
+<li>搜狗输入法是通过再次按单引号和双引号键来键入对应的右单双引号，具体如下图，通过这种方法把一个键映射为两个编码（’: ’‘，”: “”）完美解决了右单双引号的输入问题。</li>
+</ol>
+<img width="700" alt="右单双引号的输入" src="https://github.com/qwertyyb/qwertyyb.github.io/assets/16240729/b101ee43-10c8-4c38-8834-af7f8f28497c">
 
-<p>这个感觉和 <code>manifest.json</code> 中的 <code>display: standalone</code> 的表现是一致的，两个选择一个就好，推荐使用 <code>manifest.json</code>，毕竟是 PWA 规范而不是 safari 的私有特性</p>
+
 <ol start="2">
-<li>apple-mobile-web-app-status-bar-style</li>
+<li>那搜狗输入法又是如何解决直角引号的输入问题的呢？搜狗输入法把左右大括号按键（{}）分别映射为左单双直角（「『）和右单双直角（」』）符号来输入直角引号的，具体的方案如下图，可以看到搜狗输入法也是把一个按键映射为两个编码来解决这个问题的，唯一不同的是右直角引号的编码依赖了最近一次左直角引号的输出这一点。</li>
 </ol>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;meta name="apple-mobile-web-app-status-bar-style" content="black"&gt;</span><br></pre></td></tr></tbody></table></figure>
+<img width="700" alt="直角引号的输入" src="https://github.com/qwertyyb/qwertyyb.github.io/assets/16240729/9f54861d-8aab-4fe4-8d24-e56466be2bf7">
 
-<p>设置状态栏样式，有三个值<br>default: 白底黑字，页面无法覆盖到状态栏</p>
-<p><img src="https://github.com/qwertyyb/qwertyyb.github.io/assets/16240729/3531bc73-2378-43b1-a388-b6b518c3adca" alt="default"></p>
-<p>black: 黑底白字，页面无法覆盖到状态栏</p>
-<p><img src="https://github.com/qwertyyb/qwertyyb.github.io/assets/16240729/26397fd8-dc69-47d4-9f98-4b0c31b8010b" alt="black"></p>
-<p>black-translucent: 透明底，白色字体，页面覆盖到状态栏</p>
-<p><img src="https://github.com/qwertyyb/qwertyyb.github.io/assets/16240729/6267f3d6-903b-4bca-b0fa-a0474a124e19" alt="black-translucent"></p>
-<p>所以如果只是简单自定义一下状态栏黑白色，可以通过设置此 meta 为 default 或 black即可。那如果要设置颜色为黑色或白色之外的颜色就没有办法了吗？当然不是。</p>
 <ol start="3">
-<li>theme color</li>
+<li>如果在输入过程中，输入框进行了切换，那输入法要怎么处理呢？比如说在输入框1中输入了左双引号，然后切到了输入框2，再次按双引号按键时，此时是应该输出左双引号还是右双引号呢？也就是说这个按钮的状态是全局的，还是输入框维度的呢？搜狗输入法的实现是，单双引号的输入是全局维度的，直角引号的输入又是输入框维度。</li>
 </ol>
-<p>theme color 可以使用Meta 标签 theme-color，也可以作为 <code>manifest.json</code> 中 theme_color 的字段。作为 manifest.json 的规范，兼容度比较高，所以无论是从规范上还是从兼容性上来说，manifest.theme_color都是比较推荐的方案。</p>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;meta name="theme-color" content="#f00"&gt;</span><br></pre></td></tr></tbody></table></figure>
-
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">// manifest.json</span><br><span class="line">...</span><br><span class="line">   "theme_color": "#f00"</span><br><span class="line">...</span><br></pre></td></tr></tbody></table></figure>
-
-<p>需要注意的是 theme-color 在safari上不仅仅在PWA应用下生效，在浏览器中也会生效，状态栏文字颜色会自动根据背景颜色自动调整为黑色或白色。</p>
-<p><img src="https://github.com/qwertyyb/qwertyyb.github.io/assets/16240729/2d9132a4-433d-4f96-84b7-651cbfa1b966" alt="theme color"></p>
-<h2 id="black-translucent的坑"><a href="#black-translucent的坑" class="headerlink" title="black-translucent的坑"></a>black-translucent的坑</h2><ol>
-<li>状态栏文字颜色固定为白色。</li>
-</ol>
-<p>如果不甘于只是简单的自定义状态栏的背景颜色，那就需要使用 <code>black-translucent</code> 让页面覆盖到状态栏，然后在页面中自定义状态栏的背景，唯一遗憾的是，状态栏的文字颜色是写死的白色，所以为了让状态栏上的文字能比较清晰的显示，背景需要为深色。</p>
-<ol start="2">
-<li>100%高度占不全</li>
-</ol>
-<p>这个坑就有些离谱了，在html定义高度为 100% 时，预期是页面能占满手机屏幕，然而并不是，下面还有一部分没有覆盖到，如下图所示。</p>
-<p><img src="https://github.com/qwertyyb/qwertyyb.github.io/assets/16240729/dee154fd-adc5-43ce-a9d5-9643d1be2a8a" alt="html height 100%"></p>
-<p><img src="https://github.com/qwertyyb/qwertyyb.github.io/assets/16240729/376a6cda-12dc-419b-8b93-d806f3eae4a3" alt="未全覆盖"></p>
-<p>实在是非常离谱，经过几番测试，发现了最终的解决方案在 html 上应用样式 height: 100vh 就可以了</p>
+<h2 id="思考"><a href="#思考" class="headerlink" title="思考"></a>思考</h2><p>到目前为止，问题一二可以参考系统和搜狗输入法的方案，我唯一有些异议的是状态是要跟全局还是要跟输入框，刚开始我觉得输入框维度会比较好，因为这里的符号都是成对出现的，所以输入框维度的状态更符合使用习惯。然而，再设想一种边缘场景，如果有一个输入框，只能输入一个右单引号或右双引号，这种场景下，输入框维度的状态就会出现要想输入右引号，必须先输入左引号，从而导致没办法输入符合条件字符的问题。</p>
+<p>基于以上的原因，经过思考，业火输入法的单双引号的输入状态最终采用了全局状态的方案。</p>
+<h2 id="技术实现"><a href="#技术实现" class="headerlink" title="技术实现"></a>技术实现</h2><p>关于技术上的实现，单双引号会比较简单。以单引号为例，用一个计数器记录单引号按下的次数，当前是奇数次时，输出左单引号的编码，当前是偶数次时，输出右单引号的编码。再进一步，为了避免记录的次数随着使用的时间越来越大导致溢出，可以把记录的次数对2取余后再存储。最终代码实现: <a href="https://github.com/qwertyyb/Fire/blob/4bc0674cabce790fe2c94082fbb89d4dcea73b8a/Fire/PunctuationConversion.swift#L27">https://github.com/qwertyyb/Fire/blob/4bc0674cabce790fe2c94082fbb89d4dcea73b8a/Fire/PunctuationConversion.swift#L27</a></p>
+<p>至于直角引号的输出，只需要在左直角符号输出的时候，关联一下右直角符号的次数即可: <a href="https://github.com/qwertyyb/Fire/blob/4bc0674cabce790fe2c94082fbb89d4dcea73b8a/Fire/PunctuationConversion.swift#L67">https://github.com/qwertyyb/Fire/blob/4bc0674cabce790fe2c94082fbb89d4dcea73b8a/Fire/PunctuationConversion.swift#L67</a></p>
+<p>在实现上另外有一个点需要注意一下，就是为什么要用编码后的字符而不是原码来判断按键呢？这里主要是因为，每个符号按键转换为哪个符号在业火输入法中是可以由用户定义的，所以使用编码后的字符来处理就能让逻辑跟随用户定义的符号转换逻辑，而不是绑死在某个按键上。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>业火输入法的这两个问题一直都存在，但是我一直拖延，这次总算彻底处理了这个问题，过程比我想象得更顺利。</p>
 
     </div>
 
@@ -344,7 +321,7 @@
   </li>
   <li class="post-copyright-link">
       <strong>本文链接：</strong>
-      <a href="https://qwertyyb.github.io/2023/06/15/Safari%20PWA%E5%BA%94%E7%94%A8%E8%A6%86%E7%9B%96%E7%8A%B6%E6%80%81%E6%A0%8F%E5%AE%9E%E8%B7%B5/" title="Safari PWA应用覆盖状态栏实践">https://qwertyyb.github.io/2023/06/15/Safari PWA应用覆盖状态栏实践/</a>
+      <a href="https://qwertyyb.github.io/2023/10/27/%E4%B8%9A%E7%81%AB%E8%BE%93%E5%85%A5%E6%B3%95%E5%85%A8%E8%A7%92%E5%8D%95%E5%8F%8C%E5%BC%95%E5%8F%B7%E7%9A%84%E5%AE%9E%E7%8E%B0/" title="业火输入法全角单双引号的实现">https://qwertyyb.github.io/2023/10/27/业火输入法全角单双引号的实现/</a>
   </li>
   <li class="post-copyright-license">
       <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
@@ -353,23 +330,20 @@
 </div>
 
           <div class="post-tags">
-              <a href="/tags/%E5%89%8D%E7%AB%AF/" rel="tag"><i class="fa fa-tag"></i> 前端</a>
-              <a href="/tags/Safari/" rel="tag"><i class="fa fa-tag"></i> Safari</a>
-              <a href="/tags/PWA/" rel="tag"><i class="fa fa-tag"></i> PWA</a>
+              <a href="/tags/MacOS/" rel="tag"><i class="fa fa-tag"></i> MacOS</a>
+              <a href="/tags/InputMethodKit/" rel="tag"><i class="fa fa-tag"></i> InputMethodKit</a>
+              <a href="/tags/%E4%B8%9A%E7%81%AB%E8%BE%93%E5%85%A5%E6%B3%95/" rel="tag"><i class="fa fa-tag"></i> 业火输入法</a>
           </div>
 
         
 
           <div class="post-nav">
             <div class="post-nav-item">
-                <a href="/2023/05/07/Hexo%20+%20Github%20Pages%20+%20Github%20Actions%20+%20Github%20Issues%20%E5%B7%A5%E4%BD%9C%E6%B5%81/" rel="prev" title="Hexo + Github Pages + Github Actions + Github Issues 工作流">
-                  <i class="fa fa-chevron-left"></i> Hexo + Github Pages + Github Actions + Github Issues 工作流
+                <a href="/2023/10/18/%E4%B8%8D%E5%90%8C%E5%A4%A7%E5%B0%8F%E7%9A%84%E6%96%87%E5%AD%97%E5%BA%95%E9%83%A8%E5%AF%B9%E9%BD%90%EF%BC%8C%E5%BA%94%E8%AF%A5%E4%BD%BF%E7%94%A8baseline%E8%80%8C%E4%B8%8D%E6%98%AFflex-end/" rel="prev" title="不同大小的文字底部对齐，应该使用baseline而不是flex-end">
+                  <i class="fa fa-chevron-left"></i> 不同大小的文字底部对齐，应该使用baseline而不是flex-end
                 </a>
             </div>
             <div class="post-nav-item">
-                <a href="/2023/06/16/%E5%89%8D%E7%AB%AF%E8%8E%B7%E5%8F%96%E4%B8%8B%E8%BD%BD%E8%BF%9B%E5%BA%A6%E2%80%94%E2%80%94%E4%BB%8E%E5%85%A5%E9%97%A8%E5%88%B0%E6%94%BE%E5%BC%83/" rel="next" title="前端获取下载进度——从入门到放弃">
-                  前端获取下载进度——从入门到放弃 <i class="fa fa-chevron-right"></i>
-                </a>
             </div>
           </div>
     </footer>
