@@ -17,7 +17,7 @@ jobs:
       - uses: actions/checkout@v3
       
       - name: transform images
-        uses: qwertyyb/replace-md-images-action@v1.0.0
+        uses: qwertyyb/replace-md-images-action@v1.1.0
         with:
           token: ${{ secrets.github_token }}
           bucket: ${{ secrets.BUCKET }}
