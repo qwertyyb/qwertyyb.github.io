@@ -25,5 +25,5 @@ jobs:
           secretId: ${{ secrets.SECRETID }}
           secretKey: ${{ secrets.SECRETKEY }}
           prefix: '/tmp/md/'
-          mdfile: ${{ secrets.mdfile }}
+          mdfile: ${{ inputs.mdfile }}
           webhookUrl: ${{ secrets.WEBHOOKURL }}
