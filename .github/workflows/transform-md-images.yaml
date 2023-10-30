@@ -2,6 +2,11 @@ name: transform markdown image urls
 
 on:
   push:
+  workflow_dispatch:
+    inputs:
+      mdfile:
+        description: 'markdown file name'
+        required: false
   
 jobs:
   transform-markdown-image-urls:
@@ -20,4 +25,5 @@ jobs:
           secretId: ${{ secrets.SECRETID }}
           secretKey: ${{ secrets.SECRETKEY }}
           prefix: '/tmp/md/'
+          mdfile: ${{ secrets.mdfile }}
           webhookUrl: ${{ secrets.WEBHOOKURL }}
