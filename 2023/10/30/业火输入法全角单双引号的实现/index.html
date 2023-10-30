@@ -29,8 +29,8 @@
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://github.com/qwertyyb/qwertyyb.github.io/assets/16240729/b101ee43-10c8-4c38-8834-af7f8f28497c">
 <meta property="og:image" content="https://github.com/qwertyyb/qwertyyb.github.io/assets/16240729/9f54861d-8aab-4fe4-8d24-e56466be2bf7">
-<meta property="article:published_time" content="2023-10-30T05:10:29.845Z">
-<meta property="article:modified_time" content="2023-10-30T05:10:29.845Z">
+<meta property="article:published_time" content="2023-10-30T05:11:13.033Z">
+<meta property="article:modified_time" content="2023-10-30T05:11:13.033Z">
 <meta property="article:author" content="虚幻">
 <meta property="article:tag" content="MacOS">
 <meta property="article:tag" content="InputMethodKit">
@@ -237,7 +237,7 @@
       </span>
       <span class="post-meta-item-text">发表于</span>
 
-      <time title="创建时间：2023-10-30 05:10:29" itemprop="dateCreated datePublished" datetime="2023-10-30T05:10:29+00:00">2023-10-30</time>
+      <time title="创建时间：2023-10-30 05:11:13" itemprop="dateCreated datePublished" datetime="2023-10-30T05:11:13+00:00">2023-10-30</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -302,8 +302,7 @@
 <p>基于以上的原因，经过思考，业火输入法的单双引号的输入状态最终采用了全局状态的方案。</p>
 <h2 id="技术实现"><a href="#技术实现" class="headerlink" title="技术实现"></a>技术实现</h2><p>关于技术上的实现，当然是单双引号会比较简单。</p>
 <p>以单引号为例，可以用一个计数器记录单引号按下的次数，当前是奇数次时，输出左单引号的编码，当前是偶数次时，输出右单引号的编码。</p>
-<p>然而，考虑到这个状态是全局的，所以随着使用的时间增长，这个数字可见会越来越大，所以要考虑到数字太大，最终溢出的问题，为了避免记录的次数随着使用的时间越来越大导致溢出，可以把记录的次数对2取余后再存储。最终代码实现: </p>
-<p><a href="https://github.com/qwertyyb/Fire/blob/4bc0674cabce790fe2c94082fbb89d4dcea73b8a/Fire/PunctuationConversion.swift#L27">https://github.com/qwertyyb/Fire/blob/4bc0674cabce790fe2c94082fbb89d4dcea73b8a/Fire/PunctuationConversion.swift#L27</a></p>
+<p>然而，考虑到这个状态是全局的，所以随着使用的时间增长，这个数字可见会越来越大，所以要考虑到数字太大，最终溢出的问题，为了避免记录的次数随着使用的时间越来越大导致溢出，可以把记录的次数对2取余后再存储。</p>
 <p>当实现了单双引号的输出后，直角引号的输出也就有了思路，只需要在左直角符号输出的时候，关联一下右直角符号的次数即可。</p>
 <p>在实现上另外有一个点需要注意一下，就是为什么要用编码后的字符而不是原码来判断按键呢？这里主要是因为，每个符号按键转换为哪个符号在业火输入法中是可以由用户定义的，所以使用编码后的字符来处理就能让逻辑跟随用户定义的符号转换逻辑，而不是绑死在某个按键上。</p>
 <h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>业火输入法的这两个问题一直都存在，但是我一直拖延，这次总算彻底处理了这个问题，过程比我想象得更顺利。</p>
