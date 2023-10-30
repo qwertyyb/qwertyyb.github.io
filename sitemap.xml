@@ -101,15 +101,6 @@
   </url>
   
   <url>
-    <loc>https://qwertyyb.github.io/categories/index.html</loc>
-    
-    <lastmod>2023-10-30</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
     <loc>https://qwertyyb.github.io/tags/index.html</loc>
     
     <lastmod>2023-10-30</lastmod>
@@ -282,6 +273,15 @@
   
   <url>
     <loc>https://qwertyyb.github.io/about/index.html</loc>
+    
+    <lastmod>2023-10-30</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://qwertyyb.github.io/categories/index.html</loc>
     
     <lastmod>2023-10-30</lastmod>
     
