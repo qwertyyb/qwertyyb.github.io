@@ -847,7 +847,7 @@
   </entry>
   <entry>
     <title>业火输入法全角单双引号的实现</title>
-    <url>/2024/01/21/%E4%B8%9A%E7%81%AB%E8%BE%93%E5%85%A5%E6%B3%95%E5%85%A8%E8%A7%92%E5%8D%95%E5%8F%8C%E5%BC%95%E5%8F%B7%E7%9A%84%E5%AE%9E%E7%8E%B0/</url>
+    <url>/2023/10/27/%E4%B8%9A%E7%81%AB%E8%BE%93%E5%85%A5%E6%B3%95%E5%85%A8%E8%A7%92%E5%8D%95%E5%8F%8C%E5%BC%95%E5%8F%B7%E7%9A%84%E5%AE%9E%E7%8E%B0/</url>
     <content><![CDATA[<p>业火输入法在全角符号的模式下，转换全角引号（包括‘、’、“、”、『、「、」、』）一直都有问题，比如说没有办法输入右引号等，这篇文章介绍一下业火输入法如何处理这些个问题。</p>
 <span id="more"></span>
 
@@ -1401,6 +1401,37 @@
       </tags>
   </entry>
   <entry>
+    <title>微信浏览器视频播放器开发实践</title>
+    <url>/2018/09/30/%E5%BE%AE%E4%BF%A1%E6%B5%8F%E8%A7%88%E5%99%A8%E8%A7%86%E9%A2%91%E6%92%AD%E6%94%BE%E5%99%A8%E5%BC%80%E5%8F%91%E5%AE%9E%E8%B7%B5/</url>
+    <content><![CDATA[<p>在移动端页面中，video通常会被浏览器劫持，然后替换使用浏览器自定义的播放器。而由于微信有庞大的用户使用量，所以兼容微信就不可避免。在这里记录一下，项目开发过程中出现的问题和解决方法</p>
+<span id="more"></span>
+<p>初始代码：</p>
+<figure class="highlight plaintext"><table><tbody><tr><td class="code"><pre><span class="line">// index.html</span><br><span class="line">&lt;video src="xxx.mp4" class="video" /&gt;</span><br><span class="line"></span><br><span class="line">// index.css</span><br><span class="line">.video {</span><br><span class="line">  width: 100vw;</span><br><span class="line">  height: auto;</span><br><span class="line">}</span><br></pre></td></tr></tbody></table></figure>
+
+<h3 id="1-视频高度太高的问题-兼容问题的开始"><a href="#1-视频高度太高的问题-兼容问题的开始" class="headerlink" title="1. 视频高度太高的问题(兼容问题的开始)"></a>1. 视频高度太高的问题(兼容问题的开始)</h3><p>由于项目中使用的视频，宽高比不固定，有宽屏视频，也有高屏视频。而代码中只限制了视频的宽占比为屏幕宽，高度自由不限制。所以在手机屏幕高度比视频高度小的情况下，就会出现视频太高，而一屏不能完全显示，导致部分视频被遮住的情况<br>这个问题也很好解决，把高度限制一下就OK，如下：</p>
+<figure class="highlight plaintext"><table><tbody><tr><td class="code"><pre><span class="line">.video {</span><br><span class="line">  width: 100vw;</span><br><span class="line">  height: auto;</span><br><span class="line">  max-height: 40vh;</span><br><span class="line">}</span><br></pre></td></tr></tbody></table></figure>
+<p>但是在测试过程中，一个新的问题出现了<br>在测试过程中发现，iphone和部分android手机上表现优秀，高视频会以最大高度40vh，宽度等比缩小，然后居中播放。<br>但是部分android手机上的视频，会出现高视频的宽度被横向拉伸的情况，出现的机率还挺高。</p>
+<h3 id="2-视频被拉伸的问题"><a href="#2-视频被拉伸的问题" class="headerlink" title="2. 视频被拉伸的问题"></a>2. 视频被拉伸的问题</h3><p>既然宽度被拉伸，那就设置视频的宽度看一下具体的表现，如下:</p>
+<figure class="highlight plaintext"><table><tbody><tr><td class="code"><pre><span class="line">.video {</span><br><span class="line">  width: 40vw;</span><br><span class="line">  height: auto;</span><br><span class="line">  max-height: 40vh;</span><br><span class="line">}</span><br></pre></td></tr></tbody></table></figure>
+<p>测试结果并不满意，因为宽度被设置，视频两边会有留白的情况，而且播放器下面的控制条的宽度也被缩小，效果很不好看。而且宽视频的问题也不能解决。但是在测试过程中，发现部分android手机会全屏播放，而全屏播放的视频宽高没有被拉伸。</p>
+<p>最后解决方案： iphone手机上内联播放，android手机上全屏播放，根据文档修改代码</p>
+<figure class="highlight plaintext"><table><tbody><tr><td class="code"><pre><span class="line">// index.html</span><br><span class="line">&lt;video src="xxx.mpe" class="video"</span><br><span class="line">  webkit-playsinline playsinline  // IOS内联播放</span><br><span class="line">  x5-video-player-type="h5" // 启用同层H5播放器</span><br><span class="line">  x5-video-player-fullscreen="true" // 全屏播放</span><br><span class="line">/&gt;</span><br><span class="line">// index.css</span><br><span class="line">.video {</span><br><span class="line">  width: 100vw;</span><br><span class="line">  height: auto;</span><br><span class="line">  max-height: 40vh;</span><br><span class="line">}</span><br></pre></td></tr></tbody></table></figure>
+<p>测试结果： android手机上和iphone手机上都如期表现，但是android的全屏播放不完全，虽然显示了全屏播放的界面，但是高度是40vh, 宽度也没有占满屏幕</p>
+<h3 id="3-全屏显示不满的问题"><a href="#3-全屏显示不满的问题" class="headerlink" title="3. 全屏显示不满的问题"></a>3. 全屏显示不满的问题</h3><p>解决办法，查询文档可知，微信在视频全屏的时候，会触发x5videoenterfullscreen，退出全屏时会触发x5videoexitfullscreen。所以可以监听这两个事件，全屏里不限制高度，退出全屏里还原回max-height</p>
+<figure class="highlight plaintext"><table><tbody><tr><td class="code"><pre><span class="line">// index.js</span><br><span class="line">const video = document.querySelector('.video')</span><br><span class="line">video.addEventListener('x5videoenterfullscreen', () =&gt; {</span><br><span class="line">  video.style.maxHeight = ''</span><br><span class="line">})</span><br><span class="line">video.addEventListener('x5videoexitfullscreen', () =&gt; {</span><br><span class="line">  video.style.maxHeight = '40vh'</span><br><span class="line">})</span><br></pre></td></tr></tbody></table></figure>
+
+
+]]></content>
+      <categories>
+        <category>前端</category>
+        <category>微信</category>
+      </categories>
+      <tags>
+        <tag>前端</tag>
+        <tag>微信</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>彻底搞懂字符编码</title>
     <url>/2017/03/12/%E5%BD%BB%E5%BA%95%E6%90%9E%E6%87%82%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81/</url>
     <content><![CDATA[<p>​	编码的相关知识还真是杂乱不堪，不少人对一些知识理解似乎也有些偏差，网上百度,google的内容，也有不少以讹传讹，根本就是错误的（例如说 unicode编码是两个字节），各种软件让你选择编码的时候，常常是很长的一个选单，让用户不知道该如何选。基于这样的问题，我就写下我的理解吧，一方面帮助一些需要帮助的人纠正认识，一方面作为自己以后备查的资料。</p>
@@ -1499,37 +1530,6 @@
       </categories>
       <tags>
         <tag>编码</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>微信浏览器视频播放器开发实践</title>
-    <url>/2018/09/30/%E5%BE%AE%E4%BF%A1%E6%B5%8F%E8%A7%88%E5%99%A8%E8%A7%86%E9%A2%91%E6%92%AD%E6%94%BE%E5%99%A8%E5%BC%80%E5%8F%91%E5%AE%9E%E8%B7%B5/</url>
-    <content><![CDATA[<p>在移动端页面中，video通常会被浏览器劫持，然后替换使用浏览器自定义的播放器。而由于微信有庞大的用户使用量，所以兼容微信就不可避免。在这里记录一下，项目开发过程中出现的问题和解决方法</p>
-<span id="more"></span>
-<p>初始代码：</p>
-<figure class="highlight plaintext"><table><tbody><tr><td class="code"><pre><span class="line">// index.html</span><br><span class="line">&lt;video src="xxx.mp4" class="video" /&gt;</span><br><span class="line"></span><br><span class="line">// index.css</span><br><span class="line">.video {</span><br><span class="line">  width: 100vw;</span><br><span class="line">  height: auto;</span><br><span class="line">}</span><br></pre></td></tr></tbody></table></figure>
-
-<h3 id="1-视频高度太高的问题-兼容问题的开始"><a href="#1-视频高度太高的问题-兼容问题的开始" class="headerlink" title="1. 视频高度太高的问题(兼容问题的开始)"></a>1. 视频高度太高的问题(兼容问题的开始)</h3><p>由于项目中使用的视频，宽高比不固定，有宽屏视频，也有高屏视频。而代码中只限制了视频的宽占比为屏幕宽，高度自由不限制。所以在手机屏幕高度比视频高度小的情况下，就会出现视频太高，而一屏不能完全显示，导致部分视频被遮住的情况<br>这个问题也很好解决，把高度限制一下就OK，如下：</p>
-<figure class="highlight plaintext"><table><tbody><tr><td class="code"><pre><span class="line">.video {</span><br><span class="line">  width: 100vw;</span><br><span class="line">  height: auto;</span><br><span class="line">  max-height: 40vh;</span><br><span class="line">}</span><br></pre></td></tr></tbody></table></figure>
-<p>但是在测试过程中，一个新的问题出现了<br>在测试过程中发现，iphone和部分android手机上表现优秀，高视频会以最大高度40vh，宽度等比缩小，然后居中播放。<br>但是部分android手机上的视频，会出现高视频的宽度被横向拉伸的情况，出现的机率还挺高。</p>
-<h3 id="2-视频被拉伸的问题"><a href="#2-视频被拉伸的问题" class="headerlink" title="2. 视频被拉伸的问题"></a>2. 视频被拉伸的问题</h3><p>既然宽度被拉伸，那就设置视频的宽度看一下具体的表现，如下:</p>
-<figure class="highlight plaintext"><table><tbody><tr><td class="code"><pre><span class="line">.video {</span><br><span class="line">  width: 40vw;</span><br><span class="line">  height: auto;</span><br><span class="line">  max-height: 40vh;</span><br><span class="line">}</span><br></pre></td></tr></tbody></table></figure>
-<p>测试结果并不满意，因为宽度被设置，视频两边会有留白的情况，而且播放器下面的控制条的宽度也被缩小，效果很不好看。而且宽视频的问题也不能解决。但是在测试过程中，发现部分android手机会全屏播放，而全屏播放的视频宽高没有被拉伸。</p>
-<p>最后解决方案： iphone手机上内联播放，android手机上全屏播放，根据文档修改代码</p>
-<figure class="highlight plaintext"><table><tbody><tr><td class="code"><pre><span class="line">// index.html</span><br><span class="line">&lt;video src="xxx.mpe" class="video"</span><br><span class="line">  webkit-playsinline playsinline  // IOS内联播放</span><br><span class="line">  x5-video-player-type="h5" // 启用同层H5播放器</span><br><span class="line">  x5-video-player-fullscreen="true" // 全屏播放</span><br><span class="line">/&gt;</span><br><span class="line">// index.css</span><br><span class="line">.video {</span><br><span class="line">  width: 100vw;</span><br><span class="line">  height: auto;</span><br><span class="line">  max-height: 40vh;</span><br><span class="line">}</span><br></pre></td></tr></tbody></table></figure>
-<p>测试结果： android手机上和iphone手机上都如期表现，但是android的全屏播放不完全，虽然显示了全屏播放的界面，但是高度是40vh, 宽度也没有占满屏幕</p>
-<h3 id="3-全屏显示不满的问题"><a href="#3-全屏显示不满的问题" class="headerlink" title="3. 全屏显示不满的问题"></a>3. 全屏显示不满的问题</h3><p>解决办法，查询文档可知，微信在视频全屏的时候，会触发x5videoenterfullscreen，退出全屏时会触发x5videoexitfullscreen。所以可以监听这两个事件，全屏里不限制高度，退出全屏里还原回max-height</p>
-<figure class="highlight plaintext"><table><tbody><tr><td class="code"><pre><span class="line">// index.js</span><br><span class="line">const video = document.querySelector('.video')</span><br><span class="line">video.addEventListener('x5videoenterfullscreen', () =&gt; {</span><br><span class="line">  video.style.maxHeight = ''</span><br><span class="line">})</span><br><span class="line">video.addEventListener('x5videoexitfullscreen', () =&gt; {</span><br><span class="line">  video.style.maxHeight = '40vh'</span><br><span class="line">})</span><br></pre></td></tr></tbody></table></figure>
-
-
-]]></content>
-      <categories>
-        <category>前端</category>
-        <category>微信</category>
-      </categories>
-      <tags>
-        <tag>前端</tag>
-        <tag>微信</tag>
       </tags>
   </entry>
   <entry>
