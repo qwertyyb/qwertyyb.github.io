@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/avatar.jpg">
+  <link rel="mask-icon" href="/images/avatar.jpg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha256-HtsXJanqjKTc8vVQjO4YMhiqFoXkfBsjBWcX91T1jr8=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"qwertyyb.github.io","root":"/","images":"/images","scheme":"Pisces","darkmode":true,"version":"8.15.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":-1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="项目接入 WebAuthn 实践">
+<meta property="og:type" content="article">
+<meta property="og:title" content="WebAuthn 接入实践">
+<meta property="og:url" content="https://qwertyyb.github.io/2024/02/29/WebAuthn%20%E6%8E%A5%E5%85%A5%E5%AE%9E%E8%B7%B5/index.html">
+<meta property="og:site_name" content="虚幻">
+<meta property="og:description" content="项目接入 WebAuthn 实践">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://github.com/qwertyyb/qwertyyb.github.io/assets/16240729/f2defc76-8a45-4df6-929f-e71faf25569e">
+<meta property="article:published_time" content="2024-02-29T00:00:00.000Z">
+<meta property="article:modified_time" content="2024-02-29T02:13:02.645Z">
+<meta property="article:author" content="虚幻">
+<meta property="article:tag" content="前端">
+<meta property="article:tag" content="Javascript">
+<meta property="article:tag" content="WebAuthn">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://github.com/qwertyyb/qwertyyb.github.io/assets/16240729/f2defc76-8a45-4df6-929f-e71faf25569e">
+
+
+<link rel="canonical" href="https://qwertyyb.github.io/2024/02/29/WebAuthn%20%E6%8E%A5%E5%85%A5%E5%AE%9E%E8%B7%B5/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://qwertyyb.github.io/2024/02/29/WebAuthn%20%E6%8E%A5%E5%85%A5%E5%AE%9E%E8%B7%B5/","path":"2024/02/29/WebAuthn 接入实践/","title":"WebAuthn 接入实践"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>WebAuthn 接入实践 | 虚幻</title>
+  
+
+  <script src="/js/third-party/analytics/baidu-analytics.js"></script>
+  <script async src="https://hm.baidu.com/hm.js?512529800174ec76de81bf92990fed78"></script>
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+
+<style>.github-emoji { position: relative; display: inline-block; width: 1.2em; min-height: 1.2em; overflow: hidden; vertical-align: top; color: transparent; }  .github-emoji > span { position: relative; z-index: 10; }  .github-emoji img, .github-emoji .fancybox { margin: 0 !important; padding: 0 !important; border: none !important; outline: none !important; text-decoration: none !important; user-select: none !important; cursor: auto !important; }  .github-emoji img { height: 1.2em !important; width: 1.2em !important; position: absolute !important; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) !important; user-select: none !important; cursor: auto !important; } .github-emoji-fallback { color: inherit; } .github-emoji-fallback img { opacity: 0 !important; }</style>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">虚幻</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">陪伴像幼蝉钻进土壤，无声却能生长</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-moment"><a href="/moment/" rel="section"><i class="fa fa-pencil fa-fw"></i>moment</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-业火输入法"><a href="/Fire/index.html" rel="section"><i class="fa fa-fire-flame-curved fa-fw"></i>业火输入法</a></li><li class="menu-item menu-item-ypaste"><a href="/YPaste/index.html" rel="section"><i class="fa fa-paste fa-fw"></i>YPaste</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9F%BA%E6%9C%AC%E5%8E%9F%E7%90%86"><span class="nav-number">1.</span> <span class="nav-text">基本原理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E6%96%B9%E5%BC%8F"><span class="nav-number">2.</span> <span class="nav-text">使用方式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SimpleWebAuthn-%E7%9A%84%E5%9D%91"><span class="nav-number">3.</span> <span class="nav-text">SimpleWebAuthn 的坑</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#base64url%E7%BC%96-x2F-%E8%A7%A3%E7%A0%81"><span class="nav-number">3.1.</span> <span class="nav-text">base64url编&#x2F;解码</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#userVerification-%E7%9A%84%E9%97%AE%E9%A2%98"><span class="nav-number">3.2.</span> <span class="nav-text">userVerification 的问题</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="虚幻"
+      src="https://avatars.githubusercontent.com/u/16240729?v=4">
+  <p class="site-author-name" itemprop="name">虚幻</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">30</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">36</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">45</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/qwertyyb" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;qwertyyb" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://qwertyyb.github.io/2024/02/29/WebAuthn%20%E6%8E%A5%E5%85%A5%E5%AE%9E%E8%B7%B5/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://avatars.githubusercontent.com/u/16240729?v=4">
+      <meta itemprop="name" content="虚幻">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="虚幻">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="WebAuthn 接入实践 | 虚幻">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          WebAuthn 接入实践<a href="https://github.com/qwertyyb/qwertyyb.github.io/tree/master/source/_posts/WebAuthn%20%E6%8E%A5%E5%85%A5%E5%AE%9E%E8%B7%B5.md" class="post-edit-link" title="编辑" rel="noopener" target="_blank"><i class="fa fa-pen-nib"></i></a>
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2024-02-29 00:00:00" itemprop="dateCreated datePublished" datetime="2024-02-29T00:00:00+00:00">2024-02-29</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E5%89%8D%E7%AB%AF/" itemprop="url" rel="index"><span itemprop="name">前端</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E5%89%8D%E7%AB%AF/Javascript/" itemprop="url" rel="index"><span itemprop="name">Javascript</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>项目接入 WebAuthn 实践</p>
+<span id="more"></span>
+
+<h2 id="基本原理"><a href="#基本原理" class="headerlink" title="基本原理"></a>基本原理</h2><p>WebAuthn 全称为 <code>Web Authentication API</code>，它可以彻底干掉非常容易泄漏的密码。WebAuthn 的基础是非对称加密，有公钥和私钥之分，其中公钥由客户端传给服务器保存在数据库中，私钥则存储在用户端的认证器中。它的注册的基本流程如下：</p>
+<ol>
+<li>浏览器调用 <code>navigator.credentials.create</code> 获取公钥</li>
+<li>认证器响应第一步的API调用，生成一对密钥（公钥和私钥），其中私钥就保存在认证器中，公钥返回给浏览器</li>
+<li>获取到公钥后，把公钥传给服务器，服务器保存以供后续验证</li>
+</ol>
+<p>上述过程省略了很多细节，比如传给 <code>navigator.credentials.create</code> 的参数需要在服务器上生成，参数中包含了网站的域名和用户ID等信息，所以密钥对是平台用户维度的，这些信息也会存储在认证器中。另外把公钥传给服务器这一过程，传递的不仅仅是公钥，还有签名信息，服务器需要进行安全校验。</p>
+<p>注册后，用户登录时的基本流程如下:</p>
+<ol>
+<li>浏览器调用 <code>navigator.credentials.get</code> 进行密钥认证</li>
+<li>认证器根据传入的参数进行密钥认证，并返回认证结果</li>
+<li>把结果回传给服务器，服务器根据传入参数和服务端之前存储的公钥进行验证，验证成功即为登录成功</li>
+</ol>
+<p>上述的登录过程也省略了细节，比如说 <code>navigator.credentials.get</code> 需要的参数也是需要在服务器上生成的，参数中可以包含之前已注册过的保存在服务器上的公钥ID，由认证器进行检索，但是在一般的多用户网站中不会如此做，因为未登录的情况下，不知当前用户，也就无法获取到当前用户的所有公钥ID。如果在第一步的参数中未传入 <code>allowCredentials</code> 或传入了空数组，则在返回的认证结果中，会返回 <code>userHandle</code> 字段，即注册时的 <code>userId</code> 字段，在第三步就可以根据此字段，获取到当前是哪个用户登录了。如果在第一步的参数中传入了 <code>allowCredentials</code> ，则不会在认证结果中返回 <code>userHandle</code> ，真是奇怪的特性。</p>
+<h2 id="使用方式"><a href="#使用方式" class="headerlink" title="使用方式"></a>使用方式</h2><p>WebAuthn 虽然只提供了 <code>navigator.credentials.create</code> 和 <code>navigator.credentials.get</code> 两个API，看上去似乎很方便调用，然而其中的参数生成和结果校验颇为复杂，所以自行开发的行为并不明智，推荐使用 <code>SimpleWebAuthn</code> 这个库来接入 WebAuthn 。</p>
+<p><code>SimpleWebAuthn</code> 分为三个包，分别是浏览器环境中使用的 <code>@simplewebauthn/browser</code>、<code>node server</code> 环境中使用的 <code>@simplewebauthn/server</code> 和 在使用 <code>typescript</code> 开发时的辅助包 <code>@simplewebauthn/types</code>。浏览器环境下，提供了 <code>startRegistration</code> 和 <code>startAuthentication</code> 这两个API，分别对浏览器提供的两个API进行了封装，这两个API接收的参数分别是来自服务端的包中的 <code>generateRegistrationOptions</code> 和 <code>generateAuthenticationOptions</code> 两个方法的返回值，而 <code>startRegistration</code> 和 <code>startAuthentication</code> 这两个方法的返回值，需要分别作为服务端包中的 <code>verifyRegisterationResponse</code> 和 <code>verifyAuthenticationResponse</code> 两个方法的参数传入以校验。它们的关系图如下:</p>
+<p><img src="https://github.com/qwertyyb/qwertyyb.github.io/assets/16240729/f2defc76-8a45-4df6-929f-e71faf25569e" alt="SimpleWebauthn的调用关系"></p>
+<h2 id="SimpleWebAuthn-的坑"><a href="#SimpleWebAuthn-的坑" class="headerlink" title="SimpleWebAuthn 的坑"></a>SimpleWebAuthn 的坑</h2><p>SimpleWebAuthn 已经很好用了，但是在实际调用过程中，发现在格式上有些问题，需要留意处理。</p>
+<h3 id="base64url编-x2F-解码"><a href="#base64url编-x2F-解码" class="headerlink" title="base64url编/解码"></a>base64url编/解码</h3><p>首先是 <code>verifyRegisterationResponse</code> 返回的结果中，公钥和密钥ID需要存储到数据库中，但是这两个字段的类型的 <code>Uint8Array</code>, 需要进行 <code>base64url</code> 编码后再保存到数据库。其次是 <code>generateRegisterationOptions</code> 的参数字段 <code>excludeCredentials</code> 和 <code>generateAuthenticationOptions</code> 的参数字段 <code>allowCredentials</code> 的 <code>id</code> 需要是 <code>Uint8Array</code>, 所以就需要在从数据库中取出之后，进行 <code>base64url</code> 解码。最后是 <code>verifyAuthenticationResponse</code> 的参数中 <code>credentialID</code> 和 <code>credentialPublicKey</code> 也需要是 <code>Uint8Array</code> 类型，所以也需要注意 <code>base64url</code> 解码。</p>
+<h3 id="userVerification-的问题"><a href="#userVerification-的问题" class="headerlink" title="userVerification 的问题"></a>userVerification 的问题</h3><p>在 <code>generateRegisterationOptions</code> 和 <code>generateAuthenticationOptions</code> 方法的参数中，都有一个参数叫 <code>userVerification</code>，这个参数的似乎是用来设置认证器行为的，可以要求认证器是否进行用户认证，有三个值，分别如下：</p>
+<ol>
+<li><code>discouraged</code>：要求认证器不要进行用户认证，因为不需要用户执行认证流程，所以对用户没有打扰，但是我理解相对的，也就会有安全方面的风险。</li>
+<li><code>preferred</code>: 期望认证器进行用户认证，如果认证器不进行认证，也会成功，但是不会设置认证标志位。</li>
+<li><code>required</code>: 期望认证器进行用户认证，如果认证器无法进行认证，则操作会失败</li>
+</ol>
+<p>推荐的设置是 <code>preferred</code>，这样就需要在调用 <code>verifyRegisterationResponse</code> 或 <code>verifyAuthenticationResponse</code> 时，传入参数 <code>requireUserVerification: false</code>, 不进行 <code>userVerfication</code> 的校验。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          
+
+<div class="post-copyright">
+<ul>
+  <li class="post-copyright-author">
+      <strong>本文作者： </strong>虚幻
+  </li>
+  <li class="post-copyright-link">
+      <strong>本文链接：</strong>
+      <a href="https://qwertyyb.github.io/2024/02/29/WebAuthn%20%E6%8E%A5%E5%85%A5%E5%AE%9E%E8%B7%B5/" title="WebAuthn 接入实践">https://qwertyyb.github.io/2024/02/29/WebAuthn 接入实践/</a>
+  </li>
+  <li class="post-copyright-license">
+      <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/%E5%89%8D%E7%AB%AF/" rel="tag"><i class="fa fa-tag"></i> 前端</a>
+              <a href="/tags/Javascript/" rel="tag"><i class="fa fa-tag"></i> Javascript</a>
+              <a href="/tags/WebAuthn/" rel="tag"><i class="fa fa-tag"></i> WebAuthn</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2024/01/12/iptables%20%E7%94%A8%E6%B3%95%E7%94%A8%E9%87%8F/" rel="prev" title="iptables 用法用量">
+                  <i class="fa fa-chevron-left"></i> iptables 用法用量
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">豫ICP备18003010号-1 </a>
+  </div>
+
+<div class="copyright">
+  &copy; 2015 – 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">虚幻</span>
+</div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/pisces/" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"none","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js"></script>
+
+
+
+</body>
+</html>

@@ -532,6 +532,49 @@
       </tags>
   </entry>
   <entry>
+    <title>WebAuthn 接入实践</title>
+    <url>/2024/02/29/WebAuthn%20%E6%8E%A5%E5%85%A5%E5%AE%9E%E8%B7%B5/</url>
+    <content><![CDATA[<p>项目接入 WebAuthn 实践</p>
+<span id="more"></span>
+
+<h2 id="基本原理"><a href="#基本原理" class="headerlink" title="基本原理"></a>基本原理</h2><p>WebAuthn 全称为 <code>Web Authentication API</code>，它可以彻底干掉非常容易泄漏的密码。WebAuthn 的基础是非对称加密，有公钥和私钥之分，其中公钥由客户端传给服务器保存在数据库中，私钥则存储在用户端的认证器中。它的注册的基本流程如下：</p>
+<ol>
+<li>浏览器调用 <code>navigator.credentials.create</code> 获取公钥</li>
+<li>认证器响应第一步的API调用，生成一对密钥（公钥和私钥），其中私钥就保存在认证器中，公钥返回给浏览器</li>
+<li>获取到公钥后，把公钥传给服务器，服务器保存以供后续验证</li>
+</ol>
+<p>上述过程省略了很多细节，比如传给 <code>navigator.credentials.create</code> 的参数需要在服务器上生成，参数中包含了网站的域名和用户ID等信息，所以密钥对是平台用户维度的，这些信息也会存储在认证器中。另外把公钥传给服务器这一过程，传递的不仅仅是公钥，还有签名信息，服务器需要进行安全校验。</p>
+<p>注册后，用户登录时的基本流程如下:</p>
+<ol>
+<li>浏览器调用 <code>navigator.credentials.get</code> 进行密钥认证</li>
+<li>认证器根据传入的参数进行密钥认证，并返回认证结果</li>
+<li>把结果回传给服务器，服务器根据传入参数和服务端之前存储的公钥进行验证，验证成功即为登录成功</li>
+</ol>
+<p>上述的登录过程也省略了细节，比如说 <code>navigator.credentials.get</code> 需要的参数也是需要在服务器上生成的，参数中可以包含之前已注册过的保存在服务器上的公钥ID，由认证器进行检索，但是在一般的多用户网站中不会如此做，因为未登录的情况下，不知当前用户，也就无法获取到当前用户的所有公钥ID。如果在第一步的参数中未传入 <code>allowCredentials</code> 或传入了空数组，则在返回的认证结果中，会返回 <code>userHandle</code> 字段，即注册时的 <code>userId</code> 字段，在第三步就可以根据此字段，获取到当前是哪个用户登录了。如果在第一步的参数中传入了 <code>allowCredentials</code> ，则不会在认证结果中返回 <code>userHandle</code> ，真是奇怪的特性。</p>
+<h2 id="使用方式"><a href="#使用方式" class="headerlink" title="使用方式"></a>使用方式</h2><p>WebAuthn 虽然只提供了 <code>navigator.credentials.create</code> 和 <code>navigator.credentials.get</code> 两个API，看上去似乎很方便调用，然而其中的参数生成和结果校验颇为复杂，所以自行开发的行为并不明智，推荐使用 <code>SimpleWebAuthn</code> 这个库来接入 WebAuthn 。</p>
+<p><code>SimpleWebAuthn</code> 分为三个包，分别是浏览器环境中使用的 <code>@simplewebauthn/browser</code>、<code>node server</code> 环境中使用的 <code>@simplewebauthn/server</code> 和 在使用 <code>typescript</code> 开发时的辅助包 <code>@simplewebauthn/types</code>。浏览器环境下，提供了 <code>startRegistration</code> 和 <code>startAuthentication</code> 这两个API，分别对浏览器提供的两个API进行了封装，这两个API接收的参数分别是来自服务端的包中的 <code>generateRegistrationOptions</code> 和 <code>generateAuthenticationOptions</code> 两个方法的返回值，而 <code>startRegistration</code> 和 <code>startAuthentication</code> 这两个方法的返回值，需要分别作为服务端包中的 <code>verifyRegisterationResponse</code> 和 <code>verifyAuthenticationResponse</code> 两个方法的参数传入以校验。它们的关系图如下:</p>
+<p><img src="https://github.com/qwertyyb/qwertyyb.github.io/assets/16240729/f2defc76-8a45-4df6-929f-e71faf25569e" alt="SimpleWebauthn的调用关系"></p>
+<h2 id="SimpleWebAuthn-的坑"><a href="#SimpleWebAuthn-的坑" class="headerlink" title="SimpleWebAuthn 的坑"></a>SimpleWebAuthn 的坑</h2><p>SimpleWebAuthn 已经很好用了，但是在实际调用过程中，发现在格式上有些问题，需要留意处理。</p>
+<h3 id="base64url编-x2F-解码"><a href="#base64url编-x2F-解码" class="headerlink" title="base64url编/解码"></a>base64url编/解码</h3><p>首先是 <code>verifyRegisterationResponse</code> 返回的结果中，公钥和密钥ID需要存储到数据库中，但是这两个字段的类型的 <code>Uint8Array</code>, 需要进行 <code>base64url</code> 编码后再保存到数据库。其次是 <code>generateRegisterationOptions</code> 的参数字段 <code>excludeCredentials</code> 和 <code>generateAuthenticationOptions</code> 的参数字段 <code>allowCredentials</code> 的 <code>id</code> 需要是 <code>Uint8Array</code>, 所以就需要在从数据库中取出之后，进行 <code>base64url</code> 解码。最后是 <code>verifyAuthenticationResponse</code> 的参数中 <code>credentialID</code> 和 <code>credentialPublicKey</code> 也需要是 <code>Uint8Array</code> 类型，所以也需要注意 <code>base64url</code> 解码。</p>
+<h3 id="userVerification-的问题"><a href="#userVerification-的问题" class="headerlink" title="userVerification 的问题"></a>userVerification 的问题</h3><p>在 <code>generateRegisterationOptions</code> 和 <code>generateAuthenticationOptions</code> 方法的参数中，都有一个参数叫 <code>userVerification</code>，这个参数的似乎是用来设置认证器行为的，可以要求认证器是否进行用户认证，有三个值，分别如下：</p>
+<ol>
+<li><code>discouraged</code>：要求认证器不要进行用户认证，因为不需要用户执行认证流程，所以对用户没有打扰，但是我理解相对的，也就会有安全方面的风险。</li>
+<li><code>preferred</code>: 期望认证器进行用户认证，如果认证器不进行认证，也会成功，但是不会设置认证标志位。</li>
+<li><code>required</code>: 期望认证器进行用户认证，如果认证器无法进行认证，则操作会失败</li>
+</ol>
+<p>推荐的设置是 <code>preferred</code>，这样就需要在调用 <code>verifyRegisterationResponse</code> 或 <code>verifyAuthenticationResponse</code> 时，传入参数 <code>requireUserVerification: false</code>, 不进行 <code>userVerfication</code> 的校验。</p>
+]]></content>
+      <categories>
+        <category>前端</category>
+        <category>Javascript</category>
+      </categories>
+      <tags>
+        <tag>前端</tag>
+        <tag>Javascript</tag>
+        <tag>WebAuthn</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>cocoapods项目迁移至swift package manager</title>
     <url>/2023/09/15/cocoapods%E9%A1%B9%E7%9B%AE%E8%BF%81%E7%A7%BB%E8%87%B3swift%20package%20manager/</url>
     <content><![CDATA[<p>把 <a href="https://github.com/qwertyyb/Fire">业火输入法</a> 的项目依赖从 <code>cocoapods</code> 迁移至 <code>swift package manager</code> 记录</p>
@@ -979,8 +1022,8 @@
       </categories>
       <tags>
         <tag>前端</tag>
-        <tag>正则表达式</tag>
         <tag>Javascript</tag>
+        <tag>正则表达式</tag>
       </tags>
   </entry>
   <entry>
@@ -1401,37 +1444,6 @@
       </tags>
   </entry>
   <entry>
-    <title>微信浏览器视频播放器开发实践</title>
-    <url>/2018/09/30/%E5%BE%AE%E4%BF%A1%E6%B5%8F%E8%A7%88%E5%99%A8%E8%A7%86%E9%A2%91%E6%92%AD%E6%94%BE%E5%99%A8%E5%BC%80%E5%8F%91%E5%AE%9E%E8%B7%B5/</url>
-    <content><![CDATA[<p>在移动端页面中，video通常会被浏览器劫持，然后替换使用浏览器自定义的播放器。而由于微信有庞大的用户使用量，所以兼容微信就不可避免。在这里记录一下，项目开发过程中出现的问题和解决方法</p>
-<span id="more"></span>
-<p>初始代码：</p>
-<figure class="highlight plaintext"><table><tbody><tr><td class="code"><pre><span class="line">// index.html</span><br><span class="line">&lt;video src="xxx.mp4" class="video" /&gt;</span><br><span class="line"></span><br><span class="line">// index.css</span><br><span class="line">.video {</span><br><span class="line">  width: 100vw;</span><br><span class="line">  height: auto;</span><br><span class="line">}</span><br></pre></td></tr></tbody></table></figure>
-
-<h3 id="1-视频高度太高的问题-兼容问题的开始"><a href="#1-视频高度太高的问题-兼容问题的开始" class="headerlink" title="1. 视频高度太高的问题(兼容问题的开始)"></a>1. 视频高度太高的问题(兼容问题的开始)</h3><p>由于项目中使用的视频，宽高比不固定，有宽屏视频，也有高屏视频。而代码中只限制了视频的宽占比为屏幕宽，高度自由不限制。所以在手机屏幕高度比视频高度小的情况下，就会出现视频太高，而一屏不能完全显示，导致部分视频被遮住的情况<br>这个问题也很好解决，把高度限制一下就OK，如下：</p>
-<figure class="highlight plaintext"><table><tbody><tr><td class="code"><pre><span class="line">.video {</span><br><span class="line">  width: 100vw;</span><br><span class="line">  height: auto;</span><br><span class="line">  max-height: 40vh;</span><br><span class="line">}</span><br></pre></td></tr></tbody></table></figure>
-<p>但是在测试过程中，一个新的问题出现了<br>在测试过程中发现，iphone和部分android手机上表现优秀，高视频会以最大高度40vh，宽度等比缩小，然后居中播放。<br>但是部分android手机上的视频，会出现高视频的宽度被横向拉伸的情况，出现的机率还挺高。</p>
-<h3 id="2-视频被拉伸的问题"><a href="#2-视频被拉伸的问题" class="headerlink" title="2. 视频被拉伸的问题"></a>2. 视频被拉伸的问题</h3><p>既然宽度被拉伸，那就设置视频的宽度看一下具体的表现，如下:</p>
-<figure class="highlight plaintext"><table><tbody><tr><td class="code"><pre><span class="line">.video {</span><br><span class="line">  width: 40vw;</span><br><span class="line">  height: auto;</span><br><span class="line">  max-height: 40vh;</span><br><span class="line">}</span><br></pre></td></tr></tbody></table></figure>
-<p>测试结果并不满意，因为宽度被设置，视频两边会有留白的情况，而且播放器下面的控制条的宽度也被缩小，效果很不好看。而且宽视频的问题也不能解决。但是在测试过程中，发现部分android手机会全屏播放，而全屏播放的视频宽高没有被拉伸。</p>
-<p>最后解决方案： iphone手机上内联播放，android手机上全屏播放，根据文档修改代码</p>
-<figure class="highlight plaintext"><table><tbody><tr><td class="code"><pre><span class="line">// index.html</span><br><span class="line">&lt;video src="xxx.mpe" class="video"</span><br><span class="line">  webkit-playsinline playsinline  // IOS内联播放</span><br><span class="line">  x5-video-player-type="h5" // 启用同层H5播放器</span><br><span class="line">  x5-video-player-fullscreen="true" // 全屏播放</span><br><span class="line">/&gt;</span><br><span class="line">// index.css</span><br><span class="line">.video {</span><br><span class="line">  width: 100vw;</span><br><span class="line">  height: auto;</span><br><span class="line">  max-height: 40vh;</span><br><span class="line">}</span><br></pre></td></tr></tbody></table></figure>
-<p>测试结果： android手机上和iphone手机上都如期表现，但是android的全屏播放不完全，虽然显示了全屏播放的界面，但是高度是40vh, 宽度也没有占满屏幕</p>
-<h3 id="3-全屏显示不满的问题"><a href="#3-全屏显示不满的问题" class="headerlink" title="3. 全屏显示不满的问题"></a>3. 全屏显示不满的问题</h3><p>解决办法，查询文档可知，微信在视频全屏的时候，会触发x5videoenterfullscreen，退出全屏时会触发x5videoexitfullscreen。所以可以监听这两个事件，全屏里不限制高度，退出全屏里还原回max-height</p>
-<figure class="highlight plaintext"><table><tbody><tr><td class="code"><pre><span class="line">// index.js</span><br><span class="line">const video = document.querySelector('.video')</span><br><span class="line">video.addEventListener('x5videoenterfullscreen', () =&gt; {</span><br><span class="line">  video.style.maxHeight = ''</span><br><span class="line">})</span><br><span class="line">video.addEventListener('x5videoexitfullscreen', () =&gt; {</span><br><span class="line">  video.style.maxHeight = '40vh'</span><br><span class="line">})</span><br></pre></td></tr></tbody></table></figure>
-
-
-]]></content>
-      <categories>
-        <category>前端</category>
-        <category>微信</category>
-      </categories>
-      <tags>
-        <tag>前端</tag>
-        <tag>微信</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>彻底搞懂字符编码</title>
     <url>/2017/03/12/%E5%BD%BB%E5%BA%95%E6%90%9E%E6%87%82%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81/</url>
     <content><![CDATA[<p>​	编码的相关知识还真是杂乱不堪，不少人对一些知识理解似乎也有些偏差，网上百度,google的内容，也有不少以讹传讹，根本就是错误的（例如说 unicode编码是两个字节），各种软件让你选择编码的时候，常常是很长的一个选单，让用户不知道该如何选。基于这样的问题，我就写下我的理解吧，一方面帮助一些需要帮助的人纠正认识，一方面作为自己以后备查的资料。</p>
@@ -1530,6 +1542,37 @@
       </categories>
       <tags>
         <tag>编码</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>微信浏览器视频播放器开发实践</title>
+    <url>/2018/09/30/%E5%BE%AE%E4%BF%A1%E6%B5%8F%E8%A7%88%E5%99%A8%E8%A7%86%E9%A2%91%E6%92%AD%E6%94%BE%E5%99%A8%E5%BC%80%E5%8F%91%E5%AE%9E%E8%B7%B5/</url>
+    <content><![CDATA[<p>在移动端页面中，video通常会被浏览器劫持，然后替换使用浏览器自定义的播放器。而由于微信有庞大的用户使用量，所以兼容微信就不可避免。在这里记录一下，项目开发过程中出现的问题和解决方法</p>
+<span id="more"></span>
+<p>初始代码：</p>
+<figure class="highlight plaintext"><table><tbody><tr><td class="code"><pre><span class="line">// index.html</span><br><span class="line">&lt;video src="xxx.mp4" class="video" /&gt;</span><br><span class="line"></span><br><span class="line">// index.css</span><br><span class="line">.video {</span><br><span class="line">  width: 100vw;</span><br><span class="line">  height: auto;</span><br><span class="line">}</span><br></pre></td></tr></tbody></table></figure>
+
+<h3 id="1-视频高度太高的问题-兼容问题的开始"><a href="#1-视频高度太高的问题-兼容问题的开始" class="headerlink" title="1. 视频高度太高的问题(兼容问题的开始)"></a>1. 视频高度太高的问题(兼容问题的开始)</h3><p>由于项目中使用的视频，宽高比不固定，有宽屏视频，也有高屏视频。而代码中只限制了视频的宽占比为屏幕宽，高度自由不限制。所以在手机屏幕高度比视频高度小的情况下，就会出现视频太高，而一屏不能完全显示，导致部分视频被遮住的情况<br>这个问题也很好解决，把高度限制一下就OK，如下：</p>
+<figure class="highlight plaintext"><table><tbody><tr><td class="code"><pre><span class="line">.video {</span><br><span class="line">  width: 100vw;</span><br><span class="line">  height: auto;</span><br><span class="line">  max-height: 40vh;</span><br><span class="line">}</span><br></pre></td></tr></tbody></table></figure>
+<p>但是在测试过程中，一个新的问题出现了<br>在测试过程中发现，iphone和部分android手机上表现优秀，高视频会以最大高度40vh，宽度等比缩小，然后居中播放。<br>但是部分android手机上的视频，会出现高视频的宽度被横向拉伸的情况，出现的机率还挺高。</p>
+<h3 id="2-视频被拉伸的问题"><a href="#2-视频被拉伸的问题" class="headerlink" title="2. 视频被拉伸的问题"></a>2. 视频被拉伸的问题</h3><p>既然宽度被拉伸，那就设置视频的宽度看一下具体的表现，如下:</p>
+<figure class="highlight plaintext"><table><tbody><tr><td class="code"><pre><span class="line">.video {</span><br><span class="line">  width: 40vw;</span><br><span class="line">  height: auto;</span><br><span class="line">  max-height: 40vh;</span><br><span class="line">}</span><br></pre></td></tr></tbody></table></figure>
+<p>测试结果并不满意，因为宽度被设置，视频两边会有留白的情况，而且播放器下面的控制条的宽度也被缩小，效果很不好看。而且宽视频的问题也不能解决。但是在测试过程中，发现部分android手机会全屏播放，而全屏播放的视频宽高没有被拉伸。</p>
+<p>最后解决方案： iphone手机上内联播放，android手机上全屏播放，根据文档修改代码</p>
+<figure class="highlight plaintext"><table><tbody><tr><td class="code"><pre><span class="line">// index.html</span><br><span class="line">&lt;video src="xxx.mpe" class="video"</span><br><span class="line">  webkit-playsinline playsinline  // IOS内联播放</span><br><span class="line">  x5-video-player-type="h5" // 启用同层H5播放器</span><br><span class="line">  x5-video-player-fullscreen="true" // 全屏播放</span><br><span class="line">/&gt;</span><br><span class="line">// index.css</span><br><span class="line">.video {</span><br><span class="line">  width: 100vw;</span><br><span class="line">  height: auto;</span><br><span class="line">  max-height: 40vh;</span><br><span class="line">}</span><br></pre></td></tr></tbody></table></figure>
+<p>测试结果： android手机上和iphone手机上都如期表现，但是android的全屏播放不完全，虽然显示了全屏播放的界面，但是高度是40vh, 宽度也没有占满屏幕</p>
+<h3 id="3-全屏显示不满的问题"><a href="#3-全屏显示不满的问题" class="headerlink" title="3. 全屏显示不满的问题"></a>3. 全屏显示不满的问题</h3><p>解决办法，查询文档可知，微信在视频全屏的时候，会触发x5videoenterfullscreen，退出全屏时会触发x5videoexitfullscreen。所以可以监听这两个事件，全屏里不限制高度，退出全屏里还原回max-height</p>
+<figure class="highlight plaintext"><table><tbody><tr><td class="code"><pre><span class="line">// index.js</span><br><span class="line">const video = document.querySelector('.video')</span><br><span class="line">video.addEventListener('x5videoenterfullscreen', () =&gt; {</span><br><span class="line">  video.style.maxHeight = ''</span><br><span class="line">})</span><br><span class="line">video.addEventListener('x5videoexitfullscreen', () =&gt; {</span><br><span class="line">  video.style.maxHeight = '40vh'</span><br><span class="line">})</span><br></pre></td></tr></tbody></table></figure>
+
+
+]]></content>
+      <categories>
+        <category>前端</category>
+        <category>微信</category>
+      </categories>
+      <tags>
+        <tag>前端</tag>
+        <tag>微信</tag>
       </tags>
   </entry>
   <entry>
