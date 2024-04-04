@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/avatar.jpg">
+  <link rel="mask-icon" href="/images/avatar.jpg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha256-HtsXJanqjKTc8vVQjO4YMhiqFoXkfBsjBWcX91T1jr8=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"qwertyyb.github.io","root":"/","images":"/images","scheme":"Pisces","darkmode":true,"version":"8.15.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":-1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="JS的最大安全数字是 Number.MAX_SAFE_INTEGER 是 16 位数字，如果JSON中数字长度为17位及之上就会溢出，这里介绍两种方式来规避数字溢出的问题">
+<meta property="og:type" content="article">
+<meta property="og:title" content="JSON 长数字处理">
+<meta property="og:url" content="https://qwertyyb.github.io/2024/04/04/JSON%20%E9%95%BF%E6%95%B0%E5%AD%97%E5%A4%84%E7%90%86/index.html">
+<meta property="og:site_name" content="虚幻">
+<meta property="og:description" content="JS的最大安全数字是 Number.MAX_SAFE_INTEGER 是 16 位数字，如果JSON中数字长度为17位及之上就会溢出，这里介绍两种方式来规避数字溢出的问题">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://github.com/qwertyyb/qwertyyb.github.io/assets/16240729/51ad4469-5813-414b-8008-09c6a4900100">
+<meta property="og:image" content="https://github.com/qwertyyb/qwertyyb.github.io/assets/16240729/5ced6a9c-51f7-477a-907c-f772c8f7393e">
+<meta property="og:image" content="https://github.com/qwertyyb/qwertyyb.github.io/assets/16240729/13e88bf0-eda9-4414-a7d3-4b79cc93da15">
+<meta property="article:published_time" content="2024-04-04T00:00:00.000Z">
+<meta property="article:modified_time" content="2024-04-04T06:43:52.292Z">
+<meta property="article:author" content="虚幻">
+<meta property="article:tag" content="前端">
+<meta property="article:tag" content="Javascript">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://github.com/qwertyyb/qwertyyb.github.io/assets/16240729/51ad4469-5813-414b-8008-09c6a4900100">
+
+
+<link rel="canonical" href="https://qwertyyb.github.io/2024/04/04/JSON%20%E9%95%BF%E6%95%B0%E5%AD%97%E5%A4%84%E7%90%86/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://qwertyyb.github.io/2024/04/04/JSON%20%E9%95%BF%E6%95%B0%E5%AD%97%E5%A4%84%E7%90%86/","path":"2024/04/04/JSON 长数字处理/","title":"JSON 长数字处理"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>JSON 长数字处理 | 虚幻</title>
+  
+
+  <script src="/js/third-party/analytics/baidu-analytics.js"></script>
+  <script async src="https://hm.baidu.com/hm.js?512529800174ec76de81bf92990fed78"></script>
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+
+<style>.github-emoji { position: relative; display: inline-block; width: 1.2em; min-height: 1.2em; overflow: hidden; vertical-align: top; color: transparent; }  .github-emoji > span { position: relative; z-index: 10; }  .github-emoji img, .github-emoji .fancybox { margin: 0 !important; padding: 0 !important; border: none !important; outline: none !important; text-decoration: none !important; user-select: none !important; cursor: auto !important; }  .github-emoji img { height: 1.2em !important; width: 1.2em !important; position: absolute !important; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) !important; user-select: none !important; cursor: auto !important; } .github-emoji-fallback { color: inherit; } .github-emoji-fallback img { opacity: 0 !important; }</style>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">虚幻</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">陪伴像幼蝉钻进土壤，无声却能生长</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-moment"><a href="/moment/" rel="section"><i class="fa fa-pencil fa-fw"></i>moment</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-业火输入法"><a href="/Fire/index.html" rel="section"><i class="fa fa-fire-flame-curved fa-fw"></i>业火输入法</a></li><li class="menu-item menu-item-ypaste"><a href="/YPaste/index.html" rel="section"><i class="fa fa-paste fa-fw"></i>YPaste</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%83%8C%E6%99%AF"><span class="nav-number">1.</span> <span class="nav-text">背景</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%8E%B0%E6%9C%89%E6%96%B9%E6%A1%88"><span class="nav-number">2.</span> <span class="nav-text">现有方案</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%9D%A2%E5%90%91%E6%9C%AA%E6%9D%A5%E7%9A%84%E6%96%B9%E6%A1%88"><span class="nav-number">3.</span> <span class="nav-text">面向未来的方案</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8F%90%E6%A1%88%E4%B8%AD%E7%9A%84-JSON-stringify"><span class="nav-number">4.</span> <span class="nav-text">提案中的 JSON.stringify</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%A4%BA%E4%BE%8B"><span class="nav-number">5.</span> <span class="nav-text">示例</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="虚幻"
+      src="https://avatars.githubusercontent.com/u/16240729?v=4">
+  <p class="site-author-name" itemprop="name">虚幻</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">31</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">36</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">45</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/qwertyyb" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;qwertyyb" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://qwertyyb.github.io/2024/04/04/JSON%20%E9%95%BF%E6%95%B0%E5%AD%97%E5%A4%84%E7%90%86/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://avatars.githubusercontent.com/u/16240729?v=4">
+      <meta itemprop="name" content="虚幻">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="虚幻">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="JSON 长数字处理 | 虚幻">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          JSON 长数字处理<a href="https://github.com/qwertyyb/qwertyyb.github.io/tree/master/source/_posts/JSON%20%E9%95%BF%E6%95%B0%E5%AD%97%E5%A4%84%E7%90%86.md" class="post-edit-link" title="编辑" rel="noopener" target="_blank"><i class="fa fa-pen-nib"></i></a>
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2024-04-04 00:00:00" itemprop="dateCreated datePublished" datetime="2024-04-04T00:00:00+00:00">2024-04-04</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E5%89%8D%E7%AB%AF/" itemprop="url" rel="index"><span itemprop="name">前端</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E5%89%8D%E7%AB%AF/Javascript/" itemprop="url" rel="index"><span itemprop="name">Javascript</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>JS的最大安全数字是 <code>Number.MAX_SAFE_INTEGER</code> 是 16 位数字，如果JSON中数字长度为17位及之上就会溢出，这里介绍两种方式来规避数字溢出的问题</p>
+<span id="more"></span>
+
+
+<h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>JSON.parse 长数字导致精度丢失。当JSON中包含的对象含有超长的数字（17位或18位）时，直接使用 JSON.parse 会导致数字精度丢失，如下图：</p>
+<p><img src="https://github.com/qwertyyb/qwertyyb.github.io/assets/16240729/51ad4469-5813-414b-8008-09c6a4900100" alt="JSON.parse 后精度丢失"></p>
+<p>这里是因为数字已经超出了 <code>Number.MAX_SAFE_INTEGER</code> 的值，所以导致了序列化后的值和序列化前的值不一致。</p>
+<h2 id="现有方案"><a href="#现有方案" class="headerlink" title="现有方案"></a>现有方案</h2><p>市场上现有的方案推荐的是第三方实现的npm包 <code>json-bigint</code> , <code>lossless-json</code> 等，它们的原理的自行实现了 <code>JSON.stringify</code> 和 <code>JSON.parse</code> 这两个方法，然后自定义了超长数字的序列化和反序列化方案。它们的方案是类似的，都是把超长的数字用一个自行实现的类实现，所以反序列化后它们已经不是 <code>Javascript</code> 的 <code>Number</code> 对象了。</p>
+<p>另外，这里因为是自行实现了 <code>JSON.stringify</code> 和 <code>JSON.parse</code> ，所以性能上损耗会比较大，对于追求高性能的场景，往往不是很好的方案。</p>
+<h2 id="面向未来的方案"><a href="#面向未来的方案" class="headerlink" title="面向未来的方案"></a>面向未来的方案</h2><p>除了上面的方式外，还有另外一个面向未来的方案 <code>JSON.parse source text access</code> ，这个是ES的提案，目前已进入Stage3，它增强了 <code>JSON.parse</code> 的能力。</p>
+<p>先来看一看原来的 <code>JSON.parse</code> 有什么问题吧，原来的 <code>JSON.parse</code> 第二个参数 <code>receiver</code> ，可以自定义反序列化的逻辑，听上去似乎已经很好了，然而并不是。<code>receiver</code> 接受两个参数，分别是字段的名字 <code>key</code> 和 <code>value</code> ，但是 <code>value</code> 是已经解析后的值，而不是输入的原字符串。也就是说，如果用这个方法来处理超长数字，那在 <code>receiver</code> 中获取到的数字则是已经丢失了精度了，这就是问题所在了。而 <code>JSON.parse source text access</code> 就是为了解决这个问题的。</p>
+<p><img src="https://github.com/qwertyyb/qwertyyb.github.io/assets/16240729/5ced6a9c-51f7-477a-907c-f772c8f7393e" alt="JSON.parse 的原函数签名"></p>
+<p><code>JSON.parse source text access</code> 提案的具体内容是在 <code>receiver</code> 中追加了第三个参数，第三个参数是一个对象，对象中有一个字段 <code>source</code> 指向了 JSON 字符串的原始值。</p>
+<p><img src="https://github.com/qwertyyb/qwertyyb.github.io/assets/16240729/13e88bf0-eda9-4414-a7d3-4b79cc93da15" alt="JSON.parse 第三个参数"></p>
+<p>遗憾的是，这个提案虽然已经进入了 Stage3，但是主流的浏览器和 Node.js 都还没有实现。去到官方的提案仓库发现，有开发者已经实现了一个 <code>polyfill</code> 可以使用: <a href="https://github.com/ton-js/json-parser">text</a> 。需要注意的是，这个 polyfill 仓库中是有说明的，它的解析速度比原生的更慢，官方的说法是解析 1M 的内容耗时约为 40ms，比原生库慢了25倍，所以目前建议仅在必要情况下使用这个库。</p>
+<p>除了上面的方案，Node.js 20 版本已经实验性的支持了这个提案，需要在命令行中添加 <code>--harmony-json-parse-with-source</code> 即可使用。在 <code>chrome</code> 123 版本中，此API目前也是可用的。检测可用性的方法为 <code>typeof JSON.rawJSON === 'function'</code> ，<code>JSON.rawJSON</code> 是 <code>JSON.parse source text access</code> 提案的另一部分内容。</p>
+<h2 id="提案中的-JSON-stringify"><a href="#提案中的-JSON-stringify" class="headerlink" title="提案中的 JSON.stringify"></a>提案中的 <code>JSON.stringify</code></h2><p><code>JSON.parse source text access</code> 提案不仅仅对 <code>JSON.parse</code> 做了扩展，而且也增强了 <code>JSON.stringify</code> 的能力。</p>
+<p><code>JSON.stringify</code> 虽然也有第二个参数 <code>replacer</code> 可以自定义对象序列化后的内容，但是和 <code>JSON.parse</code> 一样，也是缺胳膊少腿的，<code>replacer</code> 的参数和 <code>JSON.parse</code> 的 <code>receiver</code> 一样，同样是 <code>key</code> 和 <code>value</code> ，函数返回值会<span style="color:#ff4500">经过JS引擎再序列化后</span>写入最终的序列化结果中，也就是如果返回的是数字类型的1234，则序列化后的内容是 <code>1234</code> ，如果返回的是字符串类型的是1234，则序列化后的内容是 <code>"1234"</code> 。按照这个的调用如果我们想要把一个18位的数字写入序列化结果中是办不到的，因为如果按数字类型返回，则会因为数字太长，精度会丢失，如果按字符串类型返回，则写入序列化结果中的是字符串形式，所以即使写入一个纯18位数字到序列化结果中，使用 <code>JSON.stringify</code> 是难以达到这个结果的。</p>
+<p>而提案内容除了扩展 <code>JSON.parse</code> 外，也没忘记对对称方法 <code>JSON.stringify</code> 的扩展。对 <code>JSON.stringify</code> 的扩展就是添加了 <code>JSON.rawJSON</code> 这个方法，这个方法接受字符串作为参数，这个方法的返回值可以作为 <code>JSON.stringify</code> 第二个参数的返回值，可以直接把原字符串值写入序列化结果中，而无须再添加两边的双绰号。</p>
+<h2 id="示例"><a href="#示例" class="headerlink" title="示例"></a>示例</h2><p>下面是一个使用了 ES 提案的示例，主要作用是把18位的长数字反序列化为字符串，序列化为纯数字。</p>
+<figure class="highlight javascript"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 主要针对18位数字进行处理</span></span><br><span class="line"><span class="comment"> * 由于18位数字已超过前端的最大安全数字（Number.MAX_SAFE_NUMBER），所以在前端JS环境，需要以字符串的形式处理</span></span><br><span class="line"><span class="comment"> * 而由于历史原因（魔方物品ID为数字），后端需要以数字的形式处理</span></span><br><span class="line"><span class="comment"> * 所以此处针对这种情况进行处理</span></span><br><span class="line"><span class="comment"> * stringify时，格式化为数字存入数据，parse时格式化为string，解决精度丢失的问题</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">const</span> <span class="title function_">check</span> = (<span class="params"></span>) =&gt; {</span><br><span class="line">  <span class="keyword">if</span> (!<span class="title class_">JSON</span>.<span class="property">rawJSON</span>) {</span><br><span class="line">    <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">Error</span>(<span class="string">'不支持的操作，请升级node.js版本'</span>);</span><br><span class="line">  }</span><br><span class="line">};</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> <span class="title function_">isEighteenNum</span> = str =&gt; <span class="keyword">typeof</span> str === <span class="string">'string'</span> &amp;&amp; <span class="regexp">/^[1-9]\d{17}$/</span>.<span class="title function_">test</span>(str);</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> <span class="title function_">eighteenNumToString</span> = (<span class="params">key, value, { source }</span>) =&gt; {</span><br><span class="line">  <span class="keyword">if</span> (<span class="title function_">isEighteenNum</span>(source)) {</span><br><span class="line">    <span class="keyword">return</span> source;</span><br><span class="line">  }</span><br><span class="line">  <span class="keyword">return</span> value;</span><br><span class="line">};</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> <span class="title function_">stringToEighteenNum</span> = (<span class="params">key, value</span>) =&gt; {</span><br><span class="line">  <span class="keyword">if</span> (<span class="title function_">isEighteenNum</span>(value)) {</span><br><span class="line">    <span class="keyword">return</span> <span class="title class_">JSON</span>.<span class="title function_">rawJSON</span>(value);</span><br><span class="line">  }</span><br><span class="line">  <span class="keyword">return</span> value;</span><br><span class="line">};</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> <span class="title function_">parse</span> = (<span class="params">json</span>) =&gt; {</span><br><span class="line">  <span class="title function_">check</span>();</span><br><span class="line">  <span class="keyword">return</span> <span class="title class_">JSON</span>.<span class="title function_">parse</span>(json, eighteenNumToString);</span><br><span class="line">};</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> <span class="title function_">stringify</span> = (<span class="params">data</span>) =&gt; {</span><br><span class="line">  <span class="title function_">check</span>();</span><br><span class="line">  <span class="keyword">return</span> <span class="title class_">JSON</span>.<span class="title function_">stringify</span>(data, stringToEighteenNum);</span><br><span class="line">};</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> safeJSON = { parse, stringify };</span><br><span class="line"></span><br><span class="line"><span class="variable language_">module</span>.<span class="property">exports</span> = safeJSON;</span><br><span class="line"></span><br></pre></td></tr></tbody></table></figure>
+
+
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          
+
+<div class="post-copyright">
+<ul>
+  <li class="post-copyright-author">
+      <strong>本文作者： </strong>虚幻
+  </li>
+  <li class="post-copyright-link">
+      <strong>本文链接：</strong>
+      <a href="https://qwertyyb.github.io/2024/04/04/JSON%20%E9%95%BF%E6%95%B0%E5%AD%97%E5%A4%84%E7%90%86/" title="JSON 长数字处理">https://qwertyyb.github.io/2024/04/04/JSON 长数字处理/</a>
+  </li>
+  <li class="post-copyright-license">
+      <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/%E5%89%8D%E7%AB%AF/" rel="tag"><i class="fa fa-tag"></i> 前端</a>
+              <a href="/tags/Javascript/" rel="tag"><i class="fa fa-tag"></i> Javascript</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2024/02/29/WebAuthn%20%E6%8E%A5%E5%85%A5%E5%AE%9E%E8%B7%B5/" rel="prev" title="WebAuthn 接入实践">
+                  <i class="fa fa-chevron-left"></i> WebAuthn 接入实践
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">豫ICP备18003010号-1 </a>
+  </div>
+
+<div class="copyright">
+  &copy; 2015 – 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">虚幻</span>
+</div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/pisces/" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"none","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js"></script>
+
+
+
+</body>
+</html>
