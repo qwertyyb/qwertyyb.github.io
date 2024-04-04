@@ -1112,6 +1112,49 @@
       </tags>
   </entry>
   <entry>
+    <title>前端获取下载进度——从入门到放弃</title>
+    <url>/2023/06/16/%E5%89%8D%E7%AB%AF%E8%8E%B7%E5%8F%96%E4%B8%8B%E8%BD%BD%E8%BF%9B%E5%BA%A6%E2%80%94%E2%80%94%E4%BB%8E%E5%85%A5%E9%97%A8%E5%88%B0%E6%94%BE%E5%BC%83/</url>
+    <content><![CDATA[<p>前端获取下载进度，从入门到放弃，讲讲如何使用 fetch/xhr 获取下载进度，有哪些弊端。</p>
+<span id="more"></span>
+
+<h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>前端大文件的下载，友好的交互方式是能够显示一个进度条，获取到当前下载了多少，还剩余多少。目前有两种原生的方式获取下载进度，分别是 <code>XMLHttpRequest</code> 的 <code>progress</code> 事件 和 <code>fetch</code> 的 <code>response.body</code>。</p>
+<h2 id="XMLHttpRequest-的方式"><a href="#XMLHttpRequest-的方式" class="headerlink" title="XMLHttpRequest 的方式"></a><code>XMLHttpRequest</code> 的方式</h2><p>XMLHttpRequest 是一个比较旧的 API 了，可以通过监听 XMLHttpRequest 的 progress 事件，来获取下载进度，示例代码如下：</p>
+<figure class="highlight javascript"><table><tbody><tr><td class="code"><pre><span class="line"><span class="keyword">const</span> xhr = <span class="keyword">new</span> <span class="title class_">XMLHttpRequest</span>()</span><br><span class="line">xhr.<span class="title function_">addEventListener</span>(<span class="string">'progress'</span>, <span class="function">(<span class="params">event</span>) =&gt;</span> {</span><br><span class="line">  <span class="keyword">if</span> (event.<span class="property">lengthComputable</span>) {</span><br><span class="line">    <span class="variable language_">console</span>.<span class="title function_">log</span>(event.<span class="property">loaded</span>, event.<span class="property">total</span>)</span><br><span class="line">  } <span class="keyword">else</span> {</span><br><span class="line">    <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">'cant get progress'</span>, event)</span><br><span class="line">  }</span><br><span class="line">})</span><br><span class="line"></span><br><span class="line">xhr.<span class="title function_">open</span>(<span class="string">'GET'</span>, <span class="string">'./data.txt'</span>)</span><br><span class="line">xhr.<span class="title function_">send</span>()</span><br></pre></td></tr></tbody></table></figure>
+
+<p>正常情况下，这段代码是可以跑通的。但是显然大多数场景都是不正常的情况，会在控制台输出 <code>cant get progress</code>。这是为什么?</p>
+<p><code>progress</code> 的 <code>event </code>实例有以下三个属性需要关注</p>
+<ol>
+<li><code>lengthComputable</code>: Boolean 值，指出下载进度能否被计算</li>
+<li><code>loaded</code>: 已下载的大小，单位为 <code>B</code></li>
+<li><code>total</code>: 文件总大小，单位为B，大小和 <code>respone.headers</code> 中的 <code>Content-Length</code> 一致，实际测试发现，当 <code>lengthComputable</code> 为 <code>false</code> 时，<code>total</code> 为0</li>
+</ol>
+<p>现网会走到 <code>lengthComputable</code> 为 <code>false</code> 的场景，我遇到的一个原因是 <code>gzip</code>，现网请求时，文件不再以原大小的方式直接返回，而是通过 <code>gzip</code> 之后再返回。</p>
+<p>这样就 <code>total</code> 也就是 <code>response.headers</code> 中的 <code>Content-Length</code>不再是实际文件的大小，而是gzip之后的, 而 <code>loaded</code> 属性是文件已经下载的 gzip 解压之后的实际大小，并不是已经下载的gzip内容的大小，所以从JS层面无法再正确获取到下载的实际进度，所以 <code>lengthComputable</code> 为 <code>false</code> 也就可以解释了。</p>
+<h2 id="fetch-的方式"><a href="#fetch-的方式" class="headerlink" title="fetch 的方式"></a><code>fetch</code> 的方式</h2><p><code>fetch</code> 是一个比较新的API，从发请求的角度来说，<code>fetch</code> 相比于 <code>XMLHttpRequest</code> 更方便调用。在 <code>fetch</code> 刚推出的时候，普遍认为的一个劣势是 <code>fetch</code> 没有办法获取到下载进度，其实借鉴 <code>XMLHttpRequest</code> 的方式，<code>fetch</code> 也能实时获取到下载进度。</p>
+<p><code>fetch</code> 把请求分为了两步，第一步是从发起请求到接收返回头，第二步是 <code>body</code> 内容，所以在 <code>fetch</code> 调用时，如果要获取返回，一般有两个 <code>await</code> 如下:</p>
+<figure class="highlight plaintext"><table><tbody><tr><td class="code"><pre><span class="line">const response = await fetch('xxxx')</span><br><span class="line">const body = await response.json()</span><br></pre></td></tr></tbody></table></figure>
+
+<p>平时用的比较多的应该是 <code>response.json()</code> 或 <code>response.arrayBuffer()</code> 这两个方法，实际上除此之外， <code>response</code> 还有一个 <code>body</code> 的属性，这个 <code>body</code> 是一个<code> ReadableStream</code> 实例，一说 <code>Stream</code> 大家应该都懂了，流式读取数据，可以通过 <code>response.body</code> 实时获取后台返回的数据，代码如下:</p>
+<figure class="highlight javascript"><table><tbody><tr><td class="code"><pre><span class="line"><span class="keyword">const</span> <span class="title function_">downloadWithProgress</span> = <span class="keyword">async</span> (<span class="params">url, onUpdate</span>) =&gt; {</span><br><span class="line">  <span class="keyword">const</span> response = <span class="keyword">await</span> <span class="title function_">fetch</span>(url)</span><br><span class="line">  <span class="keyword">const</span> total = +response.<span class="property">headers</span>.<span class="title function_">get</span>(<span class="string">'Content-Length'</span>)</span><br><span class="line">  <span class="keyword">const</span> result = []</span><br><span class="line">  <span class="keyword">let</span> progress = <span class="number">0</span></span><br><span class="line">  <span class="keyword">const</span> reader = response.<span class="property">body</span>.<span class="title function_">getReader</span>()</span><br><span class="line">  <span class="keyword">while</span>(<span class="literal">true</span>) {</span><br><span class="line">    <span class="keyword">const</span> { done, value } = <span class="keyword">await</span> reader.<span class="title function_">read</span>()</span><br><span class="line">    <span class="keyword">if</span> (done) {</span><br><span class="line">      <span class="keyword">break</span>;</span><br><span class="line">    }</span><br><span class="line">    result.<span class="title function_">push</span>(value)</span><br><span class="line">    progress += value.<span class="property">length</span></span><br><span class="line">    onUpdate &amp;&amp; <span class="title function_">onUpdate</span>(progress, total)</span><br><span class="line">  }</span><br><span class="line"></span><br><span class="line">  <span class="keyword">let</span> data = <span class="keyword">new</span> <span class="title class_">Uint8Array</span>(progress)</span><br><span class="line"></span><br><span class="line">  <span class="keyword">let</span> position = <span class="number">0</span></span><br><span class="line">  result.<span class="title function_">forEach</span>(<span class="function"><span class="params">item</span> =&gt;</span> {</span><br><span class="line">    data.<span class="title function_">set</span>(item, position)</span><br><span class="line">    position += item.<span class="property">length</span></span><br><span class="line">  })</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> data</span><br><span class="line">} </span><br></pre></td></tr></tbody></table></figure>
+
+<p>猛一看，可能会有点疑问，既然已经拿到了 <code>total</code> 值，为什么不一开始创建一个 <code>Uint8Array</code>，逐次往里面 set，而要全部返回后再实例化 <code>Uint8Array</code> ?</p>
+<p>其实和 <code>XMLHttpRequest</code> 是同样的道理，total 是通过 <code>response.headers</code> 中的 <code>Content-Length</code> 获取的，当使用了 <code>gzip</code> 之后，这个 <code>total</code> 值就不准了，而在每一次拿到的 <code>value</code> 值，是 <code>gzip</code> 解压之后的内容，所以 <code>total</code> 和 <code>value</code> 不配套的情况下，无法在起始阶段就分配缓冲区大小，也无法获取到实际的下载进度。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>事情到了这里，不管是用 <code>XMLHttpRequest</code>， 还是使用 <code>fetch</code> 也好，最终都回到了同一个问题上，<code>gzip</code> 之后，无法获取下载进度，除非每次请求都不使用 <code>gzip</code> 之后的，但是这样无异于饮鸩止渴，无论是使用方，还是提供方都需要付出巨大的带宽成本。</p>
+<p>此时就需要业务存储文件的实际大小，配合 <code>fetch</code> 或 <code>XMLHttpRequest</code> 才能处理下载进度了。</p>
+<p>而且之前没细想，其实也不难发现, <code>gzip</code> 具有加下载加解压的能力。</p>
+]]></content>
+      <categories>
+        <category>前端</category>
+        <category>下载进度</category>
+      </categories>
+      <tags>
+        <tag>前端</tag>
+        <tag>fetch</tag>
+        <tag>js</tag>
+        <tag>下载进度</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>内网穿透的几种方案</title>
     <url>/2023/05/05/%E5%86%85%E7%BD%91%E7%A9%BF%E9%80%8F%E7%9A%84%E5%87%A0%E7%A7%8D%E6%96%B9%E6%A1%88/</url>
     <content><![CDATA[<p><code>ssh</code> 端口转发、<code>zerotier</code>、<code>nps</code> 内网穿透、<code>frp</code> 内网穿透这几种内网穿透技术的总结。</p>
@@ -1245,49 +1288,6 @@
       <tags>
         <tag>前端</tag>
         <tag>WebRTC</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>前端获取下载进度——从入门到放弃</title>
-    <url>/2023/06/16/%E5%89%8D%E7%AB%AF%E8%8E%B7%E5%8F%96%E4%B8%8B%E8%BD%BD%E8%BF%9B%E5%BA%A6%E2%80%94%E2%80%94%E4%BB%8E%E5%85%A5%E9%97%A8%E5%88%B0%E6%94%BE%E5%BC%83/</url>
-    <content><![CDATA[<p>前端获取下载进度，从入门到放弃，讲讲如何使用 fetch/xhr 获取下载进度，有哪些弊端。</p>
-<span id="more"></span>
-
-<h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>前端大文件的下载，友好的交互方式是能够显示一个进度条，获取到当前下载了多少，还剩余多少。目前有两种原生的方式获取下载进度，分别是 <code>XMLHttpRequest</code> 的 <code>progress</code> 事件 和 <code>fetch</code> 的 <code>response.body</code>。</p>
-<h2 id="XMLHttpRequest-的方式"><a href="#XMLHttpRequest-的方式" class="headerlink" title="XMLHttpRequest 的方式"></a><code>XMLHttpRequest</code> 的方式</h2><p>XMLHttpRequest 是一个比较旧的 API 了，可以通过监听 XMLHttpRequest 的 progress 事件，来获取下载进度，示例代码如下：</p>
-<figure class="highlight javascript"><table><tbody><tr><td class="code"><pre><span class="line"><span class="keyword">const</span> xhr = <span class="keyword">new</span> <span class="title class_">XMLHttpRequest</span>()</span><br><span class="line">xhr.<span class="title function_">addEventListener</span>(<span class="string">'progress'</span>, <span class="function">(<span class="params">event</span>) =&gt;</span> {</span><br><span class="line">  <span class="keyword">if</span> (event.<span class="property">lengthComputable</span>) {</span><br><span class="line">    <span class="variable language_">console</span>.<span class="title function_">log</span>(event.<span class="property">loaded</span>, event.<span class="property">total</span>)</span><br><span class="line">  } <span class="keyword">else</span> {</span><br><span class="line">    <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">'cant get progress'</span>, event)</span><br><span class="line">  }</span><br><span class="line">})</span><br><span class="line"></span><br><span class="line">xhr.<span class="title function_">open</span>(<span class="string">'GET'</span>, <span class="string">'./data.txt'</span>)</span><br><span class="line">xhr.<span class="title function_">send</span>()</span><br></pre></td></tr></tbody></table></figure>
-
-<p>正常情况下，这段代码是可以跑通的。但是显然大多数场景都是不正常的情况，会在控制台输出 <code>cant get progress</code>。这是为什么?</p>
-<p><code>progress</code> 的 <code>event </code>实例有以下三个属性需要关注</p>
-<ol>
-<li><code>lengthComputable</code>: Boolean 值，指出下载进度能否被计算</li>
-<li><code>loaded</code>: 已下载的大小，单位为 <code>B</code></li>
-<li><code>total</code>: 文件总大小，单位为B，大小和 <code>respone.headers</code> 中的 <code>Content-Length</code> 一致，实际测试发现，当 <code>lengthComputable</code> 为 <code>false</code> 时，<code>total</code> 为0</li>
-</ol>
-<p>现网会走到 <code>lengthComputable</code> 为 <code>false</code> 的场景，我遇到的一个原因是 <code>gzip</code>，现网请求时，文件不再以原大小的方式直接返回，而是通过 <code>gzip</code> 之后再返回。</p>
-<p>这样就 <code>total</code> 也就是 <code>response.headers</code> 中的 <code>Content-Length</code>不再是实际文件的大小，而是gzip之后的, 而 <code>loaded</code> 属性是文件已经下载的 gzip 解压之后的实际大小，并不是已经下载的gzip内容的大小，所以从JS层面无法再正确获取到下载的实际进度，所以 <code>lengthComputable</code> 为 <code>false</code> 也就可以解释了。</p>
-<h2 id="fetch-的方式"><a href="#fetch-的方式" class="headerlink" title="fetch 的方式"></a><code>fetch</code> 的方式</h2><p><code>fetch</code> 是一个比较新的API，从发请求的角度来说，<code>fetch</code> 相比于 <code>XMLHttpRequest</code> 更方便调用。在 <code>fetch</code> 刚推出的时候，普遍认为的一个劣势是 <code>fetch</code> 没有办法获取到下载进度，其实借鉴 <code>XMLHttpRequest</code> 的方式，<code>fetch</code> 也能实时获取到下载进度。</p>
-<p><code>fetch</code> 把请求分为了两步，第一步是从发起请求到接收返回头，第二步是 <code>body</code> 内容，所以在 <code>fetch</code> 调用时，如果要获取返回，一般有两个 <code>await</code> 如下:</p>
-<figure class="highlight plaintext"><table><tbody><tr><td class="code"><pre><span class="line">const response = await fetch('xxxx')</span><br><span class="line">const body = await response.json()</span><br></pre></td></tr></tbody></table></figure>
-
-<p>平时用的比较多的应该是 <code>response.json()</code> 或 <code>response.arrayBuffer()</code> 这两个方法，实际上除此之外， <code>response</code> 还有一个 <code>body</code> 的属性，这个 <code>body</code> 是一个<code> ReadableStream</code> 实例，一说 <code>Stream</code> 大家应该都懂了，流式读取数据，可以通过 <code>response.body</code> 实时获取后台返回的数据，代码如下:</p>
-<figure class="highlight javascript"><table><tbody><tr><td class="code"><pre><span class="line"><span class="keyword">const</span> <span class="title function_">downloadWithProgress</span> = <span class="keyword">async</span> (<span class="params">url, onUpdate</span>) =&gt; {</span><br><span class="line">  <span class="keyword">const</span> response = <span class="keyword">await</span> <span class="title function_">fetch</span>(url)</span><br><span class="line">  <span class="keyword">const</span> total = +response.<span class="property">headers</span>.<span class="title function_">get</span>(<span class="string">'Content-Length'</span>)</span><br><span class="line">  <span class="keyword">const</span> result = []</span><br><span class="line">  <span class="keyword">let</span> progress = <span class="number">0</span></span><br><span class="line">  <span class="keyword">const</span> reader = response.<span class="property">body</span>.<span class="title function_">getReader</span>()</span><br><span class="line">  <span class="keyword">while</span>(<span class="literal">true</span>) {</span><br><span class="line">    <span class="keyword">const</span> { done, value } = <span class="keyword">await</span> reader.<span class="title function_">read</span>()</span><br><span class="line">    <span class="keyword">if</span> (done) {</span><br><span class="line">      <span class="keyword">break</span>;</span><br><span class="line">    }</span><br><span class="line">    result.<span class="title function_">push</span>(value)</span><br><span class="line">    progress += value.<span class="property">length</span></span><br><span class="line">    onUpdate &amp;&amp; <span class="title function_">onUpdate</span>(progress, total)</span><br><span class="line">  }</span><br><span class="line"></span><br><span class="line">  <span class="keyword">let</span> data = <span class="keyword">new</span> <span class="title class_">Uint8Array</span>(progress)</span><br><span class="line"></span><br><span class="line">  <span class="keyword">let</span> position = <span class="number">0</span></span><br><span class="line">  result.<span class="title function_">forEach</span>(<span class="function"><span class="params">item</span> =&gt;</span> {</span><br><span class="line">    data.<span class="title function_">set</span>(item, position)</span><br><span class="line">    position += item.<span class="property">length</span></span><br><span class="line">  })</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> data</span><br><span class="line">} </span><br></pre></td></tr></tbody></table></figure>
-
-<p>猛一看，可能会有点疑问，既然已经拿到了 <code>total</code> 值，为什么不一开始创建一个 <code>Uint8Array</code>，逐次往里面 set，而要全部返回后再实例化 <code>Uint8Array</code> ?</p>
-<p>其实和 <code>XMLHttpRequest</code> 是同样的道理，total 是通过 <code>response.headers</code> 中的 <code>Content-Length</code> 获取的，当使用了 <code>gzip</code> 之后，这个 <code>total</code> 值就不准了，而在每一次拿到的 <code>value</code> 值，是 <code>gzip</code> 解压之后的内容，所以 <code>total</code> 和 <code>value</code> 不配套的情况下，无法在起始阶段就分配缓冲区大小，也无法获取到实际的下载进度。</p>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>事情到了这里，不管是用 <code>XMLHttpRequest</code>， 还是使用 <code>fetch</code> 也好，最终都回到了同一个问题上，<code>gzip</code> 之后，无法获取下载进度，除非每次请求都不使用 <code>gzip</code> 之后的，但是这样无异于饮鸩止渴，无论是使用方，还是提供方都需要付出巨大的带宽成本。</p>
-<p>此时就需要业务存储文件的实际大小，配合 <code>fetch</code> 或 <code>XMLHttpRequest</code> 才能处理下载进度了。</p>
-<p>而且之前没细想，其实也不难发现, <code>gzip</code> 具有加下载加解压的能力。</p>
-]]></content>
-      <categories>
-        <category>前端</category>
-        <category>下载进度</category>
-      </categories>
-      <tags>
-        <tag>前端</tag>
-        <tag>fetch</tag>
-        <tag>js</tag>
-        <tag>下载进度</tag>
       </tags>
   </entry>
   <entry>
@@ -1581,6 +1581,21 @@
       </tags>
   </entry>
   <entry>
+    <title>测试从issue生成post</title>
+    <url>/2023/05/01/%E6%B5%8B%E8%AF%95%E4%BB%8Eissue%E7%94%9F%E6%88%90post/</url>
+    <content><![CDATA[<p>文章简介</p>
+<span id="more"></span>
+
+<p>文章内容</p>
+]]></content>
+      <categories>
+        <category>test</category>
+      </categories>
+      <tags>
+        <tag>test</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>微信浏览器视频播放器开发实践</title>
     <url>/2018/09/30/%E5%BE%AE%E4%BF%A1%E6%B5%8F%E8%A7%88%E5%99%A8%E8%A7%86%E9%A2%91%E6%92%AD%E6%94%BE%E5%99%A8%E5%BC%80%E5%8F%91%E5%AE%9E%E8%B7%B5/</url>
     <content><![CDATA[<p>在移动端页面中，video通常会被浏览器劫持，然后替换使用浏览器自定义的播放器。而由于微信有庞大的用户使用量，所以兼容微信就不可避免。在这里记录一下，项目开发过程中出现的问题和解决方法</p>
@@ -1609,21 +1624,6 @@
       <tags>
         <tag>前端</tag>
         <tag>微信</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>测试从issue生成post</title>
-    <url>/2023/05/01/%E6%B5%8B%E8%AF%95%E4%BB%8Eissue%E7%94%9F%E6%88%90post/</url>
-    <content><![CDATA[<p>文章简介</p>
-<span id="more"></span>
-
-<p>文章内容</p>
-]]></content>
-      <categories>
-        <category>test</category>
-      </categories>
-      <tags>
-        <tag>test</tag>
       </tags>
   </entry>
   <entry>
