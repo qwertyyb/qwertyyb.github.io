@@ -131,6 +131,66 @@
       </tags>
   </entry>
   <entry>
+    <title>Hexo + Github Pages + Github Actions + Github Issues 工作流</title>
+    <url>/2023/05/07/Hexo%20+%20Github%20Pages%20+%20Github%20Actions%20+%20Github%20Issues%20%E5%B7%A5%E4%BD%9C%E6%B5%81/</url>
+    <content><![CDATA[<p>使用 <code>Github Issue</code> 写文章，同步到 <code>Hexo</code> 静态站点，利用 <code>Github Actions</code> 构建 <code>Hexo</code> 静态站点并发布到 <code>Github Pages</code> ，构建易用的工作流。</p>
+<span id="more"></span>
+
+<h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>目标当然是为了能够方便快捷地写作，同时低成本，最好是能白嫖。</p>
+<p>先看看起始的写作流程是什么</p>
+<ol>
+<li>把项目 Clone 到本地</li>
+<li><code>npm install</code> 安装依赖</li>
+<li>执行 <code>hexo new xxx</code> 在 <code>source/_posts/</code> 目录创建一个 Markdown 文件</li>
+<li>使用 Markdown 编辑器打开新创建的文件进行写作</li>
+<li>执行 <code>hexo build &amp;&amp; hexo deploy</code> 发布到 <code>gh-pages</code> 上</li>
+</ol>
+<p>遇到的问题:<br>如果在一个新的设备上，当开始写作时，要做很多前置工作才能准备好环境，很多时候，当everything is ready，已经没有写作的兴致了。</p>
+<h2 id="Github-Actions-自动构建"><a href="#Github-Actions-自动构建" class="headerlink" title="Github Actions 自动构建"></a><code>Github Actions</code> 自动构建</h2><p>自从 <code>Github</code> 被微软收购后，开始财大气粗地推出了很多需要烧钱的功能，<a href="https://github.com/features/actions"><code>Github Actions</code></a> 就是一项强大的功能，可以用 <code>Github Actions</code> 来做CI/CD 自动化流程。借助 <code>Github Actions</code> 和 <code>Github</code> 在线编辑 Markdown 的功能可以不用把项目 Clone 下来了。</p>
+<p>我可以在 <code>Github</code> 在线仓库中，在对应的 <code>source/_posts/</code> 目录直接 <code>Create New File</code>, 新增一个 Markdown 文件，然后直接在线编辑即可，编辑完直接在线 <code>commit</code> 到仓库中。</p>
+<p><code>Github Actions</code> 在检测到 <code>master</code> 分支上有新的 <code>commit</code> —— 即 <code>push</code> 事件，自动执行拉 <code>master</code> 分支，安装依赖，执行构建，发布到 <code>gh-pages</code> 分支这一系列操作。</p>
+<p>遇到的问题:</p>
+<ol>
+<li>在线创建的 Markdown 文件是空的，需要我手动填充 Front Matter 内容和格式，一是容易遗漏，二也容易出错。</li>
+<li>Github 仓库的在线 Markdown 编辑器不能支持图片的上传，导致每次写作时，需要引用图片的时候，我还需要想办法把图片上传到图床获得图片地址才行，太不优雅了。</li>
+</ol>
+<h2 id="图片放在哪里"><a href="#图片放在哪里" class="headerlink" title="图片放在哪里?"></a>图片放在哪里?</h2><p>关于图片放在哪里的问题，首先我不喜欢把图片放在仓库中，虽然不会丢失，但是会导致仓库变大，不太好看。而所有的国内的所谓图床，大企业的如微信、微博都有防盗链，无法使用在我的个人站点，而小企业的图床都是朝不保夕，说不定哪天就没了，很不稳定。所以可供选择的图床仅有国外的类似 <code>imgur</code> 等相对而言还比较可靠。</p>
+<p>我发现在 Github 的 issue 中上传的图片可在无鉴权的情况下访问，也没有限制第三方网站的直接引用，所以相对于 <code>imgur</code> ，我更倾向于把图片上传到 Github 中，毕竟我的整个站点都是放在 Github 仓库中，那我希望我的图片也能放在 Github 上。</p>
+<h2 id="用-Github-Issues-写作"><a href="#用-Github-Issues-写作" class="headerlink" title="用 Github Issues 写作"></a>用 <code>Github Issues</code> 写作</h2><p>自从发现在 Github Issues 中可以上传图片后，我就发现 Github Issues 的编辑器很好用，支持 Markdown 还能直接拖拽上传图片。除此之外，还有模板的能力，可以在模板中写入 Front Matter，能完美解决上面遇到的两个问题。那么如果我用 <code>Github Issues</code> 写作，然后使用 <code>Github Actions</code> 把 issues 中的文章同步到仓库，就能发布到个人站点了。</p>
+<p>为此，写了一个 <code>nodejs</code> 脚本，去读取仓库下的 <code>issues</code> 内容同步到 <code>sources/_posts/</code> 文件夹，可<a href="https://github.com/qwertyyb/qwertyyb.github.io/tree/master/packages/create_from_issues">在这里找到具体实现</a>。</p>
+<p>具体步骤如下: </p>
+<ol>
+<li><p>在项目仓库中创建一个 Issue Label 命名为 <code>posts</code>，脚本将拉取包含此 label 的 issues 并生成 Markdown 文件。在生成 Markdown 文件时，在 Front Matter 中插入一个特殊的字段 <code>create_from_issue: true</code> 以标记是的 issue 自动生成的。</p>
+</li>
+<li><p>创建一个 Issue 模板(Issue Template), 命名为 posts，labels 选中 posts label, 然后填充 posts 的模板内容填充。<strong>这里需要注意的是 posts 使用 Front Matter 来定义创建时间、标题、分类、标签等元数据，但是 issue template 也使用 Front Matter 来定义模块的标题、描述、内容等数据，所以如果在模块的默认内容中也使用 Front Matter来填充，会冲突，所以内容区域的Front Matter不要写全，可以只写上面部分或下面部分</strong>。如下图:</p>
+<p> 2.a. 使用 Front Matter 作为模板内容填充，从模块创建时，内容是空的。</p>
+<p> <img src="https://user-images.githubusercontent.com/16240729/236664337-4b8115ae-43d0-47ef-a594-79b9e7559db2.png" alt="使用 Front Matter 作为模板内容填充"><br>  <img src="https://user-images.githubusercontent.com/16240729/236664364-6d4d3487-d12a-4bc9-88f3-ce900624cbb3.png" alt="从模板创建时，内容是空的"></p>
+<p> 2.b. 不用完整的 Front Matter 填充，仅填写上面的分隔符，从模板创建时内容正常。</p>
+<p>   <img src="https://user-images.githubusercontent.com/16240729/236664422-25c1279b-319f-41cf-b21a-8ed9415af00f.png" alt="不用完整的 Front Matter 填充，仅填写上面的分隔符"><br><img src="https://user-images.githubusercontent.com/16240729/236664452-7c0018ed-886e-4627-aade-6d290b265b3e.png" alt="从模板创建时内容正常"></p>
+</li>
+</ol>
+<p>经过上面一番操作，终于可以愉快的写作了，不再需要clone项目等前置操作，流程完全自动化了，不再有任何的技术门槛了。</p>
+<p><img src="https://user-images.githubusercontent.com/16240729/236663063-cb90e3a1-e109-42cd-b6cb-6c63f0e84af7.png" alt="工作流程"></p>
+<h2 id="国内访问"><a href="#国内访问" class="headerlink" title="国内访问"></a>国内访问</h2><p>GIthub Pages 在国内的访问一直都很不流畅，处于半墙不墙的状态，如果有条件的话当然是可以在 <code>Gitee</code> 码云部署一个 <code>Gitee Pages</code> 作为镜像站点，但是码云从2022年起，所有的代码都会被人工审核，<code>Gitee Pages</code> 更是要求实名认证 ＋ 手举身份证的照片，如果不介意，Gitee Pages应该是最好的方案。如果介意，可以使用 <code>GitLab Pages</code> 或 <code>netlify.app</code> 这两个虽然在国内没有服务器，但是目前还没有被墙，也可以作为替代方案。</p>
+<p><img src="https://user-images.githubusercontent.com/16240729/236665323-ca1c79b1-49e1-48d7-a91c-3a3c6d4bfd14.png" alt="github pages在国内的测速情况"></p>
+<p><img src="https://user-images.githubusercontent.com/16240729/236665335-01f38978-6780-4aab-900d-8b8afacdef1a.png" alt="gitlab pages在国内的测速情况"></p>
+<p><img src="https://user-images.githubusercontent.com/16240729/236665376-a1f34ce2-26fc-4e1c-9890-1bb6e77e48d8.png" alt="netlify app在国内的测速情况"></p>
+]]></content>
+      <categories>
+        <category>前端</category>
+        <category>Hexo</category>
+        <category>项目管理</category>
+        <category>Github</category>
+        <category>Github Pages</category>
+        <category>Github Actions</category>
+      </categories>
+      <tags>
+        <tag>Hexo</tag>
+        <tag>Github Pages</tag>
+        <tag>Github Actions</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Godot游戏开发第二天-随机地图生成</title>
     <url>/2023/03/16/Godot%E6%B8%B8%E6%88%8F%E5%BC%80%E5%8F%91%E7%AC%AC%E4%BA%8C%E5%A4%A9-%E9%9A%8F%E6%9C%BA%E5%9C%B0%E5%9B%BE%E7%94%9F%E6%88%90/</url>
     <content><![CDATA[<p>使用Godot游戏引擎开发一款2D游戏，第二天，在前一天，搭建了基本场景，包含有一个很短滑道和游戏人物，并且让人物在物理引擎的作用下沿滑道滑动，今天来研究并生成一个随机且无限长的滑道。</p>
@@ -236,66 +296,6 @@
       </categories>
       <tags>
         <tag>游戏开发</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Hexo + Github Pages + Github Actions + Github Issues 工作流</title>
-    <url>/2023/05/07/Hexo%20+%20Github%20Pages%20+%20Github%20Actions%20+%20Github%20Issues%20%E5%B7%A5%E4%BD%9C%E6%B5%81/</url>
-    <content><![CDATA[<p>使用 <code>Github Issue</code> 写文章，同步到 <code>Hexo</code> 静态站点，利用 <code>Github Actions</code> 构建 <code>Hexo</code> 静态站点并发布到 <code>Github Pages</code> ，构建易用的工作流。</p>
-<span id="more"></span>
-
-<h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>目标当然是为了能够方便快捷地写作，同时低成本，最好是能白嫖。</p>
-<p>先看看起始的写作流程是什么</p>
-<ol>
-<li>把项目 Clone 到本地</li>
-<li><code>npm install</code> 安装依赖</li>
-<li>执行 <code>hexo new xxx</code> 在 <code>source/_posts/</code> 目录创建一个 Markdown 文件</li>
-<li>使用 Markdown 编辑器打开新创建的文件进行写作</li>
-<li>执行 <code>hexo build &amp;&amp; hexo deploy</code> 发布到 <code>gh-pages</code> 上</li>
-</ol>
-<p>遇到的问题:<br>如果在一个新的设备上，当开始写作时，要做很多前置工作才能准备好环境，很多时候，当everything is ready，已经没有写作的兴致了。</p>
-<h2 id="Github-Actions-自动构建"><a href="#Github-Actions-自动构建" class="headerlink" title="Github Actions 自动构建"></a><code>Github Actions</code> 自动构建</h2><p>自从 <code>Github</code> 被微软收购后，开始财大气粗地推出了很多需要烧钱的功能，<a href="https://github.com/features/actions"><code>Github Actions</code></a> 就是一项强大的功能，可以用 <code>Github Actions</code> 来做CI/CD 自动化流程。借助 <code>Github Actions</code> 和 <code>Github</code> 在线编辑 Markdown 的功能可以不用把项目 Clone 下来了。</p>
-<p>我可以在 <code>Github</code> 在线仓库中，在对应的 <code>source/_posts/</code> 目录直接 <code>Create New File</code>, 新增一个 Markdown 文件，然后直接在线编辑即可，编辑完直接在线 <code>commit</code> 到仓库中。</p>
-<p><code>Github Actions</code> 在检测到 <code>master</code> 分支上有新的 <code>commit</code> —— 即 <code>push</code> 事件，自动执行拉 <code>master</code> 分支，安装依赖，执行构建，发布到 <code>gh-pages</code> 分支这一系列操作。</p>
-<p>遇到的问题:</p>
-<ol>
-<li>在线创建的 Markdown 文件是空的，需要我手动填充 Front Matter 内容和格式，一是容易遗漏，二也容易出错。</li>
-<li>Github 仓库的在线 Markdown 编辑器不能支持图片的上传，导致每次写作时，需要引用图片的时候，我还需要想办法把图片上传到图床获得图片地址才行，太不优雅了。</li>
-</ol>
-<h2 id="图片放在哪里"><a href="#图片放在哪里" class="headerlink" title="图片放在哪里?"></a>图片放在哪里?</h2><p>关于图片放在哪里的问题，首先我不喜欢把图片放在仓库中，虽然不会丢失，但是会导致仓库变大，不太好看。而所有的国内的所谓图床，大企业的如微信、微博都有防盗链，无法使用在我的个人站点，而小企业的图床都是朝不保夕，说不定哪天就没了，很不稳定。所以可供选择的图床仅有国外的类似 <code>imgur</code> 等相对而言还比较可靠。</p>
-<p>我发现在 Github 的 issue 中上传的图片可在无鉴权的情况下访问，也没有限制第三方网站的直接引用，所以相对于 <code>imgur</code> ，我更倾向于把图片上传到 Github 中，毕竟我的整个站点都是放在 Github 仓库中，那我希望我的图片也能放在 Github 上。</p>
-<h2 id="用-Github-Issues-写作"><a href="#用-Github-Issues-写作" class="headerlink" title="用 Github Issues 写作"></a>用 <code>Github Issues</code> 写作</h2><p>自从发现在 Github Issues 中可以上传图片后，我就发现 Github Issues 的编辑器很好用，支持 Markdown 还能直接拖拽上传图片。除此之外，还有模板的能力，可以在模板中写入 Front Matter，能完美解决上面遇到的两个问题。那么如果我用 <code>Github Issues</code> 写作，然后使用 <code>Github Actions</code> 把 issues 中的文章同步到仓库，就能发布到个人站点了。</p>
-<p>为此，写了一个 <code>nodejs</code> 脚本，去读取仓库下的 <code>issues</code> 内容同步到 <code>sources/_posts/</code> 文件夹，可<a href="https://github.com/qwertyyb/qwertyyb.github.io/tree/master/packages/create_from_issues">在这里找到具体实现</a>。</p>
-<p>具体步骤如下: </p>
-<ol>
-<li><p>在项目仓库中创建一个 Issue Label 命名为 <code>posts</code>，脚本将拉取包含此 label 的 issues 并生成 Markdown 文件。在生成 Markdown 文件时，在 Front Matter 中插入一个特殊的字段 <code>create_from_issue: true</code> 以标记是的 issue 自动生成的。</p>
-</li>
-<li><p>创建一个 Issue 模板(Issue Template), 命名为 posts，labels 选中 posts label, 然后填充 posts 的模板内容填充。<strong>这里需要注意的是 posts 使用 Front Matter 来定义创建时间、标题、分类、标签等元数据，但是 issue template 也使用 Front Matter 来定义模块的标题、描述、内容等数据，所以如果在模块的默认内容中也使用 Front Matter来填充，会冲突，所以内容区域的Front Matter不要写全，可以只写上面部分或下面部分</strong>。如下图:</p>
-<p> 2.a. 使用 Front Matter 作为模板内容填充，从模块创建时，内容是空的。</p>
-<p> <img src="https://user-images.githubusercontent.com/16240729/236664337-4b8115ae-43d0-47ef-a594-79b9e7559db2.png" alt="使用 Front Matter 作为模板内容填充"><br>  <img src="https://user-images.githubusercontent.com/16240729/236664364-6d4d3487-d12a-4bc9-88f3-ce900624cbb3.png" alt="从模板创建时，内容是空的"></p>
-<p> 2.b. 不用完整的 Front Matter 填充，仅填写上面的分隔符，从模板创建时内容正常。</p>
-<p>   <img src="https://user-images.githubusercontent.com/16240729/236664422-25c1279b-319f-41cf-b21a-8ed9415af00f.png" alt="不用完整的 Front Matter 填充，仅填写上面的分隔符"><br><img src="https://user-images.githubusercontent.com/16240729/236664452-7c0018ed-886e-4627-aade-6d290b265b3e.png" alt="从模板创建时内容正常"></p>
-</li>
-</ol>
-<p>经过上面一番操作，终于可以愉快的写作了，不再需要clone项目等前置操作，流程完全自动化了，不再有任何的技术门槛了。</p>
-<p><img src="https://user-images.githubusercontent.com/16240729/236663063-cb90e3a1-e109-42cd-b6cb-6c63f0e84af7.png" alt="工作流程"></p>
-<h2 id="国内访问"><a href="#国内访问" class="headerlink" title="国内访问"></a>国内访问</h2><p>GIthub Pages 在国内的访问一直都很不流畅，处于半墙不墙的状态，如果有条件的话当然是可以在 <code>Gitee</code> 码云部署一个 <code>Gitee Pages</code> 作为镜像站点，但是码云从2022年起，所有的代码都会被人工审核，<code>Gitee Pages</code> 更是要求实名认证 ＋ 手举身份证的照片，如果不介意，Gitee Pages应该是最好的方案。如果介意，可以使用 <code>GitLab Pages</code> 或 <code>netlify.app</code> 这两个虽然在国内没有服务器，但是目前还没有被墙，也可以作为替代方案。</p>
-<p><img src="https://user-images.githubusercontent.com/16240729/236665323-ca1c79b1-49e1-48d7-a91c-3a3c6d4bfd14.png" alt="github pages在国内的测速情况"></p>
-<p><img src="https://user-images.githubusercontent.com/16240729/236665335-01f38978-6780-4aab-900d-8b8afacdef1a.png" alt="gitlab pages在国内的测速情况"></p>
-<p><img src="https://user-images.githubusercontent.com/16240729/236665376-a1f34ce2-26fc-4e1c-9890-1bb6e77e48d8.png" alt="netlify app在国内的测速情况"></p>
-]]></content>
-      <categories>
-        <category>前端</category>
-        <category>项目管理</category>
-        <category>Hexo</category>
-        <category>Github</category>
-        <category>Github Pages</category>
-        <category>Github Actions</category>
-      </categories>
-      <tags>
-        <tag>Hexo</tag>
-        <tag>Github Pages</tag>
-        <tag>Github Actions</tag>
       </tags>
   </entry>
   <entry>
@@ -816,7 +816,7 @@
 <span id="more"></span>
 
 <p>缘起于发现开发的输入法在某台机器上总是越用越卡，终于腾出时间打算排查一下（关于这里具体的原因后面再说），然后就在尝试删除重新安装的过程中发现了这个问题。说一下我的操作步骤，首先删除了原目录 <code>/Library/Input Methods</code>  下的文件，然后下载了最新版的 <code>installer.pkg</code> 文件，运行安装程序，安装过程中也没有什么报错。但是在安装完成后，并没有自动启动此输入法，在系统设置 -&gt; 键盘设置中也无法找到此输入法，就好像完全没安装上一样。</p>
-<p>排查后发现安装后 <code>/Library/Input Methods</code> 目录下并没有输入法应用，这就很不合理了，因为我很确定，这个版本是可以正常安装升级的，因为我的另一台设备就可以通过同一个安装文件以重新安装的方式升级到这个最新版本，所以不应该出现问题才对。</p>
+<p>排查后发现安装后 <code>/Library/Input Methods</code> 目录下并没有输入法应用，这就很不合理了，因为我很确定，这个版本是可以正常安装升级的，我的另一台设备就是通过同一个安装文件以重新安装的方式升级到这个最新版本，所以不应该出现问题才对。</p>
 <p>刚开始我以为是 <code>installer.pkg</code> 文件中的 <code>postinstall</code> 脚本有问题，这个脚本中会先通过 <code>pkill</code> 进程名的方式停掉旧版本的进程，但是并没有提前判断这个进程是否存在，新安装的设备中因为不存在这个进程所以这个命令必然会失败，所以我首先猜测的就是这个脚本有问题。然而很遗憾的是，经过验证，并不是这个问题的原因，事后在复盘这里时，觉得也确实不太可能是这里的问题，因为 <code>postinstall</code> 是应用安装后执行的脚本，脚本中也并没有删除文件夹中应用的逻辑，所以问题不大可能出现在这里。</p>
 <p>上面的方式尝试后没有结果，于是尝试以更新的方式重新安装了一下，具体操作步骤是，先往 <code>/Library/Input Methods</code> 丢一个旧版本的 <code>.app</code> 应用文件，再重新运行 <code>installer.pkg</code>。神奇的是，从 <code>.app</code> 文件的创建时间来分析，竟然安装成功了，旧版本成功被替换成了新版本，神奇吧。</p>
 <p>无奈之下，啃了一下 <code>pkgbuild</code> 的使用说明，发现最有可能的原因是在构建的命令中缺少了 <code>--component-plist ${plist file}</code> 这个选项导致的，于是我翻了翻 git 的提交历史，重新把 <code>component.plist</code> 这个文件给找了出来（是的，在最初的构建脚本中，是有这个文件的，后面迭代过程中删除了），然后修改 <code>pkgbuild</code> 构建的命令，你猜怎么着，竟然可以了，真是让人苦笑不得。</p>
@@ -1135,6 +1135,49 @@
       </tags>
   </entry>
   <entry>
+    <title>前端获取下载进度——从入门到放弃</title>
+    <url>/2023/06/16/%E5%89%8D%E7%AB%AF%E8%8E%B7%E5%8F%96%E4%B8%8B%E8%BD%BD%E8%BF%9B%E5%BA%A6%E2%80%94%E2%80%94%E4%BB%8E%E5%85%A5%E9%97%A8%E5%88%B0%E6%94%BE%E5%BC%83/</url>
+    <content><![CDATA[<p>前端获取下载进度，从入门到放弃，讲讲如何使用 fetch/xhr 获取下载进度，有哪些弊端。</p>
+<span id="more"></span>
+
+<h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>前端大文件的下载，友好的交互方式是能够显示一个进度条，获取到当前下载了多少，还剩余多少。目前有两种原生的方式获取下载进度，分别是 <code>XMLHttpRequest</code> 的 <code>progress</code> 事件 和 <code>fetch</code> 的 <code>response.body</code>。</p>
+<h2 id="XMLHttpRequest-的方式"><a href="#XMLHttpRequest-的方式" class="headerlink" title="XMLHttpRequest 的方式"></a><code>XMLHttpRequest</code> 的方式</h2><p>XMLHttpRequest 是一个比较旧的 API 了，可以通过监听 XMLHttpRequest 的 progress 事件，来获取下载进度，示例代码如下：</p>
+<figure class="highlight javascript"><table><tbody><tr><td class="code"><pre><span class="line"><span class="keyword">const</span> xhr = <span class="keyword">new</span> <span class="title class_">XMLHttpRequest</span>()</span><br><span class="line">xhr.<span class="title function_">addEventListener</span>(<span class="string">'progress'</span>, <span class="function">(<span class="params">event</span>) =&gt;</span> {</span><br><span class="line">  <span class="keyword">if</span> (event.<span class="property">lengthComputable</span>) {</span><br><span class="line">    <span class="variable language_">console</span>.<span class="title function_">log</span>(event.<span class="property">loaded</span>, event.<span class="property">total</span>)</span><br><span class="line">  } <span class="keyword">else</span> {</span><br><span class="line">    <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">'cant get progress'</span>, event)</span><br><span class="line">  }</span><br><span class="line">})</span><br><span class="line"></span><br><span class="line">xhr.<span class="title function_">open</span>(<span class="string">'GET'</span>, <span class="string">'./data.txt'</span>)</span><br><span class="line">xhr.<span class="title function_">send</span>()</span><br></pre></td></tr></tbody></table></figure>
+
+<p>正常情况下，这段代码是可以跑通的。但是显然大多数场景都是不正常的情况，会在控制台输出 <code>cant get progress</code>。这是为什么?</p>
+<p><code>progress</code> 的 <code>event </code>实例有以下三个属性需要关注</p>
+<ol>
+<li><code>lengthComputable</code>: Boolean 值，指出下载进度能否被计算</li>
+<li><code>loaded</code>: 已下载的大小，单位为 <code>B</code></li>
+<li><code>total</code>: 文件总大小，单位为B，大小和 <code>respone.headers</code> 中的 <code>Content-Length</code> 一致，实际测试发现，当 <code>lengthComputable</code> 为 <code>false</code> 时，<code>total</code> 为0</li>
+</ol>
+<p>现网会走到 <code>lengthComputable</code> 为 <code>false</code> 的场景，我遇到的一个原因是 <code>gzip</code>，现网请求时，文件不再以原大小的方式直接返回，而是通过 <code>gzip</code> 之后再返回。</p>
+<p>这样就 <code>total</code> 也就是 <code>response.headers</code> 中的 <code>Content-Length</code>不再是实际文件的大小，而是gzip之后的, 而 <code>loaded</code> 属性是文件已经下载的 gzip 解压之后的实际大小，并不是已经下载的gzip内容的大小，所以从JS层面无法再正确获取到下载的实际进度，所以 <code>lengthComputable</code> 为 <code>false</code> 也就可以解释了。</p>
+<h2 id="fetch-的方式"><a href="#fetch-的方式" class="headerlink" title="fetch 的方式"></a><code>fetch</code> 的方式</h2><p><code>fetch</code> 是一个比较新的API，从发请求的角度来说，<code>fetch</code> 相比于 <code>XMLHttpRequest</code> 更方便调用。在 <code>fetch</code> 刚推出的时候，普遍认为的一个劣势是 <code>fetch</code> 没有办法获取到下载进度，其实借鉴 <code>XMLHttpRequest</code> 的方式，<code>fetch</code> 也能实时获取到下载进度。</p>
+<p><code>fetch</code> 把请求分为了两步，第一步是从发起请求到接收返回头，第二步是 <code>body</code> 内容，所以在 <code>fetch</code> 调用时，如果要获取返回，一般有两个 <code>await</code> 如下:</p>
+<figure class="highlight plaintext"><table><tbody><tr><td class="code"><pre><span class="line">const response = await fetch('xxxx')</span><br><span class="line">const body = await response.json()</span><br></pre></td></tr></tbody></table></figure>
+
+<p>平时用的比较多的应该是 <code>response.json()</code> 或 <code>response.arrayBuffer()</code> 这两个方法，实际上除此之外， <code>response</code> 还有一个 <code>body</code> 的属性，这个 <code>body</code> 是一个<code> ReadableStream</code> 实例，一说 <code>Stream</code> 大家应该都懂了，流式读取数据，可以通过 <code>response.body</code> 实时获取后台返回的数据，代码如下:</p>
+<figure class="highlight javascript"><table><tbody><tr><td class="code"><pre><span class="line"><span class="keyword">const</span> <span class="title function_">downloadWithProgress</span> = <span class="keyword">async</span> (<span class="params">url, onUpdate</span>) =&gt; {</span><br><span class="line">  <span class="keyword">const</span> response = <span class="keyword">await</span> <span class="title function_">fetch</span>(url)</span><br><span class="line">  <span class="keyword">const</span> total = +response.<span class="property">headers</span>.<span class="title function_">get</span>(<span class="string">'Content-Length'</span>)</span><br><span class="line">  <span class="keyword">const</span> result = []</span><br><span class="line">  <span class="keyword">let</span> progress = <span class="number">0</span></span><br><span class="line">  <span class="keyword">const</span> reader = response.<span class="property">body</span>.<span class="title function_">getReader</span>()</span><br><span class="line">  <span class="keyword">while</span>(<span class="literal">true</span>) {</span><br><span class="line">    <span class="keyword">const</span> { done, value } = <span class="keyword">await</span> reader.<span class="title function_">read</span>()</span><br><span class="line">    <span class="keyword">if</span> (done) {</span><br><span class="line">      <span class="keyword">break</span>;</span><br><span class="line">    }</span><br><span class="line">    result.<span class="title function_">push</span>(value)</span><br><span class="line">    progress += value.<span class="property">length</span></span><br><span class="line">    onUpdate &amp;&amp; <span class="title function_">onUpdate</span>(progress, total)</span><br><span class="line">  }</span><br><span class="line"></span><br><span class="line">  <span class="keyword">let</span> data = <span class="keyword">new</span> <span class="title class_">Uint8Array</span>(progress)</span><br><span class="line"></span><br><span class="line">  <span class="keyword">let</span> position = <span class="number">0</span></span><br><span class="line">  result.<span class="title function_">forEach</span>(<span class="function"><span class="params">item</span> =&gt;</span> {</span><br><span class="line">    data.<span class="title function_">set</span>(item, position)</span><br><span class="line">    position += item.<span class="property">length</span></span><br><span class="line">  })</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> data</span><br><span class="line">} </span><br></pre></td></tr></tbody></table></figure>
+
+<p>猛一看，可能会有点疑问，既然已经拿到了 <code>total</code> 值，为什么不一开始创建一个 <code>Uint8Array</code>，逐次往里面 set，而要全部返回后再实例化 <code>Uint8Array</code> ?</p>
+<p>其实和 <code>XMLHttpRequest</code> 是同样的道理，total 是通过 <code>response.headers</code> 中的 <code>Content-Length</code> 获取的，当使用了 <code>gzip</code> 之后，这个 <code>total</code> 值就不准了，而在每一次拿到的 <code>value</code> 值，是 <code>gzip</code> 解压之后的内容，所以 <code>total</code> 和 <code>value</code> 不配套的情况下，无法在起始阶段就分配缓冲区大小，也无法获取到实际的下载进度。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>事情到了这里，不管是用 <code>XMLHttpRequest</code>， 还是使用 <code>fetch</code> 也好，最终都回到了同一个问题上，<code>gzip</code> 之后，无法获取下载进度，除非每次请求都不使用 <code>gzip</code> 之后的，但是这样无异于饮鸩止渴，无论是使用方，还是提供方都需要付出巨大的带宽成本。</p>
+<p>此时就需要业务存储文件的实际大小，配合 <code>fetch</code> 或 <code>XMLHttpRequest</code> 才能处理下载进度了。</p>
+<p>而且之前没细想，其实也不难发现, <code>gzip</code> 具有加下载加解压的能力。</p>
+]]></content>
+      <categories>
+        <category>前端</category>
+        <category>下载进度</category>
+      </categories>
+      <tags>
+        <tag>前端</tag>
+        <tag>fetch</tag>
+        <tag>js</tag>
+        <tag>下载进度</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>内网穿透的几种方案</title>
     <url>/2023/05/05/%E5%86%85%E7%BD%91%E7%A9%BF%E9%80%8F%E7%9A%84%E5%87%A0%E7%A7%8D%E6%96%B9%E6%A1%88/</url>
     <content><![CDATA[<p><code>ssh</code> 端口转发、<code>zerotier</code>、<code>nps</code> 内网穿透、<code>frp</code> 内网穿透这几种内网穿透技术的总结。</p>
@@ -1227,49 +1270,6 @@
       </categories>
       <tags>
         <tag>内网穿透</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>前端获取下载进度——从入门到放弃</title>
-    <url>/2023/06/16/%E5%89%8D%E7%AB%AF%E8%8E%B7%E5%8F%96%E4%B8%8B%E8%BD%BD%E8%BF%9B%E5%BA%A6%E2%80%94%E2%80%94%E4%BB%8E%E5%85%A5%E9%97%A8%E5%88%B0%E6%94%BE%E5%BC%83/</url>
-    <content><![CDATA[<p>前端获取下载进度，从入门到放弃，讲讲如何使用 fetch/xhr 获取下载进度，有哪些弊端。</p>
-<span id="more"></span>
-
-<h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>前端大文件的下载，友好的交互方式是能够显示一个进度条，获取到当前下载了多少，还剩余多少。目前有两种原生的方式获取下载进度，分别是 <code>XMLHttpRequest</code> 的 <code>progress</code> 事件 和 <code>fetch</code> 的 <code>response.body</code>。</p>
-<h2 id="XMLHttpRequest-的方式"><a href="#XMLHttpRequest-的方式" class="headerlink" title="XMLHttpRequest 的方式"></a><code>XMLHttpRequest</code> 的方式</h2><p>XMLHttpRequest 是一个比较旧的 API 了，可以通过监听 XMLHttpRequest 的 progress 事件，来获取下载进度，示例代码如下：</p>
-<figure class="highlight javascript"><table><tbody><tr><td class="code"><pre><span class="line"><span class="keyword">const</span> xhr = <span class="keyword">new</span> <span class="title class_">XMLHttpRequest</span>()</span><br><span class="line">xhr.<span class="title function_">addEventListener</span>(<span class="string">'progress'</span>, <span class="function">(<span class="params">event</span>) =&gt;</span> {</span><br><span class="line">  <span class="keyword">if</span> (event.<span class="property">lengthComputable</span>) {</span><br><span class="line">    <span class="variable language_">console</span>.<span class="title function_">log</span>(event.<span class="property">loaded</span>, event.<span class="property">total</span>)</span><br><span class="line">  } <span class="keyword">else</span> {</span><br><span class="line">    <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">'cant get progress'</span>, event)</span><br><span class="line">  }</span><br><span class="line">})</span><br><span class="line"></span><br><span class="line">xhr.<span class="title function_">open</span>(<span class="string">'GET'</span>, <span class="string">'./data.txt'</span>)</span><br><span class="line">xhr.<span class="title function_">send</span>()</span><br></pre></td></tr></tbody></table></figure>
-
-<p>正常情况下，这段代码是可以跑通的。但是显然大多数场景都是不正常的情况，会在控制台输出 <code>cant get progress</code>。这是为什么?</p>
-<p><code>progress</code> 的 <code>event </code>实例有以下三个属性需要关注</p>
-<ol>
-<li><code>lengthComputable</code>: Boolean 值，指出下载进度能否被计算</li>
-<li><code>loaded</code>: 已下载的大小，单位为 <code>B</code></li>
-<li><code>total</code>: 文件总大小，单位为B，大小和 <code>respone.headers</code> 中的 <code>Content-Length</code> 一致，实际测试发现，当 <code>lengthComputable</code> 为 <code>false</code> 时，<code>total</code> 为0</li>
-</ol>
-<p>现网会走到 <code>lengthComputable</code> 为 <code>false</code> 的场景，我遇到的一个原因是 <code>gzip</code>，现网请求时，文件不再以原大小的方式直接返回，而是通过 <code>gzip</code> 之后再返回。</p>
-<p>这样就 <code>total</code> 也就是 <code>response.headers</code> 中的 <code>Content-Length</code>不再是实际文件的大小，而是gzip之后的, 而 <code>loaded</code> 属性是文件已经下载的 gzip 解压之后的实际大小，并不是已经下载的gzip内容的大小，所以从JS层面无法再正确获取到下载的实际进度，所以 <code>lengthComputable</code> 为 <code>false</code> 也就可以解释了。</p>
-<h2 id="fetch-的方式"><a href="#fetch-的方式" class="headerlink" title="fetch 的方式"></a><code>fetch</code> 的方式</h2><p><code>fetch</code> 是一个比较新的API，从发请求的角度来说，<code>fetch</code> 相比于 <code>XMLHttpRequest</code> 更方便调用。在 <code>fetch</code> 刚推出的时候，普遍认为的一个劣势是 <code>fetch</code> 没有办法获取到下载进度，其实借鉴 <code>XMLHttpRequest</code> 的方式，<code>fetch</code> 也能实时获取到下载进度。</p>
-<p><code>fetch</code> 把请求分为了两步，第一步是从发起请求到接收返回头，第二步是 <code>body</code> 内容，所以在 <code>fetch</code> 调用时，如果要获取返回，一般有两个 <code>await</code> 如下:</p>
-<figure class="highlight plaintext"><table><tbody><tr><td class="code"><pre><span class="line">const response = await fetch('xxxx')</span><br><span class="line">const body = await response.json()</span><br></pre></td></tr></tbody></table></figure>
-
-<p>平时用的比较多的应该是 <code>response.json()</code> 或 <code>response.arrayBuffer()</code> 这两个方法，实际上除此之外， <code>response</code> 还有一个 <code>body</code> 的属性，这个 <code>body</code> 是一个<code> ReadableStream</code> 实例，一说 <code>Stream</code> 大家应该都懂了，流式读取数据，可以通过 <code>response.body</code> 实时获取后台返回的数据，代码如下:</p>
-<figure class="highlight javascript"><table><tbody><tr><td class="code"><pre><span class="line"><span class="keyword">const</span> <span class="title function_">downloadWithProgress</span> = <span class="keyword">async</span> (<span class="params">url, onUpdate</span>) =&gt; {</span><br><span class="line">  <span class="keyword">const</span> response = <span class="keyword">await</span> <span class="title function_">fetch</span>(url)</span><br><span class="line">  <span class="keyword">const</span> total = +response.<span class="property">headers</span>.<span class="title function_">get</span>(<span class="string">'Content-Length'</span>)</span><br><span class="line">  <span class="keyword">const</span> result = []</span><br><span class="line">  <span class="keyword">let</span> progress = <span class="number">0</span></span><br><span class="line">  <span class="keyword">const</span> reader = response.<span class="property">body</span>.<span class="title function_">getReader</span>()</span><br><span class="line">  <span class="keyword">while</span>(<span class="literal">true</span>) {</span><br><span class="line">    <span class="keyword">const</span> { done, value } = <span class="keyword">await</span> reader.<span class="title function_">read</span>()</span><br><span class="line">    <span class="keyword">if</span> (done) {</span><br><span class="line">      <span class="keyword">break</span>;</span><br><span class="line">    }</span><br><span class="line">    result.<span class="title function_">push</span>(value)</span><br><span class="line">    progress += value.<span class="property">length</span></span><br><span class="line">    onUpdate &amp;&amp; <span class="title function_">onUpdate</span>(progress, total)</span><br><span class="line">  }</span><br><span class="line"></span><br><span class="line">  <span class="keyword">let</span> data = <span class="keyword">new</span> <span class="title class_">Uint8Array</span>(progress)</span><br><span class="line"></span><br><span class="line">  <span class="keyword">let</span> position = <span class="number">0</span></span><br><span class="line">  result.<span class="title function_">forEach</span>(<span class="function"><span class="params">item</span> =&gt;</span> {</span><br><span class="line">    data.<span class="title function_">set</span>(item, position)</span><br><span class="line">    position += item.<span class="property">length</span></span><br><span class="line">  })</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> data</span><br><span class="line">} </span><br></pre></td></tr></tbody></table></figure>
-
-<p>猛一看，可能会有点疑问，既然已经拿到了 <code>total</code> 值，为什么不一开始创建一个 <code>Uint8Array</code>，逐次往里面 set，而要全部返回后再实例化 <code>Uint8Array</code> ?</p>
-<p>其实和 <code>XMLHttpRequest</code> 是同样的道理，total 是通过 <code>response.headers</code> 中的 <code>Content-Length</code> 获取的，当使用了 <code>gzip</code> 之后，这个 <code>total</code> 值就不准了，而在每一次拿到的 <code>value</code> 值，是 <code>gzip</code> 解压之后的内容，所以 <code>total</code> 和 <code>value</code> 不配套的情况下，无法在起始阶段就分配缓冲区大小，也无法获取到实际的下载进度。</p>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>事情到了这里，不管是用 <code>XMLHttpRequest</code>， 还是使用 <code>fetch</code> 也好，最终都回到了同一个问题上，<code>gzip</code> 之后，无法获取下载进度，除非每次请求都不使用 <code>gzip</code> 之后的，但是这样无异于饮鸩止渴，无论是使用方，还是提供方都需要付出巨大的带宽成本。</p>
-<p>此时就需要业务存储文件的实际大小，配合 <code>fetch</code> 或 <code>XMLHttpRequest</code> 才能处理下载进度了。</p>
-<p>而且之前没细想，其实也不难发现, <code>gzip</code> 具有加下载加解压的能力。</p>
-]]></content>
-      <categories>
-        <category>前端</category>
-        <category>下载进度</category>
-      </categories>
-      <tags>
-        <tag>前端</tag>
-        <tag>fetch</tag>
-        <tag>js</tag>
-        <tag>下载进度</tag>
       </tags>
   </entry>
   <entry>
@@ -1482,27 +1482,6 @@
       </tags>
   </entry>
   <entry>
-    <title>实用工具</title>
-    <url>/2023/03/25/%E5%AE%9E%E7%94%A8%E5%B7%A5%E5%85%B7/</url>
-    <content><![CDATA[<p>实用工具收集</p>
-<span id="more"></span>
-
-<ul>
-<li>网络剪切板: <a href="https://netcut.cn/">https://netcut.cn</a> 数据暂存和传送的在线服务</li>
-<li>ngrok: <a href="https://ngrok.com/">https://ngrok.com</a> 内网穿透服务，暴露本地接口给外网</li>
-<li>游戏手柄测试: <a href="https://gamepad-tester.com/">https://gamepad-tester.com</a> 在线测试游戏手柄</li>
-<li>流程图绘图: <a href="https://draw.io/">https://draw.io</a> </li>
-<li>手绘网络的在线绘图: <a href="https://excalidraw.com/">https://excalidraw.com/</a></li>
-</ul>
-]]></content>
-      <categories>
-        <category>工具</category>
-      </categories>
-      <tags>
-        <tag>工具</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>彻底搞懂字符编码</title>
     <url>/2017/03/12/%E5%BD%BB%E5%BA%95%E6%90%9E%E6%87%82%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81/</url>
     <content><![CDATA[<p>​	编码的相关知识还真是杂乱不堪，不少人对一些知识理解似乎也有些偏差，网上百度,google的内容，也有不少以讹传讹，根本就是错误的（例如说 unicode编码是两个字节），各种软件让你选择编码的时候，常常是很长的一个选单，让用户不知道该如何选。基于这样的问题，我就写下我的理解吧，一方面帮助一些需要帮助的人纠正认识，一方面作为自己以后备查的资料。</p>
@@ -1601,6 +1580,27 @@
       </categories>
       <tags>
         <tag>编码</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>实用工具</title>
+    <url>/2023/03/25/%E5%AE%9E%E7%94%A8%E5%B7%A5%E5%85%B7/</url>
+    <content><![CDATA[<p>实用工具收集</p>
+<span id="more"></span>
+
+<ul>
+<li>网络剪切板: <a href="https://netcut.cn/">https://netcut.cn</a> 数据暂存和传送的在线服务</li>
+<li>ngrok: <a href="https://ngrok.com/">https://ngrok.com</a> 内网穿透服务，暴露本地接口给外网</li>
+<li>游戏手柄测试: <a href="https://gamepad-tester.com/">https://gamepad-tester.com</a> 在线测试游戏手柄</li>
+<li>流程图绘图: <a href="https://draw.io/">https://draw.io</a> </li>
+<li>手绘网络的在线绘图: <a href="https://excalidraw.com/">https://excalidraw.com/</a></li>
+</ul>
+]]></content>
+      <categories>
+        <category>工具</category>
+      </categories>
+      <tags>
+        <tag>工具</tag>
       </tags>
   </entry>
   <entry>
