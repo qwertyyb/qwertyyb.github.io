@@ -2,7 +2,7 @@ import { defineConfig } from 'vitepress'
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
-  title: "Hello World",
+  title: "木旁随笔",
   description: "Hello World",
   srcDir: "src",
   themeConfig: {
