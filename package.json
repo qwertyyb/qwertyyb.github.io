@@ -15,11 +15,9 @@
   "license": "ISC",
   "packageManager": "pnpm@10.8.0",
   "devDependencies": {
+    "monaco-editor": "^0.55.1",
     "tsx": "^4.21.0",
     "vitepress": "2.0.0-alpha.15",
     "vue": "^3.5.25"
-  },
-  "dependencies": {
-    "monaco-editor": "^0.55.1"
   }
 }
