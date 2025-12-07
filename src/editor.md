@@ -1,6 +1,8 @@
 ---
 title: Markdown 编辑器
 layout: 'editor'
+navbar: false
+footer: false
 ---
 
 # VitePress Markdown 编辑器
