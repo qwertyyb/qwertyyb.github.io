@@ -16,5 +16,9 @@
   "devDependencies": {
     "vitepress": "2.0.0-alpha.15",
     "vue": "^3.5.25"
+  },
+  "dependencies": {
+    "@monaco-editor/loader": "^1.7.0",
+    "monaco-editor": "^0.55.1"
   }
 }

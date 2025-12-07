@@ -18,5 +18,14 @@ export default defineConfig({
     </a><br>`,
       copyright: '原创内容版权所有，保留所有权利'
     }
-  }
+  },
+  // vite: {
+  //   resolve: {
+  //     alias: [
+  //       {
+  //         find:
+  //       }
+  //     ]
+  //   }
+  // }
 })

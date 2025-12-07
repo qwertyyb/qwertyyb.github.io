@@ -5,6 +5,7 @@ import DefaultTheme from 'vitepress/theme'
 import DocsList from './DocsList.vue'
 import './style.css'
 import DocBefore from './DocBefore.vue'
+import MDEditor from './MDEditor.vue'
 
 export default {
   extends: DefaultTheme,
@@ -14,7 +15,7 @@ export default {
     })
   },
   enhanceApp({ app, router, siteData }) {
-    // ...
     app.component('list', DocsList)
+    app.component('editor', MDEditor)
   }
 } satisfies Theme
