@@ -2,21 +2,43 @@
   <div class="md-editor">
     <header class="md-editor-header">
       <a href="javascript:void(0)" @click="togglePreview" class="preview-btn btn">{{ view === 'preview' ? '编辑' : '预览' }}</a>
-      <a href="/preview" class="publish-btn btn">发布</a>
+      <a href="javascript:void(0)" @click="openSettingDialog" class="btn setting-btn">设置</a>
+      <a href="javascript:void(0)" @click="publish" class="publish-btn btn">发布</a>
     </header>
     <main class="md-editor-main">
       <div ref="editorRef" class="editor" v-show="view !== 'preview'"></div>
       <div class="preview vp-doc" ref="previewRef" v-html="preview" v-show="view !== 'editor'"></div>
     </main>
+    <dialog class="setting-dialog" ref="settingDialog">
+      <h3 class="dialog-title">设置</h3>
+      <form class="setting-content" @submit.prevent="saveSetting">
+        <div class="form-item">
+          <label for="owner" class="form-label">Owner: </label>
+          <input type="text" name="owner" class="form-input" v-model.trim="settings.owner">
+        </div>
+        <div class="form-item">
+          <label for="repo" class="form-label">Repo: </label>
+          <input type="text" name="repo" class="form-input" v-model.trim="settings.repo">
+        </div>
+        <div class="form-item">
+          <label for="auth" class="form-label">Auth: </label>
+          <input type="text" name="auth" class="form-input" v-model.trim="settings.auth">
+        </div>
+        <div class="form-actions">
+          <input type="submit" value="Submit" class="submit-btn"></input>
+        </div>
+      </form>
+    </dialog>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { onMounted, onBeforeUnmount, ref, useTemplateRef, watch, nextTick } from 'vue'
+import { onMounted, onBeforeUnmount, ref, useTemplateRef, watch } from 'vue'
 import type * as monaco from 'monaco-editor'
 import { createMarkdownRenderer } from '../../vendor/vitepress/dist/node/markdown'
 import { useData } from 'vitepress'
 import { useWindowSize } from './hooks/windowSize'
+import { useGithub } from './hooks/github'
 
 // 扩展 window 类型以支持 Monaco Editor
 declare global {
@@ -28,8 +50,30 @@ declare global {
 
 const editorContainer = useTemplateRef('editorRef')
 const previewEl = useTemplateRef('previewRef')
+const settingDialog = useTemplateRef('settingDialog')
 const { width } = useWindowSize()
 const view = ref<'default' | 'editor' | 'preview'>('default')
+
+interface Setting {
+  owner: string
+  repo: string
+  auth: string
+}
+
+const getDefaultSetting = (): Setting => {
+  try {
+    const obj = JSON.parse(localStorage.getItem('vitepress-publish-setting') || '{}') as Setting
+    return { owner: obj.owner || '', repo: obj.repo || '', auth: obj.auth || '' }
+  } catch {
+    return { owner: '', repo: '', auth: '' }
+  }
+}
+const saveSetting = () => {
+  localStorage.setItem('vitepress-publish-setting', JSON.stringify(settings.value))
+}
+
+const settings = ref<Setting>(getDefaultSetting())
+
 let editor: monaco.editor.IStandaloneCodeEditor | null = null
 let markdownRender: any
 let monacoInstance: typeof monaco | null = null
@@ -53,6 +97,47 @@ watch(width, (newWidth) => {
 
 const togglePreview = () => {
   view.value = view.value === 'preview' ? width.value < 768 ? 'editor' : 'default' : 'preview'
+}
+
+const openSettingDialog = () => {
+  settingDialog.value?.showModal()
+}
+
+const { commitFiles } = useGithub();
+
+const validate = () => {
+  const emptyKeys = Object.keys(settings.value).filter((key) => !settings.value[key as keyof Setting])
+  if (emptyKeys.length > 0) {
+    return [`未配置 ${emptyKeys.join('、')}`]
+  }
+  return []
+}
+
+const publish = async () => {
+  // 先做一些校验，比如说 frontmatter 中是否包含了 title 字段和正确格式的 createdAt 字段
+  const errors = validate()
+  if (errors.length > 0) {
+    console.error(errors)
+    return;
+  }
+  const confirmed = window.confirm('确定要发布吗？')
+  if (!confirmed) return;
+
+  const mdFiles = [{ path: 'src/test.md', raw: new File([value.value], 'test.md', { type: 'text/markdown' }) }]
+  const { owner, repo, auth } = settings.value
+  try {
+    await commitFiles({
+      owner, repo, files: mdFiles,
+      auth,
+      message: 'feat: new post'
+    })
+    window.alert('发布成功')
+    value.value = ''
+    preview.value = ''
+    editor?.setValue('')
+  } catch (err: any) {
+    window.alert(`发布失败: ${err.message}`)
+  }
 }
 
 // 加载 Monaco Editor CDN
@@ -99,7 +184,7 @@ onMounted(async () => {
     editor = monacoInstance.editor.create(editorContainer.value, {
       value: value.value,
       language: 'markdown',
-      theme: 'vs',
+      theme: isDark.value ? 'vs-dark' : 'vs',
       automaticLayout: true,
       wordWrap: 'on',
       minimap: { enabled: false },
@@ -236,6 +321,7 @@ onMounted(async () => {
 
 .md-editor-header .btn {
   font-size: 14px;
+  margin-left: 16px;
 }
 .md-editor-header .preview-btn {
   margin-left: auto;
@@ -246,7 +332,6 @@ onMounted(async () => {
   padding: 6px 16px;
   border: var(--vp-button-brand-border);
   border-radius: 4px;
-  margin-left: 16px;
 }
 
 .md-editor-main {
@@ -264,6 +349,43 @@ onMounted(async () => {
   padding: 16px;
   overflow: auto;
   height: 100%;
+}
+
+.setting-dialog {
+  border: 1px solid var(--vp-c-gutter);
+}
+.setting-dialog::backdrop {
+  background-color: rgba(0, 0, 0, 0.5);
+}
+.setting-dialog .dialog-title {
+  font-weight: bold;
+}
+.form-item {
+  display: flex;
+  flex-direction: column;
+  padding: 6px 0;
+  margin-top: 12px;
+  width: 300px;
+}
+.form-item label {
+  font-size: 14px;
+  font-weight: 500;
+}
+.form-item input {
+  border-bottom: 1px solid var(--vp-c-gutter);
+}
+.form-actions {
+  display: flex;
+  justify-content: center;
+  margin-top: 16px;
+}
+.form-actions .submit-btn {
+  background-color: var(--vp-button-brand-bg);
+  color: var(--vp-button-brand-text);
+  padding: 6px 16px;
+  border: var(--vp-button-brand-border);
+  border-radius: 4px;
+  font-weight: 500;
 }
 </style>
 
