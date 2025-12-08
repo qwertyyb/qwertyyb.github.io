@@ -1,14 +1,22 @@
 <template>
   <div class="md-editor">
-    <div ref="editorRef" class="editor"></div>
-    <div class="preview vp-doc" ref="previewRef" v-html="preview"></div>
+    <header class="md-editor-header">
+      <a href="javascript:void(0)" @click="togglePreview" class="preview-btn btn">{{ view === 'preview' ? '编辑' : '预览' }}</a>
+      <a href="/preview" class="publish-btn btn">发布</a>
+    </header>
+    <main class="md-editor-main">
+      <div ref="editorRef" class="editor" v-show="view !== 'preview'"></div>
+      <div class="preview vp-doc" ref="previewRef" v-html="preview" v-show="view !== 'editor'"></div>
+    </main>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { onMounted, onBeforeUnmount, ref, useTemplateRef } from 'vue'
+import { onMounted, onBeforeUnmount, ref, useTemplateRef, watch, nextTick } from 'vue'
 import type * as monaco from 'monaco-editor'
 import { createMarkdownRenderer } from '../../vendor/vitepress/dist/node/markdown'
+import { useData } from 'vitepress'
+import { useWindowSize } from './hooks/windowSize'
 
 // 扩展 window 类型以支持 Monaco Editor
 declare global {
@@ -20,12 +28,32 @@ declare global {
 
 const editorContainer = useTemplateRef('editorRef')
 const previewEl = useTemplateRef('previewRef')
+const { width } = useWindowSize()
+const view = ref<'default' | 'editor' | 'preview'>('default')
 let editor: monaco.editor.IStandaloneCodeEditor | null = null
 let markdownRender: any
 let monacoInstance: typeof monaco | null = null
 
 const value = ref('# VitePress Markdown 编辑器\n\n这是一个支持 VitePress 扩展语法的 Markdown 编辑器。\n\n## 基本语法\n\n### 文本格式\n\n这是 **粗体** 文本，这是 *斜体* 文本。\n\n### 列表\n\n- 无序列表项 1\n- 无序列表项 2\n\n1. 有序列表项 1\n2. 有序列表项 2\n\n### 任务列表\n\n- [x] 已完成任务\n- [ ] 未完成任务\n\n### VitePress 容器\n\n::: info 信息\n这是一个信息容器\n:::\n\n::: tip 提示\n这是一个提示容器\n:::\n\n::: warning 警告\n这是一个警告容器\n:::\n\n::: danger 危险\n这是一个危险容器\n:::\n\n### 代码块\n\n```javascript\nconsole.log(\'Hello, VitePress!\')\n```\n\n### 行内代码\n\n这是一个 \`行内代码\` 示例。\n\n### 链接\n\n[VitePress 官方文档](https://vitepress.dev/zh/guide/markdown)\n\n### 脚注\n\n这是一个脚注示例[^1]。\n\n[^1]: 这是脚注的内容。\n\n### Emoji\n\n这里有一些 emoji :tada: :fire: :rocket: :100:')
 const preview = ref('')
+
+const { isDark } = useData();
+
+watch(isDark, (dark) => {
+  monacoInstance?.editor.setTheme(dark ? 'vs-dark' : 'vs')
+})
+
+watch(width, (newWidth) => {
+  if (newWidth < 768 && view.value === 'default') {
+    view.value = 'editor'
+    return
+  }
+  view.value = 'default'
+}, { immediate: true, flush: 'post' })
+
+const togglePreview = () => {
+  view.value = view.value === 'preview' ? width.value < 768 ? 'editor' : 'default' : 'preview'
+}
 
 // 加载 Monaco Editor CDN
 async function loadMonacoCDN(): Promise<typeof monaco> {
@@ -71,7 +99,7 @@ onMounted(async () => {
     editor = monacoInstance.editor.create(editorContainer.value, {
       value: value.value,
       language: 'markdown',
-      theme: 'vs-dark',
+      theme: 'vs',
       automaticLayout: true,
       wordWrap: 'on',
       minimap: { enabled: false },
@@ -88,11 +116,12 @@ onMounted(async () => {
     })
 
     editor.onDidChangeModelContent(async (event) => {
-      value.value = editor!.getValue()
+      const mdContent = editor!.getValue()
+      localStorage.setItem('vitepress-draft-md', mdContent)
+      value.value = mdContent
       preview.value = await markdownRender.renderAsync(value.value, {})
     })
     editor.onDidScrollChange(event => {
-      console.log(event)
       if (!previewEl.value || !editorContainer.value) return;
       // 同步滚动，按比例对 preview 进行滚动
       const target = event.scrollTop / (event.scrollHeight - editorContainer.value.clientHeight) * (previewEl.value.scrollHeight - previewEl.value.clientHeight)
@@ -191,7 +220,39 @@ onMounted(async () => {
 .md-editor {
   width: 100%;
   display: flex;
+  flex-direction: column;
   height: 100vh;
+}
+
+.md-editor-header {
+  height: 64px;
+  flex-shrink: 0;
+  background-color: var(--vp-nav-bg-color);
+  border-bottom: 1px solid var(--vp-c-gutter);
+  display: flex;
+  align-items: center;
+  padding: 0 32px;
+}
+
+.md-editor-header .btn {
+  font-size: 14px;
+}
+.md-editor-header .preview-btn {
+  margin-left: auto;
+}
+.md-editor-header .publish-btn {
+  background-color: var(--vp-button-brand-bg);
+  color: var(--vp-button-brand-text);
+  padding: 6px 16px;
+  border: var(--vp-button-brand-border);
+  border-radius: 4px;
+  margin-left: 16px;
+}
+
+.md-editor-main {
+  width: 100vw;
+  display: flex;
+  height: calc(100% - 64px);
 }
 
 .editor {
@@ -203,5 +264,11 @@ onMounted(async () => {
   padding: 16px;
   overflow: auto;
   height: 100%;
+}
+</style>
+
+<style>
+.VPLocalNav.empty.fixed {
+  display: none;
 }
 </style>
