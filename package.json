@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "postinstall": "tsx ./scripts/prepare && cd vendor/vitepress && pnpm install && pnpm build",
+    "postinstall": "tsx ./scripts/prepare && cd vendor/vitepress && pnpm install && pnpm add white-matter -w && pnpm build",
     "docs:dev": "vitepress dev",
     "docs:build": "vitepress build",
     "docs:preview": "vitepress preview"
@@ -16,6 +16,7 @@
   "packageManager": "pnpm@10.8.0",
   "devDependencies": {
     "monaco-editor": "^0.55.1",
+    "sass-embedded": "^1.93.3",
     "tsx": "^4.21.0",
     "vitepress": "2.0.0-alpha.15",
     "vue": "^3.5.25"

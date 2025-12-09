@@ -24,7 +24,10 @@ const external = [
 ]
 
 const plugins = [
-  alias({ entries: { 'readable-stream': 'stream' } }),
+  alias({ entries: {
+    'readable-stream': 'stream',
+    'gray-matter': 'white-matter'
+  } }),
   replace({
     // polyfill broken browser check from bundled deps
     'navigator.userAgentData': 'undefined',

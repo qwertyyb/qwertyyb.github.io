@@ -1,16 +1,19 @@
 <template>
   <div class="md-editor">
     <header class="md-editor-header">
+      <a href="javascript:void(0)" @click="openSettingDialog" class="btn setting-btn"><svg t="1765272442706" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="7395" width="256" height="256"><path d="M313.7536 716.8a115.2 115.2 0 0 1 217.2928 0H921.6v76.8h-390.5536a115.2512 115.2512 0 0 1-217.2928 0H153.6V716.8h160.1536z m230.4-268.8a115.2512 115.2512 0 0 1 217.2928 0H921.6v76.8h-160.1536a115.2512 115.2512 0 0 1-217.2928 0H153.6v-76.8h390.5536z m-230.4-268.8a115.2 115.2 0 0 1 217.2928 0H921.6V256h-390.5536a115.2512 115.2512 0 0 1-217.2928 0H153.6V179.2h160.1536zM422.4 256a38.4 38.4 0 1 0 0-76.8 38.4 38.4 0 0 0 0 76.8z m230.4 268.8a38.4 38.4 0 1 0 0-76.8 38.4 38.4 0 0 0 0 76.8z m-230.4 268.8a38.4 38.4 0 1 0 0-76.8 38.4 38.4 0 0 0 0 76.8z" fill="#333333" opacity=".8" p-id="7396"></path></svg></a>
       <a href="javascript:void(0)" @click="togglePreview" class="preview-btn btn">{{ view === 'preview' ? '编辑' : '预览' }}</a>
-      <a href="javascript:void(0)" @click="openSettingDialog" class="btn setting-btn">设置</a>
       <a href="javascript:void(0)" @click="publish" class="publish-btn btn">发布</a>
     </header>
     <main class="md-editor-main">
-      <div ref="editorRef" class="editor" v-show="view !== 'preview'"></div>
+      <div ref="editorRef" class="editor" v-show="view !== 'preview'" @drop="dropHandler"></div>
       <div class="preview vp-doc" ref="previewRef" v-html="preview" v-show="view !== 'editor'"></div>
     </main>
     <dialog class="setting-dialog" ref="settingDialog">
-      <h3 class="dialog-title">设置</h3>
+      <div class="dialog-header">
+        <h3 class="dialog-title">设置</h3>
+        <div class="dialog-close-btn" @click="closeSettingDialog"><svg t="1765256030401" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="1822" width="256" height="256"><path d="M821.24 935.991c31.687 31.688 83.063 31.688 114.751 0 31.688-31.688 31.688-83.064 0-114.752L202.518 87.766c-31.688-31.688-83.064-31.688-114.752 0-31.688 31.688-31.688 83.064 0 114.752L821.239 935.99z" fill="#4A4A4A" p-id="1823"></path><path d="M202.518 935.991c-31.688 31.688-83.064 31.688-114.752 0-31.688-31.688-31.688-83.064 0-114.752L821.239 87.766c31.688-31.688 83.064-31.688 114.752 0 31.688 31.688 31.688 83.064 0 114.752L202.518 935.99z" fill="#4A4A4A" p-id="1824"></path></svg></div>
+      </div>
       <form class="setting-content" @submit.prevent="saveSetting">
         <div class="form-item">
           <label for="owner" class="form-label">Owner: </label>
@@ -33,12 +36,14 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, onBeforeUnmount, ref, useTemplateRef, watch } from 'vue'
+import { onMounted, ref, useTemplateRef, watch, shallowRef, watchEffect } from 'vue'
 import type * as monaco from 'monaco-editor'
 import { createMarkdownRenderer } from '../../vendor/vitepress/dist/node/markdown'
 import { useData } from 'vitepress'
 import { useWindowSize } from './hooks/windowSize'
 import { useGithub } from './hooks/github'
+import { PUBLISH_SETTING_STORAGE_KEY } from './const'
+import { useEditor } from './hooks/editor'
 
 // 扩展 window 类型以支持 Monaco Editor
 declare global {
@@ -62,29 +67,41 @@ interface Setting {
 
 const getDefaultSetting = (): Setting => {
   try {
-    const obj = JSON.parse(localStorage.getItem('vitepress-publish-setting') || '{}') as Setting
+    const obj = JSON.parse(localStorage.getItem(PUBLISH_SETTING_STORAGE_KEY) || '{}') as Setting
     return { owner: obj.owner || '', repo: obj.repo || '', auth: obj.auth || '' }
   } catch {
     return { owner: '', repo: '', auth: '' }
   }
 }
-const saveSetting = () => {
-  localStorage.setItem('vitepress-publish-setting', JSON.stringify(settings.value))
-}
 
 const settings = ref<Setting>(getDefaultSetting())
 
-let editor: monaco.editor.IStandaloneCodeEditor | null = null
-let markdownRender: any
-let monacoInstance: typeof monaco | null = null
-
-const value = ref('# VitePress Markdown 编辑器\n\n这是一个支持 VitePress 扩展语法的 Markdown 编辑器。\n\n## 基本语法\n\n### 文本格式\n\n这是 **粗体** 文本，这是 *斜体* 文本。\n\n### 列表\n\n- 无序列表项 1\n- 无序列表项 2\n\n1. 有序列表项 1\n2. 有序列表项 2\n\n### 任务列表\n\n- [x] 已完成任务\n- [ ] 未完成任务\n\n### VitePress 容器\n\n::: info 信息\n这是一个信息容器\n:::\n\n::: tip 提示\n这是一个提示容器\n:::\n\n::: warning 警告\n这是一个警告容器\n:::\n\n::: danger 危险\n这是一个危险容器\n:::\n\n### 代码块\n\n```javascript\nconsole.log(\'Hello, VitePress!\')\n```\n\n### 行内代码\n\n这是一个 \`行内代码\` 示例。\n\n### 链接\n\n[VitePress 官方文档](https://vitepress.dev/zh/guide/markdown)\n\n### 脚注\n\n这是一个脚注示例[^1]。\n\n[^1]: 这是脚注的内容。\n\n### Emoji\n\n这里有一些 emoji :tada: :fire: :rocket: :100:')
+const value = ref('---\ntitle: markdown 标题\ncreated: 2025-12-09\n----\n# VitePress Markdown 编辑器\n\n这是一个支持 VitePress 扩展语法的 Markdown 编辑器。\n\n## 基本语法\n\n### 文本格式\n\n这是 **粗体** 文本，这是 *斜体* 文本。\n\n### 列表\n\n- 无序列表项 1\n- 无序列表项 2\n\n1. 有序列表项 1\n2. 有序列表项 2\n\n### 任务列表\n\n- [x] 已完成任务\n- [ ] 未完成任务\n\n### VitePress 容器\n\n::: info 信息\n这是一个信息容器\n:::\n\n::: tip 提示\n这是一个提示容器\n:::\n\n::: warning 警告\n这是一个警告容器\n:::\n\n::: danger 危险\n这是一个危险容器\n:::\n\n### 代码块\n\n```javascript\nconsole.log(\'Hello, VitePress!\')\n```\n\n### 行内代码\n\n这是一个 \`行内代码\` 示例。\n\n### 链接\n\n[VitePress 官方文档](https://vitepress.dev/zh/guide/markdown)\n\n### 脚注\n\n这是一个脚注示例[^1]。\n\n[^1]: 这是脚注的内容。\n\n### Emoji\n\n这里有一些 emoji :tada: :fire: :rocket: :100:')
 const preview = ref('')
+
+const scrollHandler = (event: monaco.IScrollEvent) => {
+  if (!editorContainer.value || !previewEl.value) return;
+  // 同步滚动，按比例对 preview 进行滚动
+  const target = event.scrollTop / (event.scrollHeight - editorContainer.value.clientHeight) * (previewEl.value.scrollHeight - previewEl.value.clientHeight)
+  previewEl.value.scrollTo({ left: 0, top: target, behavior: 'smooth' })
+}
+
+const { editor } = useEditor(editorContainer, { value, onScroll: scrollHandler })
+
+let markdownRender = shallowRef<any>(null)
+
+watchEffect(async () => {
+  preview.value = await markdownRender.value?.renderAsync(value.value, {})
+})
+
+onMounted(async () => {
+  markdownRender.value = await createMarkdownRenderer('src')
+})
 
 const { isDark } = useData();
 
 watch(isDark, (dark) => {
-  monacoInstance?.editor.setTheme(dark ? 'vs-dark' : 'vs')
+  editor.value?.updateOptions({ theme: dark ? 'vs-dark' : 'vs' })
 })
 
 watch(width, (newWidth) => {
@@ -100,208 +117,93 @@ const togglePreview = () => {
 }
 
 const openSettingDialog = () => {
-  settingDialog.value?.showModal()
+  settingDialog.value?.showModal();
+}
+
+const closeSettingDialog = () => {
+  settingDialog.value?.close()
+}
+
+const saveSetting = () => {
+  localStorage.setItem(PUBLISH_SETTING_STORAGE_KEY, JSON.stringify(settings.value))
 }
 
 const { commitFiles } = useGithub();
 
-const validate = () => {
+interface RenderEnv {
+  frontmatter?: Record<string, any>,
+  title?: string,
+  references?: Record<string, { title: string, href: string }>
+}
+
+const validate = (env: RenderEnv) => {
   const emptyKeys = Object.keys(settings.value).filter((key) => !settings.value[key as keyof Setting])
   if (emptyKeys.length > 0) {
     return [`未配置 ${emptyKeys.join('、')}`]
+  }
+  if (!env.title) {
+    return ['获取标题失败']
+  }
+  if (!env.frontmatter?.created) {
+    return ['请填写创建时间']
+  }
+  if (!(env.frontmatter.created instanceof Date)) {
+    return ['创建时间格式错误']
   }
   return []
 }
 
 const publish = async () => {
-  // 先做一些校验，比如说 frontmatter 中是否包含了 title 字段和正确格式的 createdAt 字段
-  const errors = validate()
+  // 先做一些校验，比如说 frontmatter 中是否包含了正确格式的 created 字段
+  const env: RenderEnv = {}
+  markdownRender.value?.renderAsync(value.value, env)
+  console.log(env)
+  const errors = validate(env)
   if (errors.length > 0) {
-    console.error(errors)
+    window.alert(errors.join('\n'))
     return;
   }
   const confirmed = window.confirm('确定要发布吗？')
   if (!confirmed) return;
 
-  const mdFiles = [{ path: 'src/test.md', raw: new File([value.value], 'test.md', { type: 'text/markdown' }) }]
+  const mdFiles = [{ path: `src/${env.title}.md`, raw: new File([value.value], `${env.title}.md`, { type: 'text/markdown' }) }]
   const { owner, repo, auth } = settings.value
   try {
     await commitFiles({
       owner, repo, files: mdFiles,
       auth,
-      message: 'feat: new post'
+      message: `docs: add doc ${env.title}.md`
     })
     window.alert('发布成功')
     value.value = ''
     preview.value = ''
-    editor?.setValue('')
+    editor.value?.setValue('')
   } catch (err: any) {
     window.alert(`发布失败: ${err.message}`)
   }
 }
 
-// 加载 Monaco Editor CDN
-async function loadMonacoCDN(): Promise<typeof monaco> {
-  return new Promise((resolve, reject) => {
-    // 检查是否已经加载
-    if ((window as any).monaco) {
-      resolve((window as any).monaco)
-      return
-    }
+const dropHandler = async (event: DragEvent) => {
+  const files = Array.from(event.dataTransfer?.files || []).filter(item => item.type.startsWith('image/'))
+  if (!files.length) return;
+  event.preventDefault()
 
-    // 创建 script 标签加载 Monaco Editor
-    const script = document.createElement('script')
-    script.src = 'https://cdn.jsdelivr.net/npm/monaco-editor@0.55.1/min/vs/loader.js'
-    script.async = true
-    
-    script.onload = () => {
-      // 配置 Monaco Editor
-      const require = (window as any).require
-      require.config({ paths: { vs: 'https://cdn.jsdelivr.net/npm/monaco-editor@0.55.1/min/vs' } })
-      require(['vs/editor/editor.main'], () => {
-        resolve((window as any).monaco)
-      })
+  const text = files.map(item => {
+    return `![${item.name}](${URL.createObjectURL(item)})`
+  }).join('\n')
+  const position = editor.value?.getPosition()
+  if (!position) return;
+  editor.value?.executeEdits('insert-images', [
+    {
+      range: new window.monaco.Range(position.lineNumber, position.column, position.lineNumber, position.column),
+      text
     }
-    
-    script.onerror = () => {
-      reject(new Error('Failed to load Monaco Editor from CDN'))
-    }
-    
-    document.head.appendChild(script)
-  })
+  ])
 }
 
-onMounted(async () => {
-  if (!editorContainer.value) return
-
-  try {
-    // 从 CDN 加载 Monaco Editor
-    monacoInstance = await loadMonacoCDN()
-
-    if (!monacoInstance) return;
-
-    // 创建编辑器实例
-    editor = monacoInstance.editor.create(editorContainer.value, {
-      value: value.value,
-      language: 'markdown',
-      theme: isDark.value ? 'vs-dark' : 'vs',
-      automaticLayout: true,
-      wordWrap: 'on',
-      minimap: { enabled: false },
-      scrollBeyondLastLine: false,
-      fontSize: 14,
-      lineHeight: 1.6,
-      fontFamily: '"Cascadia Code", "Fira Code", "Consolas", "Monaco", monospace',
-      renderWhitespace: 'selection',
-      bracketPairColorization: { enabled: true },
-      suggest: {
-        showKeywords: true,
-        showSnippets: true
-      }
-    })
-
-    editor.onDidChangeModelContent(async (event) => {
-      const mdContent = editor!.getValue()
-      localStorage.setItem('vitepress-draft-md', mdContent)
-      value.value = mdContent
-      preview.value = await markdownRender.renderAsync(value.value, {})
-    })
-    editor.onDidScrollChange(event => {
-      if (!previewEl.value || !editorContainer.value) return;
-      // 同步滚动，按比例对 preview 进行滚动
-      const target = event.scrollTop / (event.scrollHeight - editorContainer.value.clientHeight) * (previewEl.value.scrollHeight - previewEl.value.clientHeight)
-      previewEl.value.scrollTo({ left: 0, top: target, behavior: 'smooth' })
-    })
-
-    // 配置自动完成
-    monacoInstance.languages.registerCompletionItemProvider('markdown', {
-      provideCompletionItems: (model, position) => {
-        if (!monacoInstance) return;
-        const range = new monacoInstance.Range(position.lineNumber, position.column, position.lineNumber, position.column)
-        const suggestions = [
-          // VitePress 容器自动完成
-          {
-            label: 'VitePress Info Container',
-            kind: monacoInstance.languages.CompletionItemKind.Snippet,
-            insertText: '::: info\n${1:内容}\n:::',
-            insertTextRules: monacoInstance.languages.CompletionItemInsertTextRule.InsertAsSnippet,
-            documentation: '插入 VitePress 信息容器',
-            range
-          },
-          {
-            label: 'VitePress Tip Container',
-            kind: monacoInstance.languages.CompletionItemKind.Snippet,
-            insertText: '::: tip\n${1:内容}\n:::',
-            insertTextRules: monacoInstance.languages.CompletionItemInsertTextRule.InsertAsSnippet,
-            documentation: '插入 VitePress 提示容器',
-            range
-          },
-          {
-            label: 'VitePress Warning Container',
-            kind: monacoInstance.languages.CompletionItemKind.Snippet,
-            insertText: '::: warning\n${1:内容}\n:::',
-            insertTextRules: monacoInstance.languages.CompletionItemInsertTextRule.InsertAsSnippet,
-            documentation: '插入 VitePress 警告容器',
-            range
-          },
-          {
-            label: 'VitePress Danger Container',
-            kind: monacoInstance.languages.CompletionItemKind.Snippet,
-            insertText: '::: danger\n${1:内容}\n:::',
-            insertTextRules: monacoInstance.languages.CompletionItemInsertTextRule.InsertAsSnippet,
-            documentation: '插入 VitePress 危险容器',
-            range,
-          },
-          // 代码块自动完成
-          {
-            label: 'Code Block',
-            kind: monacoInstance.languages.CompletionItemKind.Snippet,
-            insertText: '```${1:language}\n${2:代码}\n```',
-            insertTextRules: monacoInstance.languages.CompletionItemInsertTextRule.InsertAsSnippet,
-            documentation: '插入代码块',
-            range,
-          },
-          // 链接自动完成
-          {
-            label: 'Link',
-            kind: monacoInstance.languages.CompletionItemKind.Snippet,
-            insertText: '[${1:文本}](${2:链接})',
-            insertTextRules: monacoInstance.languages.CompletionItemInsertTextRule.InsertAsSnippet,
-            documentation: '插入链接',
-            range,
-          },
-          // 图片自动完成
-          {
-            label: 'Image',
-            kind: monacoInstance.languages.CompletionItemKind.Snippet,
-            insertText: '![${1:描述}](${2:图片链接})',
-            insertTextRules: monacoInstance.languages.CompletionItemInsertTextRule.InsertAsSnippet,
-            documentation: '插入图片',
-            range,
-          }
-        ]
-
-        return { suggestions }
-      }
-    })
-  } catch (error) {
-    console.error('Failed to load Monaco Editor:', error)
-  }
-})
-
-onBeforeUnmount(() => {
-  if (editor) {
-    editor.dispose()
-  }
-})
-
-onMounted(async () => {
-  markdownRender = await createMarkdownRenderer('src')
-  preview.value = await markdownRender.renderAsync(value.value, {})
-})
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .md-editor {
   width: 100%;
   display: flex;
@@ -323,8 +225,12 @@ onMounted(async () => {
   font-size: 14px;
   margin-left: 16px;
 }
-.md-editor-header .preview-btn {
+.md-editor-header .setting-btn {
   margin-left: auto;
+}
+.md-editor-header .setting-btn svg {
+  width: 20px;
+  height: 20px;
 }
 .md-editor-header .publish-btn {
   background-color: var(--vp-button-brand-bg);
@@ -354,8 +260,42 @@ onMounted(async () => {
 .setting-dialog {
   border: 1px solid var(--vp-c-gutter);
 }
-.setting-dialog::backdrop {
+dialog.setting-dialog {
+  transition: all .3s allow-discrete;
+  translate: 0 -30vh;
+  opacity: 0;
+  &[open] {
+    translate: 0 0;
+    opacity: 1;
+  }
+}
+
+@starting-style {
+  dialog.setting-dialog[open] {
+    translate: 0 -30vh;
+    opacity: 0;
+  }
+  dialog.setting-dialog::backdrop {
+    background-color: 0;
+  }
+}
+dialog.setting-dialog[open]::backdrop {
+  transition: all .3s allow-discrete;
   background-color: rgba(0, 0, 0, 0.5);
+
+}
+.setting-dialog .dialog-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.setting-dialog .dialog-header .dialog-close-btn {
+  cursor: pointer;
+}
+.setting-dialog .dialog-header .dialog-close-btn svg {
+  width: 28px;
+  height: 28px;
+  padding: 4px;
 }
 .setting-dialog .dialog-title {
   font-weight: bold;
