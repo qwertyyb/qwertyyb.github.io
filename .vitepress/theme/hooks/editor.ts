@@ -2,6 +2,7 @@
 import type * as monaco from 'monaco-editor'
 import { onBeforeUnmount, onMounted, Ref, ShallowRef, shallowRef, TemplateRef } from 'vue'
 import { DRAFT_STORAGE_KEY } from '../const'
+import { conf, language } from '../language/vitepress-markdown'
 import { useData } from 'vitepress'
 
 // 扩展 window 类型以支持 Monaco Editor
@@ -42,6 +43,12 @@ async function loadMonacoCDN(): Promise<typeof monaco> {
   })
 }
 
+const registerVitePressMarkdownLanguage = () => {
+  window.monaco.languages.register({ id: 'vitepress-markdown' })
+  window.monaco.languages.setLanguageConfiguration('vitepress-markdown', conf)
+  window.monaco.languages.setMonarchTokensProvider('vitepress-markdown', language)
+}
+
 export const useEditor = (
   editorContainer: TemplateRef<HTMLElement>,
   options: {
@@ -66,8 +73,10 @@ export const useEditor = (
 
     if (!window.monaco) return;
 
+    registerVitePressMarkdownLanguage();
+
     // 配置自动完成
-    window.monaco.languages.registerCompletionItemProvider('markdown', {
+    window.monaco.languages.registerCompletionItemProvider('vitepress-markdown', {
       provideCompletionItems: (model, position) => {
         if (!window.monaco) return;
         const line = model.getLineContent(position.lineNumber)
@@ -148,12 +157,13 @@ export const useEditor = (
     // 创建编辑器实例
     editor.value = window.monaco.editor.create(editorContainer.value, {
       value: options.value.value,
-      language: 'markdown',
+      language: 'vitepress-markdown',
       theme: isDark.value ? 'vs-dark' : 'vs',
       automaticLayout: true,
       wordWrap: 'on',
       minimap: { enabled: false },
       scrollBeyondLastLine: false,
+      lineNumbers: 'off',
       fontSize: 14,
       lineHeight: 1.6,
       fontFamily: '"Cascadia Code", "Fira Code", "Consolas", "Monaco", monospace',

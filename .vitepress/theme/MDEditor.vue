@@ -9,41 +9,22 @@
       <div ref="editorRef" class="editor" v-show="view !== 'preview'" @drop="dropHandler"></div>
       <div class="preview vp-doc" ref="previewRef" v-html="preview" v-show="view !== 'editor'"></div>
     </main>
-    <dialog class="setting-dialog" ref="settingDialog">
-      <div class="dialog-header">
-        <h3 class="dialog-title">设置</h3>
-        <div class="dialog-close-btn" @click="closeSettingDialog"><svg t="1765256030401" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="1822" width="256" height="256"><path d="M821.24 935.991c31.687 31.688 83.063 31.688 114.751 0 31.688-31.688 31.688-83.064 0-114.752L202.518 87.766c-31.688-31.688-83.064-31.688-114.752 0-31.688 31.688-31.688 83.064 0 114.752L821.239 935.99z" fill="#4A4A4A" p-id="1823"></path><path d="M202.518 935.991c-31.688 31.688-83.064 31.688-114.752 0-31.688-31.688-31.688-83.064 0-114.752L821.239 87.766c31.688-31.688 83.064-31.688 114.752 0 31.688 31.688 31.688 83.064 0 114.752L202.518 935.99z" fill="#4A4A4A" p-id="1824"></path></svg></div>
-      </div>
-      <form class="setting-content" @submit.prevent="saveSetting">
-        <div class="form-item">
-          <label for="owner" class="form-label">Owner: </label>
-          <input type="text" name="owner" class="form-input" v-model.trim="settings.owner">
-        </div>
-        <div class="form-item">
-          <label for="repo" class="form-label">Repo: </label>
-          <input type="text" name="repo" class="form-input" v-model.trim="settings.repo">
-        </div>
-        <div class="form-item">
-          <label for="auth" class="form-label">Auth: </label>
-          <input type="text" name="auth" class="form-input" v-model.trim="settings.auth">
-        </div>
-        <div class="form-actions">
-          <input type="submit" value="Submit" class="submit-btn"></input>
-        </div>
-      </form>
-    </dialog>
+    <SettingsDialog ref="settingsDialog" />
   </div>
 </template>
 
 <script lang="ts" setup>
 import { onMounted, ref, useTemplateRef, watch, shallowRef, watchEffect } from 'vue'
 import type * as monaco from 'monaco-editor'
+import SettingsDialog from './components/SettingsDialog.vue'
 import { createMarkdownRenderer } from '../../vendor/vitepress/dist/node/markdown'
 import { useData } from 'vitepress'
 import { useWindowSize } from './hooks/windowSize'
 import { useGithub } from './hooks/github'
-import { PUBLISH_SETTING_STORAGE_KEY } from './const'
+import { ASSETS_DIR, DEFAULT_EDITOR_VALUE, DRAFT_STORAGE_KEY, SRC_DIR } from './const'
 import { useEditor } from './hooks/editor'
+import { type Setting, useSettings } from './hooks/settings'
+import { useResource } from './hooks/resource'
 
 // 扩展 window 类型以支持 Monaco Editor
 declare global {
@@ -55,29 +36,24 @@ declare global {
 
 const editorContainer = useTemplateRef('editorRef')
 const previewEl = useTemplateRef('previewRef')
-const settingDialog = useTemplateRef('settingDialog')
+const settingsDialog = useTemplateRef('settingsDialog')
 const { width } = useWindowSize()
 const view = ref<'default' | 'editor' | 'preview'>('default')
 
-interface Setting {
-  owner: string
-  repo: string
-  auth: string
-}
+const { settings } = useSettings();
 
-const getDefaultSetting = (): Setting => {
-  try {
-    const obj = JSON.parse(localStorage.getItem(PUBLISH_SETTING_STORAGE_KEY) || '{}') as Setting
-    return { owner: obj.owner || '', repo: obj.repo || '', auth: obj.auth || '' }
-  } catch {
-    return { owner: '', repo: '', auth: '' }
+const getDraft = () => {
+  const draft = localStorage.getItem(DRAFT_STORAGE_KEY)
+  if (draft) {
+    return draft
   }
+  return DEFAULT_EDITOR_VALUE
 }
 
-const settings = ref<Setting>(getDefaultSetting())
-
-const value = ref('---\ntitle: markdown 标题\ncreated: 2025-12-09\n----\n# VitePress Markdown 编辑器\n\n这是一个支持 VitePress 扩展语法的 Markdown 编辑器。\n\n## 基本语法\n\n### 文本格式\n\n这是 **粗体** 文本，这是 *斜体* 文本。\n\n### 列表\n\n- 无序列表项 1\n- 无序列表项 2\n\n1. 有序列表项 1\n2. 有序列表项 2\n\n### 任务列表\n\n- [x] 已完成任务\n- [ ] 未完成任务\n\n### VitePress 容器\n\n::: info 信息\n这是一个信息容器\n:::\n\n::: tip 提示\n这是一个提示容器\n:::\n\n::: warning 警告\n这是一个警告容器\n:::\n\n::: danger 危险\n这是一个危险容器\n:::\n\n### 代码块\n\n```javascript\nconsole.log(\'Hello, VitePress!\')\n```\n\n### 行内代码\n\n这是一个 \`行内代码\` 示例。\n\n### 链接\n\n[VitePress 官方文档](https://vitepress.dev/zh/guide/markdown)\n\n### 脚注\n\n这是一个脚注示例[^1]。\n\n[^1]: 这是脚注的内容。\n\n### Emoji\n\n这里有一些 emoji :tada: :fire: :rocket: :100:')
+const value = ref(getDraft())
 const preview = ref('')
+
+const { addResource, allResourcesUrls, getResources } = useResource()
 
 const scrollHandler = (event: monaco.IScrollEvent) => {
   if (!editorContainer.value || !previewEl.value) return;
@@ -95,7 +71,7 @@ watchEffect(async () => {
 })
 
 onMounted(async () => {
-  markdownRender.value = await createMarkdownRenderer('src')
+  markdownRender.value = await createMarkdownRenderer('src', { math: true })
 })
 
 const { isDark } = useData();
@@ -117,15 +93,7 @@ const togglePreview = () => {
 }
 
 const openSettingDialog = () => {
-  settingDialog.value?.showModal();
-}
-
-const closeSettingDialog = () => {
-  settingDialog.value?.close()
-}
-
-const saveSetting = () => {
-  localStorage.setItem(PUBLISH_SETTING_STORAGE_KEY, JSON.stringify(settings.value))
+  settingsDialog.value?.open();
 }
 
 const { commitFiles } = useGithub();
@@ -155,22 +123,51 @@ const validate = (env: RenderEnv) => {
 
 const publish = async () => {
   // 先做一些校验，比如说 frontmatter 中是否包含了正确格式的 created 字段
+  let mdContent = value.value;
   const env: RenderEnv = {}
-  markdownRender.value?.renderAsync(value.value, env)
+  markdownRender.value?.renderAsync(mdContent, env)
   console.log(env)
   const errors = validate(env)
   if (errors.length > 0) {
     window.alert(errors.join('\n'))
     return;
   }
-  const confirmed = window.confirm('确定要发布吗？')
+
+  const allUrls = await allResourcesUrls();
+  const urls = allUrls.filter(url => mdContent.includes(url))
+  console.log('resourceUrls', urls)
+
+  const resources = await getResources(urls)
+  // update md file resource url
+  const baseUrl = `/assets/${encodeURI(env.frontmatter?.title || env.title)}/`
+  const namesMap = new Map<string, number>();
+  const resourceFiles = resources.map(item => {
+    // 判断文件原来的名字是否重复了，重复的话重新命名一下
+    let name = item.file.name
+    const count = (namesMap.get(name) || 0) + 1
+    namesMap.set(name, count);
+    if (count > 1) {
+      name = name.replace(/(.+)(\.[a-zA-Z0-9]+)$/, `$1-${count}$2`)
+    }
+    const resourcePath = `${baseUrl}${encodeURI(name)}`
+    mdContent = mdContent.replaceAll(item.url, resourcePath)
+    return { path: `${ASSETS_DIR}/${env.frontmatter?.title || env.title}/${name}`, raw: item.file }
+  })
+  console.log(resources, mdContent)
+
+  const confirmed = window.confirm(`确定要发布吗？本次发布共涉及资源 ${resources.length} 个资源文件,`)
   if (!confirmed) return;
 
-  const mdFiles = [{ path: `src/${env.title}.md`, raw: new File([value.value], `${env.title}.md`, { type: 'text/markdown' }) }]
+  const files = [
+    ...resourceFiles,
+    { path: `${SRC_DIR}/${env.title}.md`, raw: new File([mdContent], `${env.title}.md`, { type: 'text/markdown' })
+  }]
   const { owner, repo, auth } = settings.value
+
+  console.log('publish', owner, repo, auth, mdContent, files)
   try {
     await commitFiles({
-      owner, repo, files: mdFiles,
+      owner, repo, files,
       auth,
       message: `docs: add doc ${env.title}.md`
     })
@@ -188,9 +185,13 @@ const dropHandler = async (event: DragEvent) => {
   if (!files.length) return;
   event.preventDefault()
 
-  const text = files.map(item => {
-    return `![${item.name}](${URL.createObjectURL(item)})`
-  }).join('\n')
+  const text = (await Promise.all(files.map(async item => {
+    const url = await addResource(item)
+    return {
+      url,
+      name: item.name,
+    }
+  }))).map(item => `![${item.name}](${item.url})`).join('\n')
   const position = editor.value?.getPosition()
   if (!position) return;
   editor.value?.executeEdits('insert-images', [
@@ -255,77 +256,6 @@ const dropHandler = async (event: DragEvent) => {
   padding: 16px;
   overflow: auto;
   height: 100%;
-}
-
-.setting-dialog {
-  border: 1px solid var(--vp-c-gutter);
-}
-dialog.setting-dialog {
-  transition: all .3s allow-discrete;
-  translate: 0 -30vh;
-  opacity: 0;
-  &[open] {
-    translate: 0 0;
-    opacity: 1;
-  }
-}
-
-@starting-style {
-  dialog.setting-dialog[open] {
-    translate: 0 -30vh;
-    opacity: 0;
-  }
-  dialog.setting-dialog::backdrop {
-    background-color: 0;
-  }
-}
-dialog.setting-dialog[open]::backdrop {
-  transition: all .3s allow-discrete;
-  background-color: rgba(0, 0, 0, 0.5);
-
-}
-.setting-dialog .dialog-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-.setting-dialog .dialog-header .dialog-close-btn {
-  cursor: pointer;
-}
-.setting-dialog .dialog-header .dialog-close-btn svg {
-  width: 28px;
-  height: 28px;
-  padding: 4px;
-}
-.setting-dialog .dialog-title {
-  font-weight: bold;
-}
-.form-item {
-  display: flex;
-  flex-direction: column;
-  padding: 6px 0;
-  margin-top: 12px;
-  width: 300px;
-}
-.form-item label {
-  font-size: 14px;
-  font-weight: 500;
-}
-.form-item input {
-  border-bottom: 1px solid var(--vp-c-gutter);
-}
-.form-actions {
-  display: flex;
-  justify-content: center;
-  margin-top: 16px;
-}
-.form-actions .submit-btn {
-  background-color: var(--vp-button-brand-bg);
-  color: var(--vp-button-brand-text);
-  padding: 6px 16px;
-  border: var(--vp-button-brand-border);
-  border-radius: 4px;
-  font-weight: 500;
 }
 </style>
 
