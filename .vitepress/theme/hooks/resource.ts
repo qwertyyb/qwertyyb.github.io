@@ -1,6 +1,8 @@
 import { onBeforeUnmount, onMounted } from "vue"
-import { createInstance } from 'localforage'
+import localforage from 'localforage'
 import { withCache } from "../utils"
+
+const { createInstance } = localforage
 
 const resourceStore = createInstance({ name: 'vitepress-editor-resources' })
 
