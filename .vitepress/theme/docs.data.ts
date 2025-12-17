@@ -4,6 +4,8 @@ interface DocData {
   url: string
   title: string
   created: string
+  prev: DocData | null
+  next: DocData | null
 }
 
 declare const data: DocData[]
@@ -39,6 +41,15 @@ const contentLoader = createContentLoader('*.md', {
       }
     })
     .sort((a, b) => b.created.getTime() - a.created.getTime())
+    .map((item, index, list) => {
+      const prev = index > 0 ? list[index - 1] : null
+      const next = index < list.length - 1 ? list[index + 1] : null
+      return {
+        ...item,
+        prev,
+        next
+      }
+    })
   }
 })
 
