@@ -4,6 +4,7 @@ import type { Theme } from 'vitepress'
 import DefaultTheme from 'vitepress/theme'
 import DocsList from './DocsList.vue'
 import './style.css'
+import './custom.scss'
 import DocBefore from './DocBefore.vue'
 import MDEditor from './MDEditor.vue'
 

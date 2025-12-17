@@ -1,0 +1,26 @@
+@media (min-width: 1440px) {
+  html body {
+    .VPDoc:not(.has-sidebar) div.container {
+      max-width: calc(var(--vp-layout-max-width) - 64px);
+    }
+    .VPDoc:not(.has-sidebar) > .container > .content {
+      max-width: initial !important;
+    }
+  }
+}
+
+@media (min-width: 960px) {
+  html body {
+    .VPContent .VPDoc:not(.has-sidebar) div.container {
+      max-width: calc(var(--vp-layout-max-width) - 64px);
+    }
+    .VPDoc:not(.has-sidebar) > .container > .content {
+      max-width: initial !important;
+      padding-inline: 0;
+    }
+  }
+}
+
+.VPDoc.has-aside div.content > div.content-container {
+  max-width: initial;
+}
