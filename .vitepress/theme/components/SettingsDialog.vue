@@ -4,7 +4,7 @@
       <h3 class="dialog-title">设置</h3>
       <div class="dialog-close-btn" @click="close"><svg t="1765256030401" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="1822" width="256" height="256"><path d="M821.24 935.991c31.687 31.688 83.063 31.688 114.751 0 31.688-31.688 31.688-83.064 0-114.752L202.518 87.766c-31.688-31.688-83.064-31.688-114.752 0-31.688 31.688-31.688 83.064 0 114.752L821.239 935.99z" fill="#4A4A4A" p-id="1823"></path><path d="M202.518 935.991c-31.688 31.688-83.064 31.688-114.752 0-31.688-31.688-31.688-83.064 0-114.752L821.239 87.766c31.688-31.688 83.064-31.688 114.752 0 31.688 31.688 31.688 83.064 0 114.752L202.518 935.99z" fill="#4A4A4A" p-id="1824"></path></svg></div>
     </div>
-    <form class="setting-content" @submit.prevent="saveSettings">
+    <form class="setting-content" @submit.prevent="submit">
       <fieldset class="publish-settings settings-block">
         <legend class="settings-title">发布配置</legend>
         <div class="form-item">
@@ -41,6 +41,12 @@ const open = () => {
 
 const close = () => {
   settingDialog.value?.close()
+}
+
+const submit = () => {
+  saveSettings()
+  alert('保存成功！')
+  close()
 }
 
 defineExpose({
