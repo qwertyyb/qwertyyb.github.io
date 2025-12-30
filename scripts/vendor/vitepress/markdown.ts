@@ -2,10 +2,10 @@ import {
   componentPlugin,
   type ComponentPluginOptions
 } from '@mdit-vue/plugin-component'
-// import {
-//   frontmatterPlugin,
-//   type FrontmatterPluginOptions
-// } from '@mdit-vue/plugin-frontmatter'
+import {
+  frontmatterPlugin,
+  type FrontmatterPluginOptions
+} from '@mdit-vue/plugin-frontmatter'
 import {
   headersPlugin,
   type HeadersPluginOptions
@@ -166,7 +166,7 @@ export interface MarkdownOptions extends MarkdownItAsyncOptions {
    * Options for `@mdit-vue/plugin-frontmatter`
    * @see https://github.com/mdit-vue/mdit-vue/tree/main/packages/plugin-frontmatter
    */
-  // frontmatter?: FrontmatterPluginOptions
+  frontmatter?: FrontmatterPluginOptions
   /**
    * Options for `@mdit-vue/plugin-headers`
    * @see https://github.com/mdit-vue/mdit-vue/tree/main/packages/plugin-headers
@@ -341,7 +341,7 @@ export async function createMarkdownRenderer(
     ...options.anchor
   })
 
-  // frontmatterPlugin(md, options.frontmatter)
+  frontmatterPlugin(md, options.frontmatter)
 
   if (options.headers) {
     headersPlugin(md, {
