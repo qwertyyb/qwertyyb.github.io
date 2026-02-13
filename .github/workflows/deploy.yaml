@@ -69,18 +69,17 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: github-pages
-          path: ./dist
+          path: ./artifact
 
-      # 打包静态文件（压缩包直接包含文件，不包含 dist 目录）
-      - name: Zip static files
+      # 使用最高压缩等级压缩 tar 为 tar.gz
+      - name: Compress artifact
         run: |
-          cd ./dist
-          zip -r ../web.zip * .[!.]*
+          gzip -9 -c ./artifact/artifact.tar > web.tar.gz
 
       # 上传到自定义服务器
       - name: Upload to custom server
         run: |
           curl -X POST \
             -H "Authorization: Bearer ${{ secrets.DEPLOY_TOKEN }}" \
-            -F "file=@web.zip" \
+            -F "file=@web.tar.gz" \
             https://proxy.qwertyyb.cn/deploy
