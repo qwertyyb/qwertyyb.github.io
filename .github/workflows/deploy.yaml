@@ -83,4 +83,4 @@ jobs:
           curl -X POST \
             -H "Authorization: Bearer ${{ secrets.DEPLOY_TOKEN }}" \
             -F "file=@web.zip" \
-            https://proxyqwertyyb.cn/deploy
+            https://proxy.qwertyyb.cn/deploy
