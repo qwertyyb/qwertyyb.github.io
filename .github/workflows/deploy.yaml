@@ -63,3 +63,24 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
+      # 下载构建产物
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: github-pages
+          path: ./dist
+
+      # 打包静态文件（压缩包直接包含文件，不包含 dist 目录）
+      - name: Zip static files
+        run: |
+          cd ./dist
+          zip -r ../web.zip * .[!.]*
+
+      # 上传到自定义服务器
+      - name: Upload to custom server
+        run: |
+          curl -X POST \
+            -H "Authorization: Bearer ${{ secrets.DEPLOY_TOKEN }}" \
+            -F "file=@web.zip" \
+            http://qwertyyb.cn/deploy
